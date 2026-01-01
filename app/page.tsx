@@ -14,7 +14,8 @@ import {
   Check as CheckIcon,
   Mail,
   Code2,
-  User
+  User,
+  Image as ImageIcon
 } from "lucide-react";
 
 // --- DIZIONARIO TRADUZIONI ---
@@ -40,6 +41,11 @@ const TRANSLATIONS = {
         desc: "The Swiss Army knife for your documents. Merge, convert, watermark, and protect your PDFs.",
         cta: "Open Tool"
       },
+      image: {
+        title: "Image Studio",
+        desc: "Compress, Resize, Convert and Watermark your images directly in browser. Privacy First.",
+        cta: "Open Tool"
+      },
       comingSoon: {
         title: "Coming Soon",
         desc: "New tools arriving..."
@@ -59,10 +65,10 @@ const TRANSLATIONS = {
     },
     footer: {
       subtitle: "Free Professional Suite",
-      contact: "INFO & CONTACTS", // Uniformato EN
+      contact: "INFO & CONTACTS",
       privacy: "Privacy Policy",
       rights: "All rights reserved.",
-      coffee: "SUPPORT PROJECT" // Uniformato EN
+      coffee: "SUPPORT PROJECT"
     }
   },
   it: {
@@ -86,6 +92,11 @@ const TRANSLATIONS = {
         desc: "Il coltellino svizzero per i tuoi documenti. Unisci, converti, aggiungi watermark e proteggi i tuoi PDF.",
         cta: "Apri Tool"
       },
+      image: {
+        title: "Image Studio",
+        desc: "Comprimi, Ridimensiona, Converti e Watermark direttamente nel browser. Privacy First.",
+        cta: "Apri Tool"
+      },
       comingSoon: {
         title: "Coming Soon",
         desc: "Nuovi strumenti in arrivo..."
@@ -105,10 +116,10 @@ const TRANSLATIONS = {
     },
     footer: {
       subtitle: "Suite Professionale Gratuita",
-      contact: "INFO & CONTATTI", // Uniformato IT
+      contact: "INFO & CONTATTI",
       privacy: "Privacy Policy",
       rights: "Tutti i diritti riservati.",
-      coffee: "SUPPORTA IL PROGETTO" // Uniformato IT
+      coffee: "SUPPORTA IL PROGETTO"
     }
   }
 };
@@ -172,7 +183,7 @@ export default function Home() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* CARD 1: PREVENTIVI */}
+          {/* CARD 1: PREVENTIVI (BLUE) */}
           <Link href="/preventivi" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-blue-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
             <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
               <Calculator size={100} />
@@ -189,7 +200,7 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* CARD 2: PDF SUITE */}
+          {/* CARD 2: PDF SUITE (RED) */}
           <Link href="/pdf-tools" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-red-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
             <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
               <FileText size={100} />
@@ -206,14 +217,22 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* CARD 3: COMING SOON */}
-          <div className="group relative bg-zinc-950/30 border border-zinc-800 border-dashed rounded-3xl p-8 flex flex-col justify-center items-center text-center opacity-70">
-            <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-500 mb-4">
-              <Lock size={24} />
+          {/* CARD 3: IMAGE STUDIO (GREEN) */}
+          <Link href="/image-tools" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-green-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
+            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+              <ImageIcon size={100} />
             </div>
-            <h3 className="text-lg font-bold text-zinc-500 mb-1">{t.tools.comingSoon.title}</h3>
-            <p className="text-xs text-zinc-600">{t.tools.comingSoon.desc}</p>
-          </div>
+            <div className="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-500 mb-6 group-hover:scale-110 transition-transform">
+              <ImageIcon size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">{t.tools.image.title}</h3>
+            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+              {t.tools.image.desc}
+            </p>
+            <div className="flex items-center gap-2 text-xs font-bold text-green-400 uppercase tracking-wider group-hover:text-green-300">
+              {t.tools.image.cta} <ArrowRight size={14} />
+            </div>
+          </Link>
 
         </div>
       </section>
