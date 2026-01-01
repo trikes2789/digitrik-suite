@@ -1092,7 +1092,6 @@ export default function DigitrikPro() {
               )}
             </div>
           )}
-
           {activeTab === 'security' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-2">
               <div className={`p-4 rounded-xl border transition-all ${config.ghostMode ? 'bg-red-950/20 border-red-500/50' : 'bg-zinc-900 border-zinc-800'}`}>
