@@ -1,65 +1,288 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { 
+  Calculator, 
+  FileText, 
+  ShieldCheck, 
+  ArrowRight, 
+  Layers, 
+  Lock, 
+  Globe, 
+  Heart,
+  Check as CheckIcon,
+  Mail,
+  Code2,
+  User
+} from "lucide-react";
+
+// --- DIZIONARIO TRADUZIONI ---
+const TRANSLATIONS = {
+  en: {
+    hero: {
+      tag: "Privacy First Technology",
+      subtitle: "The productivity suite that respects your data.",
+      highlight: "No uploads, no servers, no cost.",
+      desc: "All computing power happens directly in your browser.",
+      ctaStart: "Start Now",
+      ctaMission: "Discover Mission"
+    },
+    tools: {
+      title: "Available Tools",
+      preventivi: {
+        title: "Smart Quotes",
+        desc: "Create professional PDF quotes. Includes 'Penny-Perfect' reverse calculation for exact totals.",
+        cta: "Open Tool"
+      },
+      pdf: {
+        title: "PDF Master Suite",
+        desc: "The Swiss Army knife for your documents. Merge, convert, watermark, and protect your PDFs.",
+        cta: "Open Tool"
+      },
+      comingSoon: {
+        title: "Coming Soon",
+        desc: "New tools arriving..."
+      }
+    },
+    mission: {
+      title: "Our Mission",
+      text1: "Digitrik Pro was born from curiosity for programming and to simplify work for thousands dealing with digital documents daily.",
+      text2: "My goal is to build a set of **free, accessible digital tools** for everyone, with no barriers.",
+      privacyTitle: "Privacy First",
+      privacyText: "I believe in total Privacy. Unlike other services, here your files **NEVER leave your browser**.",
+      bullets: [
+        "No upload to external servers",
+        "No hidden databases",
+        "100% Local processing"
+      ]
+    },
+    footer: {
+      subtitle: "Free Professional Suite",
+      contact: "INFO & CONTACTS", // Uniformato EN
+      privacy: "Privacy Policy",
+      rights: "All rights reserved.",
+      coffee: "SUPPORT PROJECT" // Uniformato EN
+    }
+  },
+  it: {
+    hero: {
+      tag: "Tecnologia Privacy First",
+      subtitle: "La suite di produttività che rispetta i tuoi dati.",
+      highlight: "Nessun upload, nessun server, nessun costo.",
+      desc: "Tutta la potenza di calcolo avviene direttamente nel tuo browser.",
+      ctaStart: "Inizia Subito",
+      ctaMission: "Scopri la Mission"
+    },
+    tools: {
+      title: "Strumenti Disponibili",
+      preventivi: {
+        title: "Preventivi Smart",
+        desc: "Crea preventivi professionali in PDF. Include il calcolo inverso 'Penny-Perfect' per totali esatti.",
+        cta: "Apri Tool"
+      },
+      pdf: {
+        title: "PDF Master Suite",
+        desc: "Il coltellino svizzero per i tuoi documenti. Unisci, converti, aggiungi watermark e proteggi i tuoi PDF.",
+        cta: "Apri Tool"
+      },
+      comingSoon: {
+        title: "Coming Soon",
+        desc: "Nuovi strumenti in arrivo..."
+      }
+    },
+    mission: {
+      title: "La nostra Mission",
+      text1: "Digitrik Pro è nato dalla mia curiosità per la programmazione, e per semplificare il lavoro di migliaia di persone che trattano con i documenti digitali ogni giorno.",
+      text2: "Il mio obiettivo è costruire una serie di **tool digitali gratuiti e accessibili a tutti**, senza barriere all'ingresso.",
+      privacyTitle: "Privacy First",
+      privacyText: "Credo nella Privacy totale. A differenza di altri servizi online, qui i tuoi file **non lasciano MAI il tuo browser**.",
+      bullets: [
+        "Nessun upload su server esterni",
+        "Nessun database nascosto",
+        "Elaborazione locale al 100%"
+      ]
+    },
+    footer: {
+      subtitle: "Suite Professionale Gratuita",
+      contact: "INFO & CONTATTI", // Uniformato IT
+      privacy: "Privacy Policy",
+      rights: "Tutti i diritti riservati.",
+      coffee: "SUPPORTA IL PROGETTO" // Uniformato IT
+    }
+  }
+};
 
 export default function Home() {
+  const [lang, setLang] = useState<'en' | 'it'>('it'); // Default IT
+  const t = TRANSLATIONS[lang];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="flex flex-col min-h-screen relative">
+      
+      {/* --- LANGUAGE TOGGLE (Top Right) --- */}
+      <div className="absolute top-6 right-6 z-50">
+        <div className="flex bg-zinc-900/80 backdrop-blur-md rounded-full p-1 border border-zinc-800">
+          <button 
+            onClick={() => setLang('en')} 
+            className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-full flex items-center gap-1 transition-all ${lang === 'en' ? 'bg-zinc-700 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+          >
+             <Globe size={10} /> EN
+          </button>
+          <button 
+            onClick={() => setLang('it')} 
+            className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-full flex items-center gap-1 transition-all ${lang === 'it' ? 'bg-zinc-700 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+          >
+             <Globe size={10} /> IT
+          </button>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
+      </div>
+
+      {/* --- HERO SECTION --- */}
+      <section className="relative px-6 pt-24 pb-20 md:pt-32 md:pb-28 max-w-6xl mx-auto w-full text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <ShieldCheck size={14} /> {t.hero.tag}
+        </div>
+        
+        <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
+          DIGITRIK <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">PRO</span>
+        </h1>
+        
+        <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          {t.hero.subtitle} 
+          <span className="text-zinc-200 font-medium"> {t.hero.highlight}</span> 
+          {' ' + t.hero.desc}
+        </p>
+
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+          <Link href="#tools" className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold transition-all shadow-lg shadow-blue-900/20 flex items-center gap-2">
+            {t.hero.ctaStart} <ArrowRight size={18} />
+          </Link>
+          <a href="#mission" className="px-8 py-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 rounded-full font-bold transition-all">
+            {t.hero.ctaMission}
           </a>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* --- TOOLS GRID --- */}
+      <section id="tools" className="px-6 py-20 max-w-6xl mx-auto w-full">
+        <h2 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-8 flex items-center gap-2">
+          <Layers size={16} /> {t.tools.title}
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* CARD 1: PREVENTIVI */}
+          <Link href="/preventivi" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-blue-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
+            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Calculator size={100} />
+            </div>
+            <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 mb-6 group-hover:scale-110 transition-transform">
+              <Calculator size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">{t.tools.preventivi.title}</h3>
+            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+              {t.tools.preventivi.desc}
+            </p>
+            <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider group-hover:text-blue-300">
+              {t.tools.preventivi.cta} <ArrowRight size={14} />
+            </div>
+          </Link>
+
+          {/* CARD 2: PDF SUITE */}
+          <Link href="/pdf-tools" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-red-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
+            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+              <FileText size={100} />
+            </div>
+            <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 mb-6 group-hover:scale-110 transition-transform">
+              <FileText size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">{t.tools.pdf.title}</h3>
+            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+              {t.tools.pdf.desc}
+            </p>
+            <div className="flex items-center gap-2 text-xs font-bold text-red-400 uppercase tracking-wider group-hover:text-red-300">
+              {t.tools.pdf.cta} <ArrowRight size={14} />
+            </div>
+          </Link>
+
+          {/* CARD 3: COMING SOON */}
+          <div className="group relative bg-zinc-950/30 border border-zinc-800 border-dashed rounded-3xl p-8 flex flex-col justify-center items-center text-center opacity-70">
+            <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-500 mb-4">
+              <Lock size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-zinc-500 mb-1">{t.tools.comingSoon.title}</h3>
+            <p className="text-xs text-zinc-600">{t.tools.comingSoon.desc}</p>
+          </div>
+
+        </div>
+      </section>
+
+      {/* --- MISSION & STORY --- */}
+      <section id="mission" className="bg-zinc-900/30 border-y border-white/5 py-24">
+        <div className="max-w-4xl mx-auto px-6">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+            <div>
+              <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
+                <Globe size={24} className="text-green-500" /> {t.mission.title}
+              </h2>
+              <p className="text-zinc-400 leading-relaxed text-sm mb-6">
+                {t.mission.text1}
+              </p>
+              <p className="text-zinc-400 leading-relaxed text-sm">
+                 {lang === 'en' ? (
+                    <>My goal is to build a set of <strong className="text-zinc-200">free, accessible digital tools</strong> for everyone, with no barriers.</>
+                 ) : (
+                    <>Il mio obiettivo è costruire una serie di <strong className="text-zinc-200">tool digitali gratuiti e accessibili a tutti</strong>, senza barriere all'ingresso.</>
+                 )}
+              </p>
+            </div>
+
+            <div className="bg-zinc-950 p-8 rounded-3xl border border-zinc-800 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full pointer-events-none"></div>
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <ShieldCheck size={20} className="text-blue-500" /> {t.mission.privacyTitle}
+              </h3>
+              <p className="text-zinc-400 text-xs leading-relaxed mb-4">
+                 {lang === 'en' ? (
+                    <>I believe in total Privacy. Unlike other services, here your files <strong className="text-white">NEVER leave your browser</strong>.</>
+                 ) : (
+                    <>Credo nella Privacy totale. A differenza di altri servizi online, qui i tuoi file <strong className="text-white">non lasciano MAI il tuo browser</strong>.</>
+                 )}
+              </p>
+              <ul className="space-y-2 text-xs text-zinc-500">
+                {t.mission.bullets.map((bullet, idx) => (
+                    <li key={idx} className="flex items-center gap-2"><CheckIcon size={12} className="text-green-500"/> {bullet}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* --- FOOTER --- */}
+      <footer className="py-12 border-t border-white/5 text-center mt-auto">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-left">
+            <h4 className="text-lg font-black text-white italic tracking-tighter">DIGITRIK</h4>
+            <p className="text-[10px] text-zinc-500 uppercase tracking-widest">{t.footer.subtitle}</p>
+          </div>
+          
+          <div className="flex gap-6 text-xs font-bold text-zinc-500">
+            <a href="mailto:trichesir@gmail.com" className="hover:text-white transition-colors">{t.footer.contact}</a>
+            <a href="#" className="hover:text-white transition-colors">{t.footer.privacy}</a>
+            <span className="text-zinc-700">|</span>
+            <span className="text-zinc-600">© 2024 {t.footer.rights}</span>
+          </div>
+
+          <a href="https://www.paypal.me/triches89" target="_blank" className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold text-green-500 hover:border-green-500 hover:text-green-400 transition-all">
+            <Heart size={14} /> {t.footer.coffee}
+          </a>
+        </div>
+      </footer>
+
+    </main>
   );
 }
