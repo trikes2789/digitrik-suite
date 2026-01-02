@@ -13,7 +13,8 @@ import {
   Check as CheckIcon,
   Image as ImageIcon,
   QrCode,
-  ScanLine
+  ScanLine,
+  Ghost // <--- NUOVA ICONA PER GHOST PIXEL
 } from "lucide-react";
 
 // --- DEFINIZIONE TIPI ---
@@ -55,6 +56,11 @@ const TRANSLATIONS = {
       barcode: {
         title: "Barcode Pro",
         desc: "Create EAN, UPC, and Code128 barcodes. Perfect for retail, logistics, and inventory.",
+        cta: "Open Tool"
+      },
+      ghost: {
+        title: "Ghost Pixel",
+        desc: "Hide secret messages inside images using LSB steganography. 100% private and local.",
         cta: "Open Tool"
       },
       comingSoon: {
@@ -116,6 +122,11 @@ const TRANSLATIONS = {
       barcode: {
         title: "Barcode Pro",
         desc: "Crea codici a barre EAN, UPC e Code128. Perfetto per vendita, logistica e inventario.",
+        cta: "Apri Tool"
+      },
+      ghost: {
+        title: "Ghost Pixel",
+        desc: "Nascondi messaggi segreti dentro le immagini usando la steganografia LSB. 100% privato.",
         cta: "Apri Tool"
       },
       comingSoon: {
@@ -236,13 +247,29 @@ export default function Home() {
             <div className="flex items-center gap-2 text-xs font-bold text-purple-400 uppercase tracking-wider">{t.tools.qr.cta} <ArrowRight size={14} /></div>
           </Link>
 
-          {/* CARD 5: BARCODE PRO (CYAN) */}
           <Link href="/barcode-generator" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-cyan-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
             <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><ScanLine size={100} /></div>
             <div className="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-500 mb-6 group-hover:scale-110 transition-transform"><ScanLine size={24} /></div>
             <h3 className="text-xl font-bold text-white mb-2">{t.tools.barcode.title}</h3>
             <p className="text-sm text-zinc-400 mb-6 leading-relaxed">{t.tools.barcode.desc}</p>
             <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider">{t.tools.barcode.cta} <ArrowRight size={14} /></div>
+          </Link>
+
+          {/* CARD 6: GHOST PIXEL (AMBER) */}
+          <Link href="/ghost-pixel" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-amber-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
+            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Ghost size={100} />
+            </div>
+            <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 mb-6 group-hover:scale-110 transition-transform">
+              <Ghost size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">{t.tools.ghost.title}</h3>
+            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+              {t.tools.ghost.desc}
+            </p>
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider group-hover:text-amber-300">
+              {t.tools.ghost.cta} <ArrowRight size={14} />
+            </div>
           </Link>
 
           <div className="group relative bg-zinc-950/30 border border-zinc-800/50 border-dashed rounded-3xl p-8 flex flex-col items-center justify-center text-center opacity-70">
