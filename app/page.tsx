@@ -146,7 +146,6 @@ const TRANSLATIONS = {
 };
 
 export default function Home() {
-  // DEFAULT LANGUAGE: ENGLISH
   const [lang, setLang] = useState<Language>('en'); 
   const t = TRANSLATIONS[lang];
 
@@ -237,7 +236,7 @@ export default function Home() {
             <div className="flex items-center gap-2 text-xs font-bold text-purple-400 uppercase tracking-wider">{t.tools.qr.cta} <ArrowRight size={14} /></div>
           </Link>
 
-          {/* CARD 5: BARCODE (CYAN) */}
+          {/* CARD 5: BARCODE PRO (CYAN) */}
           <Link href="/barcode-generator" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-cyan-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
             <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><ScanLine size={100} /></div>
             <div className="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-500 mb-6 group-hover:scale-110 transition-transform"><ScanLine size={24} /></div>

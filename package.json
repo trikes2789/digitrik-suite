@@ -12,6 +12,7 @@
     "@hello-pangea/dnd": "^18.0.1",
     "autoprefixer": "^10.4.23",
     "heic2any": "^0.0.4",
+    "jsbarcode": "^3.12.1",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.562.0",
