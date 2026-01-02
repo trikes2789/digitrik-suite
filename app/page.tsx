@@ -15,6 +15,9 @@ import {
   QrCode
 } from "lucide-react";
 
+// --- DEFINIZIONE TIPI ---
+type Language = 'en' | 'it';
+
 // --- DIZIONARIO TRADUZIONI ---
 const TRANSLATIONS = {
   en: {
@@ -132,7 +135,8 @@ const TRANSLATIONS = {
 };
 
 export default function Home() {
-  const [lang, setLang] = useState('it'); // Default IT
+  // DEFAULT LANGUAGE: ENGLISH
+  const [lang, setLang] = useState<Language>('en'); 
   const t = TRANSLATIONS[lang];
 
   return (
@@ -301,7 +305,7 @@ export default function Home() {
                  )}
               </p>
               <ul className="space-y-2 text-xs text-zinc-500">
-                {t.mission.bullets.map((bullet, idx) => (
+                {t.mission.bullets.map((bullet: string, idx: number) => (
                     <li key={idx} className="flex items-center gap-2"><CheckIcon size={12} className="text-green-500"/> {bullet}</li>
                 ))}
               </ul>

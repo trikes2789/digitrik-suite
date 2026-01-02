@@ -313,7 +313,7 @@ const Toast = ({ message, type, onClose }) => (
 // --- MAIN APP ---
 export default function DigitrikPro() {
   // CORE STATE (Default to ITALIAN)
-  const [lang, setLang] = useState('it');
+  const [lang, setLang] = useState('en');
   const t = TRANSLATIONS[lang]; 
 
   const [files, setFiles] = useState([]);

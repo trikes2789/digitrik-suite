@@ -8,7 +8,7 @@ import {
   Download, Settings, Image as ImageIcon, Palette, 
   ArrowLeft, Info, Heart, Check, X, CreditCard, PlayCircle, 
   RefreshCcw, Smartphone, ShieldCheck, Share2, Printer,
-  Wand2, Sparkles, Coffee // <--- Aggiunto Coffee qui
+  Wand2, Sparkles, Coffee 
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -157,7 +157,8 @@ const NavItem = ({ active, onClick, icon: Icon, label }) => (
 );
 
 export default function QRCreator() {
-  const [lang, setLang] = useState('it');
+  // DEFAULT LANGUAGE: ENGLISH
+  const [lang, setLang] = useState('en');
   const t = TRANSLATIONS[lang];
   
   // STATE: CONTENT

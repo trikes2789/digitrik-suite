@@ -207,7 +207,8 @@ const Slider = ({ label, value, min, max, step=1, onChange, unit="" }) => (
 );
 
 export default function ImageStudio() {
-  const [lang, setLang] = useState('it');
+  // DEFAULT LANGUAGE: ENGLISH
+  const [lang, setLang] = useState('en');
   const t = TRANSLATIONS[lang];
   
   // FILES STATE
