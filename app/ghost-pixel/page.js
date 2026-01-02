@@ -212,7 +212,6 @@ export default function GhostPixel() {
 
   // --- MODAL HANDLERS ---
   const openDownloadModal = () => {
-      // NON chiudiamo processedImage qui, altrimenti il popup di successo sparisce sotto
       setExportFilename(`ghost_${Date.now()}`);
       const keys = Object.keys(t.enc);
       const randomKey = keys[Math.floor(Math.random() * keys.length)];
@@ -226,7 +225,7 @@ export default function GhostPixel() {
       link.href = processedImage;
       link.click();
       setShowDownloadModal(false);
-      setProcessedImage(null); // Chiudiamo il successo solo dopo il download
+      setProcessedImage(null);
   };
 
   const switchToSupport = () => {
@@ -235,18 +234,18 @@ export default function GhostPixel() {
   };
 
   return (
-    <div className="h-screen bg-zinc-950 text-zinc-100 font-sans flex overflow-hidden selection:bg-amber-500/30">
+    <div className="h-screen bg-zinc-950 text-zinc-100 font-sans flex overflow-hidden selection:bg-blue-500/30">
       <canvas ref={canvasRef} className="hidden"></canvas>
 
       {/* --- SIDEBAR --- */}
       <aside className="w-64 border-r border-white/5 bg-zinc-950 flex flex-col p-4 z-20 overflow-y-auto">
         <div className="mb-6 px-2 flex items-center gap-2">
-          <Link href="/" className="w-8 h-8 bg-zinc-800/50 hover:bg-amber-600/20 rounded-lg flex items-center justify-center transition-colors group">
-            <ArrowLeft size={18} className="text-zinc-400 group-hover:text-amber-400" />
+          <Link href="/" className="w-8 h-8 bg-zinc-800/50 hover:bg-blue-600/20 rounded-lg flex items-center justify-center transition-colors group">
+            <ArrowLeft size={18} className="text-zinc-400 group-hover:text-blue-400" />
           </Link>
           <div className="flex flex-col">
             <h1 className="text-xl font-black italic tracking-tighter text-white leading-none">DIGITRIK PRO</h1>
-            <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] leading-none mt-1">{t.appName}</span>
+            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] leading-none mt-1">{t.appName}</span>
           </div>
         </div>
 
@@ -256,20 +255,20 @@ export default function GhostPixel() {
         </div>
 
         <div className="space-y-3">
-             <button onClick={() => { setMode('encode'); setProcessedImage(null); setImageSrc(null); }} className={`w-full p-4 rounded-xl border flex items-center gap-3 transition-all ${mode === 'encode' ? 'bg-amber-900/20 border-amber-500/50 text-amber-500' : 'border-zinc-800 text-zinc-500 hover:bg-zinc-900'}`}>
+             <button onClick={() => { setMode('encode'); setProcessedImage(null); setImageSrc(null); }} className={`w-full p-4 rounded-xl border flex items-center gap-3 transition-all ${mode === 'encode' ? 'bg-blue-900/20 border-blue-500/50 text-blue-500' : 'border-zinc-800 text-zinc-500 hover:bg-zinc-900'}`}>
                 <Lock size={20} /> <span className="block text-xs font-black uppercase tracking-wider">{t.modes.encode}</span>
              </button>
-             <button onClick={() => { setMode('decode'); setDecodedText(""); setImageSrc(null); }} className={`w-full p-4 rounded-xl border flex items-center gap-3 transition-all ${mode === 'decode' ? 'bg-amber-900/20 border-amber-500/50 text-amber-500' : 'border-zinc-800 text-zinc-500 hover:bg-zinc-900'}`}>
+             <button onClick={() => { setMode('decode'); setDecodedText(""); setImageSrc(null); }} className={`w-full p-4 rounded-xl border flex items-center gap-3 transition-all ${mode === 'decode' ? 'bg-blue-900/20 border-blue-500/50 text-blue-500' : 'border-zinc-800 text-zinc-500 hover:bg-zinc-900'}`}>
                 <Unlock size={20} /> <span className="block text-xs font-black uppercase tracking-wider">{t.modes.decode}</span>
              </button>
         </div>
 
         <div className="mt-auto space-y-1">
-            <div className="p-4 rounded-xl bg-amber-900/10 border border-amber-500/20 mb-4">
-                <h4 className="flex items-center gap-2 text-amber-500 text-[10px] font-black uppercase mb-2"><AlertTriangle size={12}/> {t.info.warning.split(':')[0]}</h4>
+            <div className="p-4 rounded-xl bg-blue-900/10 border border-blue-500/20 mb-4">
+                <h4 className="flex items-center gap-2 text-blue-500 text-[10px] font-black uppercase mb-2"><AlertTriangle size={12}/> {t.info.warning.split(':')[0]}</h4>
                 <p className="text-[10px] text-zinc-400 leading-tight">{t.info.warning.split(':')[1]}</p>
             </div>
-            <button onClick={() => setShowInfoModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all text-xs font-bold uppercase tracking-wide group"><Info size={16} className="group-hover:text-amber-400"/> INFO</button>
+            <button onClick={() => setShowInfoModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all text-xs font-bold uppercase tracking-wide group"><Info size={16} className="group-hover:text-blue-400"/> INFO</button>
             <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-green-600/80 hover:text-green-400 hover:bg-green-900/10 transition-all text-xs font-bold uppercase tracking-wide group"><Heart size={16} className="group-hover:scale-110 transition-transform"/> {t.modals.supportBtn}</button>
         </div>
       </aside>
@@ -278,7 +277,7 @@ export default function GhostPixel() {
       <main className="flex-1 flex flex-col relative bg-zinc-900/50 overflow-y-auto">
         <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-10">
             <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
-                <Ghost size={18} className="text-amber-500"/> {t.appName} <span className="text-zinc-600">/</span> {mode === 'encode' ? 'ENCRYPTOR' : 'DECRYPTOR'}
+                <Ghost size={18} className="text-blue-500"/> {t.appName} <span className="text-zinc-600">/</span> {mode === 'encode' ? 'ENCRYPTOR' : 'DECRYPTOR'}
             </h2>
         </header>
 
@@ -286,13 +285,13 @@ export default function GhostPixel() {
             
             {/* STEP 1: UPLOAD */}
             <div className="mb-8 animate-in fade-in slide-in-from-bottom-4">
-                <h3 className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">{mode === 'encode' ? t.steps.upload : t.steps.decodeUpload}</h3>
+                <h3 className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-4">{mode === 'encode' ? t.steps.upload : t.steps.decodeUpload}</h3>
                 <div 
                     onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
                     onClick={() => fileInputRef.current.click()}
                     className={`border-2 border-dashed rounded-3xl h-64 flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden group 
-                        ${isDragging ? 'border-amber-500 bg-amber-900/20 scale-[1.02]' : ''}
-                        ${imageSrc && !isDragging ? 'border-amber-500/50 bg-amber-900/10' : 'border-zinc-800 hover:border-zinc-600 hover:bg-zinc-900'}
+                        ${isDragging ? 'border-blue-500 bg-blue-900/20 scale-[1.02]' : ''}
+                        ${imageSrc && !isDragging ? 'border-blue-500/50 bg-blue-900/10' : 'border-zinc-800 hover:border-zinc-600 hover:bg-zinc-900'}
                     `}
                 >
                     <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleInputUpload}/>
@@ -305,7 +304,7 @@ export default function GhostPixel() {
                         </>
                     ) : (
                         <div className="flex flex-col items-center gap-3 text-zinc-500 pointer-events-none">
-                            <Upload size={32} className={`transition-colors ${isDragging ? 'text-amber-500 animate-bounce' : 'group-hover:text-amber-500'}`}/>
+                            <Upload size={32} className={`transition-colors ${isDragging ? 'text-blue-500 animate-bounce' : 'group-hover:text-blue-500'}`}/>
                             <p className="text-xs font-bold uppercase">{t.labels.dropzone}</p>
                             <p className="text-[10px] opacity-50">PNG, JPG, WEBP</p>
                         </div>
@@ -316,13 +315,13 @@ export default function GhostPixel() {
             {/* STEP 2: LOGIC */}
             {mode === 'encode' && (
                 <div className={`mb-8 transition-all duration-500 ${imageSrc ? 'opacity-100 translate-y-0' : 'opacity-50 translate-y-4 blur-sm pointer-events-none'}`}>
-                     <h3 className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">{t.steps.write}</h3>
+                     <h3 className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-4">{t.steps.write}</h3>
                      <textarea 
                         value={secretText} onChange={(e) => setSecretText(e.target.value)} placeholder={t.labels.secretPlaceholder}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-zinc-300 font-mono text-sm h-32 outline-none focus:border-amber-500 transition-colors resize-none"
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-zinc-300 font-mono text-sm h-32 outline-none focus:border-blue-500 transition-colors resize-none"
                      />
                      <div className="flex justify-end mt-4">
-                        <button onClick={encodeMessage} disabled={!secretText || isProcessing} className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-amber-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95">
+                        <button onClick={encodeMessage} disabled={!secretText || isProcessing} className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95">
                            {isProcessing ? t.labels.processing : <><Zap size={16} fill="currentColor"/> {t.steps.process}</>} 
                         </button>
                      </div>
@@ -331,7 +330,7 @@ export default function GhostPixel() {
 
             {mode === 'decode' && imageSrc && (
                 <div className="animate-in fade-in slide-in-from-bottom-4">
-                    <h3 className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">{t.steps.decodeRead}</h3>
+                    <h3 className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-4">{t.steps.decodeRead}</h3>
                     <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8 relative min-h-[100px] flex items-center justify-center">
                          {decodedText ? (
                              <div className="w-full">
@@ -352,13 +351,13 @@ export default function GhostPixel() {
       {/* --- STEP 3: SUCCESS POPUP (MODAL) --- */}
       {processedImage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
-            <div className="bg-[#0a0a0a] border border-amber-500/30 rounded-[2rem] w-full max-w-md p-8 text-center shadow-[0_0_50px_rgba(245,158,11,0.15)] relative">
+            <div className="bg-[#0a0a0a] border border-blue-500/30 rounded-[2rem] w-full max-w-md p-8 text-center shadow-[0_0_50px_rgba(59,130,246,0.15)] relative">
                 
                 {/* Close Button */}
                 <button onClick={() => setProcessedImage(null)} className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors"><X size={20}/></button>
 
                 {/* Icon */}
-                <div className="w-24 h-24 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-500">
+                <div className="w-24 h-24 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-500">
                     <Ghost size={48} />
                 </div>
 
@@ -380,19 +379,19 @@ export default function GhostPixel() {
       {/* --- EXPORT MODAL --- */}
       {showDownloadModal && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-[#0a0a0a] border border-amber-600/30 rounded-[2rem] w-full max-w-md p-8 relative shadow-[0_0_50px_rgba(245,158,11,0.1)]">
+          <div className="bg-[#0a0a0a] border border-blue-600/30 rounded-[2rem] w-full max-w-md p-8 relative shadow-[0_0_50px_rgba(59,130,246,0.1)]">
             <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-amber-500/10 rounded-full text-amber-500"><Wand2 size={24}/></div>
+                <div className="p-3 bg-blue-500/10 rounded-full text-blue-500"><Wand2 size={24}/></div>
                 <div><h3 className="text-xl font-black text-white uppercase">{t.modals.ready}</h3><p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">PNG FORMAT</p></div>
                 <button onClick={() => setShowDownloadModal(false)} className="absolute top-8 right-8 text-zinc-500 hover:text-white transition-colors"><X size={20}/></button>
             </div>
             
-            <input type="text" value={exportFilename} onChange={(e) => setExportFilename(e.target.value)} className="w-full bg-zinc-900 border border-white/10 rounded-xl p-4 text-white mb-8 outline-none focus:border-amber-500 font-bold shadow-inner" />
+            <input type="text" value={exportFilename} onChange={(e) => setExportFilename(e.target.value)} className="w-full bg-zinc-900 border border-white/10 rounded-xl p-4 text-white mb-8 outline-none focus:border-blue-500 font-bold shadow-inner" />
 
-            <div className="bg-amber-900/10 border border-amber-600/10 rounded-2xl p-5 mb-6 flex gap-4">
-              <Sparkles className="text-amber-500 shrink-0 mt-0.5" size={18} />
+            <div className="bg-blue-900/10 border border-blue-600/10 rounded-2xl p-5 mb-6 flex gap-4">
+              <Sparkles className="text-blue-500 shrink-0 mt-0.5" size={18} />
               <div className="space-y-1">
-                <span className="text-[10px] font-black text-amber-400 uppercase block tracking-widest">{t.modals.didYouKnow} ({trickCuriosity.key})</span>
+                <span className="text-[10px] font-black text-blue-400 uppercase block tracking-widest">{t.modals.didYouKnow} ({trickCuriosity.key})</span>
                 <p className="text-xs text-gray-300 italic leading-relaxed">{trickCuriosity.text}</p>
               </div>
             </div>
@@ -403,7 +402,7 @@ export default function GhostPixel() {
 
             <div className="flex gap-3">
               <button onClick={() => setShowDownloadModal(false)} className="flex-1 py-4 text-zinc-500 font-bold uppercase text-xs hover:text-zinc-300 hover:bg-white/5 rounded-xl transition-colors">{t.modals.cancel}</button>
-              <button onClick={confirmDownload} className="flex-1 py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-black uppercase text-xs shadow-lg shadow-amber-900/20 transition-all flex items-center justify-center gap-2"><Download size={16}/> {t.modals.downloadNow}</button>
+              <button onClick={confirmDownload} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black uppercase text-xs shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2"><Download size={16}/> {t.modals.downloadNow}</button>
             </div>
           </div>
         </div>
@@ -412,8 +411,8 @@ export default function GhostPixel() {
       {/* --- INFO MODAL --- */}
       {showInfoModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-[#0a0a0a] border border-amber-500/30 rounded-[2rem] w-[90%] max-w-lg overflow-hidden relative shadow-2xl">
-            <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-amber-500/10 p-3 rounded-full text-amber-500"><ShieldCheck size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">GHOST PIXEL TECH</h3></div><button onClick={() => setShowInfoModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white"><X size={20} /></button></div>
+          <div className="bg-[#0a0a0a] border border-blue-500/30 rounded-[2rem] w-[90%] max-w-lg overflow-hidden relative shadow-2xl">
+            <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-blue-500/10 p-3 rounded-full text-blue-500"><ShieldCheck size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">GHOST PIXEL TECH</h3></div><button onClick={() => setShowInfoModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white"><X size={20} /></button></div>
             <div className="p-8 space-y-6">
                 <p className="text-sm text-zinc-300 leading-relaxed">{t.info.desc}</p>
                 <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800">
@@ -440,7 +439,7 @@ export default function GhostPixel() {
                     <h4 className="text-green-400 font-bold uppercase text-xs flex gap-2"><CreditCard size={14}/> {t.modals.donateTitle}</h4>
                     <div className="grid grid-cols-3 gap-2">{['1', '2', '5'].map(a => <a key={a} href={`https://www.paypal.me/triches89/${a}`} target="_blank" className="py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-center font-bold hover:border-green-500 hover:text-green-400 transition-all">{a}€</a>)}</div>
                 </div>
-                <div className="p-8 space-y-4 bg-zinc-950/30"><h4 className="text-amber-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> Support Us</h4><button disabled className="w-full py-3 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-bold uppercase cursor-not-allowed">Watch Ad (Soon)</button></div>
+                <div className="p-8 space-y-4 bg-zinc-950/30"><h4 className="text-blue-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> Support Us</h4><button disabled className="w-full py-3 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-bold uppercase cursor-not-allowed">Watch Ad (Soon)</button></div>
             </div>
           </div>
         </div>
