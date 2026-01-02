@@ -7,7 +7,8 @@ import {
   QrCode, Link as LinkIcon, Wifi, UserSquare, Mail, Type, 
   Download, Settings, Image as ImageIcon, Palette, 
   ArrowLeft, Info, Heart, Check, X, CreditCard, PlayCircle, 
-  RefreshCcw, Smartphone, ShieldCheck, Share2, Printer
+  RefreshCcw, Smartphone, ShieldCheck, Share2, Printer,
+  Wand2, Sparkles, Coffee // <--- Aggiunto Coffee qui
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -49,16 +50,29 @@ const TRANSLATIONS = {
       margin: "Margine (Bordo)"
     },
     actions: {
-      download: "Scarica PNG",
+      download: "Scarica",
+      downloadNow: "Scarica Ora",
       print: "Stampa"
     },
     infoBtn: "INFO & CONTATTI",
     supportBtn: "SUPPORTA IL PROGETTO",
     modals: {
+      ready: "Pronto per il Download",
+      chooseName: "Scegli il nome del file",
+      fileName: "Nome File",
+      didYouKnow: "Lo sapevi?",
+      cancel: "Annulla",
       aboutTitle: "QR Code Privacy First",
       aboutText: "Genera QR Code professionali direttamente nel tuo browser. Nessun dato viene tracciato o salvato su server esterni.",
       donateTitle: "Offrici un caffè",
       adButton: "Coming Soon"
+    },
+    enc: {
+      HISTORY: { curiosity: "Il QR Code è stato inventato nel 1994 dalla Denso Wave (Toyota) per tracciare i pezzi di ricambio nelle fabbriche.", type: "Storia" },
+      CAPACITY: { curiosity: "Un singolo QR Code può contenere fino a 4.296 caratteri alfanumerici o 7.089 numeri.", type: "Tech" },
+      ERROR: { curiosity: "Grazie alla correzione Reed-Solomon, un QR Code può essere letto anche se è danneggiato fino al 30%.", type: "Tech" },
+      PATTERNS: { curiosity: "I tre quadrati agli angoli si chiamano 'Finder Patterns' e servono allo scanner per capire l'orientamento.", type: "Design" },
+      INVERTED: { curiosity: "I QR Code possono essere invertiti (bianco su nero), ma alcuni scanner vecchi potrebbero faticare a leggerli.", type: "Tip" }
     }
   },
   en: {
@@ -97,16 +111,29 @@ const TRANSLATIONS = {
       margin: "Margin (Border)"
     },
     actions: {
-      download: "Download PNG",
+      download: "Download",
+      downloadNow: "Download Now",
       print: "Print"
     },
     infoBtn: "INFO & CONTACTS",
     supportBtn: "SUPPORT PROJECT",
     modals: {
+      ready: "Ready for Download",
+      chooseName: "Choose your filename",
+      fileName: "File Name",
+      didYouKnow: "Did you know?",
+      cancel: "Cancel",
       aboutTitle: "Privacy First QR",
       aboutText: "Generate professional QR Codes directly in your browser. No data is tracked or saved on external servers.",
       donateTitle: "Buy us a coffee",
       adButton: "Coming Soon"
+    },
+    enc: {
+      HISTORY: { curiosity: "QR Codes were invented in 1994 by Denso Wave (Toyota) to track vehicle parts during manufacturing.", type: "History" },
+      CAPACITY: { curiosity: "A single QR Code can hold up to 4,296 alphanumeric characters or 7,089 numeric digits.", type: "Tech" },
+      ERROR: { curiosity: "Thanks to Reed-Solomon error correction, a QR Code can still be read even if 30% of it is damaged.", type: "Tech" },
+      PATTERNS: { curiosity: "The three squares in the corners are called 'Finder Patterns' and help the scanner determine orientation.", type: "Design" },
+      INVERTED: { curiosity: "QR Codes can be inverted (white on black), though some older scanners might struggle with them.", type: "Tip" }
     }
   }
 };
@@ -155,9 +182,14 @@ export default function QRCreator() {
 
   const [qrUrl, setQrUrl] = useState(null);
   
-  // MODALS
+  // MODALS STATE
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
+  
+  // DOWNLOAD MODAL STATE
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [exportFilename, setExportFilename] = useState("");
+  const [trickCuriosity, setTrickCuriosity] = useState({ key: '', text: '' });
 
   // --- LOGIC: GENERATE QR ---
   useEffect(() => {
@@ -217,13 +249,36 @@ export default function QRCreator() {
     }
   };
 
-  const handleDownload = () => {
-      if (!qrUrl) return;
-      const a = document.createElement('a');
-      a.href = qrUrl;
-      a.download = `digitrik_qr_${activeType}.png`;
-      a.click();
+  // --- DOWNLOAD HANDLERS ---
+  const handleDownloadClick = () => {
+    if (!qrUrl) return;
+    
+    // Default name
+    let defaultName = "digitrik_qr";
+    if (activeType === 'url' && content.url) defaultName = `qr_${content.url.replace(/https?:\/\//, '').split('/')[0]}`;
+    if (activeType === 'wifi' && content.ssid) defaultName = `qr_wifi_${content.ssid}`;
+    if (activeType === 'vcard' && content.firstName) defaultName = `qr_contact_${content.firstName}`;
+    
+    setExportFilename(defaultName.substring(0, 20)); // Limit length
+
+    // Random Curiosity
+    const keys = Object.keys(t.enc);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    setTrickCuriosity({ key: t.enc[randomKey].type, text: t.enc[randomKey].curiosity });
+
+    setShowDownloadModal(true);
   };
+
+  const confirmDownload = () => {
+    if (qrUrl) {
+        const a = document.createElement('a');
+        a.href = qrUrl;
+        a.download = `${exportFilename}.png`;
+        a.click();
+    }
+    setShowDownloadModal(false);
+  };
+
 
   const onLogoDrop = (accepted) => {
       if(accepted[0]) {
@@ -320,7 +375,7 @@ export default function QRCreator() {
         </div>
       </aside>
 
-      {/* CENTER WORKSPACE (FIXED LAYOUT: VERTICAL STACK) */}
+      {/* CENTER WORKSPACE */}
       <main className="flex-1 flex flex-col relative bg-zinc-900/50">
         <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-10">
             <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">{t.appName} <span className="text-blue-500">/</span> {t.nav[activeType]}</h2>
@@ -329,13 +384,13 @@ export default function QRCreator() {
         <div className="flex-1 p-8 overflow-y-auto">
             <div className="max-w-3xl mx-auto flex flex-col gap-8 pb-12">
                 
-                {/* 1. INPUT DATA AREA (TOP) */}
+                {/* 1. INPUT DATA AREA */}
                 <div className="w-full bg-zinc-950 border border-white/5 p-6 rounded-3xl shadow-sm">
                     <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2"><Smartphone size={20} className="text-blue-500"/> Input Data</h3>
                     {renderInputs()}
                 </div>
 
-                {/* 2. PREVIEW & DOWNLOAD AREA (BOTTOM) */}
+                {/* 2. PREVIEW & DOWNLOAD AREA */}
                 <div className="w-full flex flex-col items-center justify-center pt-4">
                     <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl border-4 border-zinc-800 relative group transition-transform duration-500 hover:scale-[1.02]">
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-6 bg-zinc-800 rounded-b-xl flex items-center justify-center gap-2">
@@ -349,7 +404,7 @@ export default function QRCreator() {
                         )}
                     </div>
                     
-                    <button onClick={handleDownload} className="mt-8 px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-900/30 flex items-center gap-3 transition-all hover:-translate-y-1">
+                    <button onClick={handleDownloadClick} className="mt-8 px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-900/30 flex items-center gap-3 transition-all hover:-translate-y-1">
                         <Download size={18} /> {t.actions.download}
                     </button>
                 </div>
@@ -415,7 +470,51 @@ export default function QRCreator() {
         </div>
       </aside>
 
-      {/* MODALS */}
+      {/* --- RENAME / DOWNLOAD MODAL --- */}
+      {showDownloadModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
+          <div className="bg-[#0a0a0a] border border-blue-600/30 rounded-[2rem] w-[90%] max-w-lg p-8 shadow-[0_0_50px_rgba(37,99,235,0.1)] relative">
+            
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-blue-600/10 p-3 rounded-full text-blue-500"><Wand2 size={24} /></div>
+              <div><h3 className="text-xl font-black italic text-white uppercase tracking-wider">{t.modals.ready}</h3><p className="text-[11px] text-gray-500 font-bold uppercase">{t.modals.chooseName}</p></div>
+              <button onClick={() => setShowDownloadModal(false)} className="absolute top-6 right-6 text-gray-600 hover:text-white transition-colors"><X size={20} /></button>
+            </div>
+            
+            {/* Input Name */}
+            <div className="space-y-2 mb-8">
+              <label className="text-xs font-bold text-gray-400 uppercase ml-2">{t.modals.fileName}</label>
+              <div className="relative">
+                <input type="text" value={exportFilename} onChange={(e) => setExportFilename(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && confirmDownload()} autoFocus className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white font-medium outline-none focus:border-blue-600 transition-all shadow-inner" />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-xs font-bold pointer-events-none">.PNG</span>
+              </div>
+            </div>
+
+            {/* Did you know? */}
+            <div className="bg-blue-900/10 border border-blue-600/10 rounded-2xl p-5 mb-6 flex gap-4">
+              <Sparkles className="text-blue-500 shrink-0 mt-0.5" size={18} />
+              <div className="space-y-1">
+                <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">{t.modals.didYouKnow} ({trickCuriosity.key})</span>
+                <p className="text-xs text-gray-300 italic leading-relaxed">{trickCuriosity.text}</p>
+              </div>
+            </div>
+
+            {/* Support */}
+            <div className="mb-8 bg-green-500/10 border border-green-500/30 p-4 rounded-2xl flex items-center justify-center group hover:bg-green-500/20 transition-all cursor-pointer" onClick={() => setShowSupportModal(true)}>
+              <button className="text-sm uppercase font-black text-green-500 group-hover:text-green-400 flex items-center gap-3 transition-colors"><Heart size={18} className="animate-pulse" /> {t.supportBtn}</button>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button onClick={() => setShowDownloadModal(false)} className="flex-1 py-4 rounded-xl border border-white/5 hover:bg-white/5 text-gray-400 font-bold text-xs uppercase tracking-widest transition-all">{t.modals.cancel}</button>
+              <button onClick={confirmDownload} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2"><Check size={16} /> {t.actions.downloadNow}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* INFO & SUPPORT MODALS */}
       {showInfoModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
           <div className="bg-[#0a0a0a] border border-zinc-800 rounded-[2rem] w-[90%] max-w-lg overflow-hidden relative shadow-2xl">
