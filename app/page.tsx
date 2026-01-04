@@ -6,10 +6,11 @@ import {
   Calculator, FileText, ShieldCheck, ArrowRight, Layers, 
   Globe, Heart, Check, Image as ImageIcon, QrCode, 
   ScanLine, Ghost, Cpu, Zap, MousePointerClick,
-  Info, Mail, CreditCard, PlayCircle, Coffee, X
+  Info, Mail, CreditCard, PlayCircle, Coffee, X,
+  Monitor // <--- IMPORTANTE: Icona per SnapGlow
 } from "lucide-react";
 
-// --- CONFIGURAZIONE STRUMENTI (Bordo Fisso + Neon Hover) ---
+// --- CONFIGURAZIONE STRUMENTI ---
 const TOOLS = [
   {
     id: 'pdf',
@@ -21,6 +22,17 @@ const TOOLS = [
     glow: "hover:shadow-[0_0_50px_-12px_rgba(239,68,68,0.6)]", 
     icon: FileText,
     link: "/pdf-tools"
+  },
+  {
+    id: 'snapglow',
+    title: { en: "SnapGlow", it: "SnapGlow" },
+    desc: { en: "Create beautiful screenshots for social media.", it: "Crea screenshot virali per i social." },
+    color: "text-pink-500",
+    bg: "bg-pink-500/10",
+    border: "border-pink-500",
+    glow: "hover:shadow-[0_0_50px_-12px_rgba(236,72,153,0.6)]",
+    icon: Monitor,
+    link: "/snapglow"
   },
   {
     id: 'quotes',
