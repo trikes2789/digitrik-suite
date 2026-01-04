@@ -191,20 +191,34 @@ const SmartScreen = ({ image, className }) => {
     );
 };
 
-// --- DEVICE RENDERER (CLIPPING FIX) ---
+// --- DEVICE RENDERER (IOS CLIP PATH FIX) ---
 const DeviceRenderer = ({ device, image, color, shadow }) => {
     
-    // WebKit Fix Style: Forza il clipping dei bordi su iOS
-    const clipStyle = { WebkitMaskImage: '-webkit-radial-gradient(white, black)' };
-
-    // 1. IPHONE 15 PRO
+    // IPHONE 15 PRO - CLIP PATH FIX APPLIED
     if (device === 'iphone15') {
         return (
             <div className={`relative ${shadow}`} style={{ width: '300px' }}>
-                <div className="rounded-[56px] p-[3px] bg-black shadow-inner" style={{ backgroundColor: color.hex, padding: '4px' }}>
-                    <div className="bg-black rounded-[52px] p-[10px] ring-1 ring-white/10 relative overflow-hidden">
-                        {/* APPLIED CLIP FIX HERE */}
-                        <div className="relative bg-black rounded-[42px] overflow-hidden aspect-[9/19.5] w-full z-10" style={clipStyle}>
+                {/* OUTER SHELL */}
+                <div 
+                    className="rounded-[56px] p-[3px] bg-black shadow-inner" 
+                    style={{ backgroundColor: color.hex, padding: '4px' }}
+                >
+                    {/* INNER BEZEL */}
+                    <div className="bg-black rounded-[52px] p-[10px] ring-1 ring-white/10 relative">
+                        
+                        {/* SCREEN CONTAINER WITH HARD CLIPPING */}
+                        <div 
+                            className="relative bg-black w-full aspect-[9/19.5] z-10"
+                            style={{ 
+                                borderRadius: '42px', 
+                                overflow: 'hidden',
+                                // THIS IS THE MAGIC FIX FOR IOS:
+                                clipPath: 'inset(0px round 42px)', 
+                                WebkitClipPath: 'inset(0px round 42px)',
+                                transform: 'translateZ(0)' // Force GPU
+                            }}
+                        >
+                            {/* Dynamic Island */}
                             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-[90px] h-[26px] bg-black rounded-full z-50 flex justify-center items-center pointer-events-none">
                                 <div className="w-2 h-2 rounded-full bg-[#1a1a1a] mr-6"></div>
                             </div>
@@ -212,6 +226,8 @@ const DeviceRenderer = ({ device, image, color, shadow }) => {
                         </div>
                     </div>
                 </div>
+
+                {/* BUTTONS */}
                 <div className="absolute top-32 -left-[4px] w-[4px] h-8 rounded-l-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
                 <div className="absolute top-48 -left-[4px] w-[4px] h-14 rounded-l-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
                 <div className="absolute top-40 -right-[4px] w-[4px] h-20 rounded-r-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
@@ -219,14 +235,23 @@ const DeviceRenderer = ({ device, image, color, shadow }) => {
         );
     }
 
-    // 2. PIXEL 8
+    // PIXEL 8 - CLIP PATH FIX
     if (device === 'pixel') {
         return (
             <div className={`relative ${shadow}`} style={{ width: '290px' }}>
                 <div className="rounded-[36px] p-[3px]" style={{ backgroundColor: color.hex, padding: '3px' }}>
                     <div className="bg-black rounded-[33px] p-[8px] ring-1 ring-white/10">
-                        {/* APPLIED CLIP FIX HERE */}
-                        <div className="relative bg-black rounded-[25px] overflow-hidden aspect-[9/20] w-full z-10" style={clipStyle}>
+                        {/* SCREEN CONTAINER */}
+                        <div 
+                            className="relative bg-black w-full aspect-[9/20] z-10 border border-zinc-900"
+                            style={{ 
+                                borderRadius: '25px', 
+                                overflow: 'hidden',
+                                clipPath: 'inset(0px round 25px)',
+                                WebkitClipPath: 'inset(0px round 25px)',
+                                transform: 'translateZ(0)'
+                            }}
+                        >
                             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-4 h-4 bg-black rounded-full z-50 border border-zinc-800"></div>
                             <SmartScreen image={image} />
                         </div>
@@ -238,13 +263,20 @@ const DeviceRenderer = ({ device, image, color, shadow }) => {
         );
     }
 
-    // 3. MACBOOK
+    // MACBOOK - CLIP PATH FIX
     if (device === 'macbook') {
         return (
             <div className={`relative ${shadow}`} style={{ width: '600px' }}>
                 <div className="rounded-t-2xl p-[12px] pb-0 relative transition-colors z-10" style={{ backgroundColor: color.id === 'midnight' ? '#0d0d0d' : color.hex }}>
-                    {/* APPLIED CLIP FIX HERE */}
-                    <div className="relative bg-black rounded-t-lg overflow-hidden aspect-[16/10] ring-1 ring-black/20" style={clipStyle}>
+                    <div 
+                        className="relative bg-black w-full aspect-[16/10] ring-1 ring-black/20"
+                        style={{ 
+                            borderRadius: '8px 8px 0 0', 
+                            overflow: 'hidden',
+                            clipPath: 'inset(0px round 8px 8px 0 0)',
+                            WebkitClipPath: 'inset(0px round 8px 8px 0 0)'
+                        }}
+                    >
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 rounded-b-lg z-40" style={{ backgroundColor: color.id === 'midnight' ? '#0d0d0d' : color.hex }}></div>
                         <InternalBrowser><SmartScreen image={image} /></InternalBrowser>
                     </div>
@@ -256,13 +288,20 @@ const DeviceRenderer = ({ device, image, color, shadow }) => {
         );
     }
 
-    // 4. iMAC
+    // iMAC - CLIP PATH FIX
     if (device === 'imac') {
         return (
             <div className={`relative flex flex-col items-center ${shadow}`} style={{ width: '580px' }}>
                 <div className="rounded-2xl p-[12px] pb-14 relative w-full shadow-lg z-10 transition-colors" style={{ backgroundColor: '#f0f0f0' }}>
-                    {/* APPLIED CLIP FIX HERE */}
-                    <div className="relative bg-black overflow-hidden aspect-[16/9] rounded-sm ring-1 ring-black/10" style={clipStyle}>
+                    <div 
+                        className="relative bg-black w-full aspect-[16/9] ring-1 ring-black/10"
+                        style={{ 
+                            borderRadius: '2px', 
+                            overflow: 'hidden',
+                            clipPath: 'inset(0px round 2px)',
+                            WebkitClipPath: 'inset(0px round 2px)'
+                        }}
+                    >
                         <InternalBrowser><SmartScreen image={image} /></InternalBrowser>
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 h-12 rounded-b-xl z-20" style={{ backgroundColor: color.hex }}>
