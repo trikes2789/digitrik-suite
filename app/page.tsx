@@ -278,7 +278,7 @@ export default function Home() {
       <footer className="py-12 border-t border-white/5 text-center mt-auto">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-left">
-            <h4 className="text-lg font-black text-white italic tracking-tighter">DIGITRIK</h4>
+            <h4 className="text-lg font-black text-white italic tracking-tighter">DIGITRIK PRO</h4>
             <p className="text-[10px] text-zinc-500 uppercase tracking-widest">{t.footer.subtitle}</p>
           </div>
           <div className="flex gap-6 text-xs font-bold text-zinc-500 items-center">
