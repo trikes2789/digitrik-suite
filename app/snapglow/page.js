@@ -8,11 +8,11 @@ import {
   Image as ImageIcon, Loader2, Info, Mail, Heart, Coffee, CreditCard, 
   PlayCircle, X, Check, Smartphone, Laptop, Wand2, Sparkles, 
   HelpCircle, Layers, Fingerprint, BookOpen, Trash2, Plus, ImagePlus,
-  FileImage, HardDrive
+  HardDrive
 } from 'lucide-react';
 import Link from 'next/link';
 
-// --- TRANSLATIONS (FIXED: SEO DATA RESTORED) ---
+// --- TRANSLATIONS ---
 const TRANSLATIONS = {
   it: {
     appName: "SNAPGLOW",
@@ -39,8 +39,8 @@ const TRANSLATIONS = {
       p1: "Presentare il tuo lavoro con cura aumenta il valore percepito. Un'app mostrata dentro un iPhone 15 o un sito web dentro un MacBook attirano il 40% di clic in più.",
       ul1: [
         "**Multi-Device:** iPhone 15, Pixel 8, MacBook, iMac e Browser.",
-        "**Smart Fit:** Adattamento automatico di qualsiasi immagine (anche 16:9 su schermi verticali).",
-        "**Privacy First:** Le immagini vengono elaborate in locale (WASM), nulla sale sui server."
+        "**Smart Fit:** Adattamento automatico di qualsiasi immagine.",
+        "**Privacy First:** Elaborazione locale (WASM), nulla sale sui server."
       ],
       h2: "Performance & Export",
       p2: "Scegli tra PNG (massima qualità), JPEG (social media) o WEBP (siti web). Vedi il peso del file in tempo reale prima di scaricare.",
@@ -48,7 +48,7 @@ const TRANSLATIONS = {
       p3: "Cambia il colore della scocca del dispositivo (Titanio, Midnight, Silver) per adattarlo al tuo branding."
     },
     enc: {
-      SNAP: { curiosity: "Il primo screenshot della storia è stato fatto nel 1960 su un computer PDP-1. Oggi ne facciamo milioni al giorno.", type: "Storia" }
+      SNAP: { curiosity: "Il primo screenshot della storia è stato fatto nel 1960 su un computer PDP-1.", type: "Storia" }
     }
   },
   en: {
@@ -76,8 +76,8 @@ const TRANSLATIONS = {
       p1: "Presenting your work with care increases perceived value. An app shown inside an iPhone 15 or a website inside a MacBook attracts 40% more clicks.",
       ul1: [
         "**Multi-Device:** iPhone 15, Pixel 8, MacBook, iMac, and Browser.",
-        "**Smart Fit:** Automatic adaptation of any image (even 16:9 on vertical screens).",
-        "**Privacy First:** Images are processed locally (WASM), nothing goes to servers."
+        "**Smart Fit:** Automatic adaptation of any image.",
+        "**Privacy First:** Local processing (WASM), nothing goes to servers."
       ],
       h2: "Performance & Export",
       p2: "Choose between PNG (max quality), JPEG (social media), or WEBP (websites). See real-time file size before downloading.",
@@ -85,7 +85,7 @@ const TRANSLATIONS = {
       p3: "Change the device body color (Titanium, Midnight, Silver) to match your branding."
     },
     enc: {
-      SNAP: { curiosity: "The first screenshot in history was taken in 1960 on a PDP-1 computer. Today we take millions daily.", type: "History" }
+      SNAP: { curiosity: "The first screenshot in history was taken in 1960 on a PDP-1 computer.", type: "History" }
     }
   }
 };
@@ -191,26 +191,30 @@ const SmartScreen = ({ image, className }) => {
     );
 };
 
-// --- DEVICE RENDERER ---
+// --- DEVICE RENDERER (CLIPPING FIX) ---
 const DeviceRenderer = ({ device, image, color, shadow }) => {
     
+    // WebKit Fix Style: Forza il clipping dei bordi su iOS
+    const clipStyle = { WebkitMaskImage: '-webkit-radial-gradient(white, black)' };
+
     // 1. IPHONE 15 PRO
     if (device === 'iphone15') {
         return (
             <div className={`relative ${shadow}`} style={{ width: '300px' }}>
-                <div className="rounded-[50px] p-[10px] ring-1 ring-black/10" style={{ backgroundColor: color.hex }}>
-                    <div className="absolute inset-0 rounded-[50px] border-[10px] pointer-events-none z-30" style={{ borderColor: color.border }}></div>
-                    <div className="relative bg-black rounded-[40px] overflow-hidden aspect-[9/19.5] w-full z-10">
-                        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-[90px] h-[26px] bg-black rounded-full z-40 flex justify-center items-center pointer-events-none">
-                            <div className="w-2 h-2 rounded-full bg-[#1a1a1a] mr-6"></div>
+                <div className="rounded-[56px] p-[3px] bg-black shadow-inner" style={{ backgroundColor: color.hex, padding: '4px' }}>
+                    <div className="bg-black rounded-[52px] p-[10px] ring-1 ring-white/10 relative overflow-hidden">
+                        {/* APPLIED CLIP FIX HERE */}
+                        <div className="relative bg-black rounded-[42px] overflow-hidden aspect-[9/19.5] w-full z-10" style={clipStyle}>
+                            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-[90px] h-[26px] bg-black rounded-full z-50 flex justify-center items-center pointer-events-none">
+                                <div className="w-2 h-2 rounded-full bg-[#1a1a1a] mr-6"></div>
+                            </div>
+                            <SmartScreen image={image} />
                         </div>
-                        <SmartScreen image={image} />
                     </div>
                 </div>
-                {/* Buttons */}
-                <div className="absolute top-28 -left-[3px] w-[3px] h-8 rounded-l-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
-                <div className="absolute top-44 -left-[3px] w-[3px] h-14 rounded-l-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
-                <div className="absolute top-36 -right-[3px] w-[3px] h-20 rounded-r-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
+                <div className="absolute top-32 -left-[4px] w-[4px] h-8 rounded-l-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
+                <div className="absolute top-48 -left-[4px] w-[4px] h-14 rounded-l-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
+                <div className="absolute top-40 -right-[4px] w-[4px] h-20 rounded-r-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
             </div>
         );
     }
@@ -219,15 +223,17 @@ const DeviceRenderer = ({ device, image, color, shadow }) => {
     if (device === 'pixel') {
         return (
             <div className={`relative ${shadow}`} style={{ width: '290px' }}>
-                <div className="rounded-[30px] p-[8px]" style={{ backgroundColor: color.hex }}>
-                    <div className="absolute inset-0 rounded-[30px] border-[8px] pointer-events-none z-30" style={{ borderColor: color.hex }}></div>
-                    <div className="relative bg-black rounded-[22px] overflow-hidden aspect-[9/20] w-full z-10 border border-black">
-                        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-4 h-4 bg-black rounded-full z-40 border border-zinc-800"></div>
-                        <SmartScreen image={image} />
+                <div className="rounded-[36px] p-[3px]" style={{ backgroundColor: color.hex, padding: '3px' }}>
+                    <div className="bg-black rounded-[33px] p-[8px] ring-1 ring-white/10">
+                        {/* APPLIED CLIP FIX HERE */}
+                        <div className="relative bg-black rounded-[25px] overflow-hidden aspect-[9/20] w-full z-10" style={clipStyle}>
+                            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-4 h-4 bg-black rounded-full z-50 border border-zinc-800"></div>
+                            <SmartScreen image={image} />
+                        </div>
                     </div>
                 </div>
-                <div className="absolute top-24 -right-[3px] w-[3px] h-10 rounded-r-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
-                <div className="absolute top-40 -right-[3px] w-[3px] h-16 rounded-r-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
+                <div className="absolute top-28 -right-[3px] w-[3px] h-10 rounded-r-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
+                <div className="absolute top-44 -right-[3px] w-[3px] h-16 rounded-r-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
             </div>
         );
     }
@@ -237,7 +243,8 @@ const DeviceRenderer = ({ device, image, color, shadow }) => {
         return (
             <div className={`relative ${shadow}`} style={{ width: '600px' }}>
                 <div className="rounded-t-2xl p-[12px] pb-0 relative transition-colors z-10" style={{ backgroundColor: color.id === 'midnight' ? '#0d0d0d' : color.hex }}>
-                    <div className="relative bg-black rounded-t-lg overflow-hidden aspect-[16/10] ring-1 ring-black/20">
+                    {/* APPLIED CLIP FIX HERE */}
+                    <div className="relative bg-black rounded-t-lg overflow-hidden aspect-[16/10] ring-1 ring-black/20" style={clipStyle}>
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 rounded-b-lg z-40" style={{ backgroundColor: color.id === 'midnight' ? '#0d0d0d' : color.hex }}></div>
                         <InternalBrowser><SmartScreen image={image} /></InternalBrowser>
                     </div>
@@ -254,7 +261,8 @@ const DeviceRenderer = ({ device, image, color, shadow }) => {
         return (
             <div className={`relative flex flex-col items-center ${shadow}`} style={{ width: '580px' }}>
                 <div className="rounded-2xl p-[12px] pb-14 relative w-full shadow-lg z-10 transition-colors" style={{ backgroundColor: '#f0f0f0' }}>
-                    <div className="relative bg-black overflow-hidden aspect-[16/9] rounded-sm ring-1 ring-black/10">
+                    {/* APPLIED CLIP FIX HERE */}
+                    <div className="relative bg-black overflow-hidden aspect-[16/9] rounded-sm ring-1 ring-black/10" style={clipStyle}>
                         <InternalBrowser><SmartScreen image={image} /></InternalBrowser>
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 h-12 rounded-b-xl z-20" style={{ backgroundColor: color.hex }}>
@@ -296,8 +304,7 @@ export default function SnapGlow() {
   const [activeTab, setActiveTab] = useState('files');
   const [toast, setToast] = useState(null);
   
-  // STATES PER EXPORT
-  const [exportFormat, setExportFormat] = useState('png'); // png, jpeg, webp
+  const [exportFormat, setExportFormat] = useState('png');
   const [estimatedSize, setEstimatedSize] = useState(null);
   const [canvasRef, setCanvasRef] = useState(null); 
 
