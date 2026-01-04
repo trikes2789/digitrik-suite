@@ -6,7 +6,7 @@ import {
   Calculator, FileText, ShieldCheck, ArrowRight, Layers, 
   Globe, Heart, Check, Image as ImageIcon, QrCode, 
   ScanLine, Ghost, Cpu, Zap, MousePointerClick,
-  Info, X, Mail, CreditCard, PlayCircle, Coffee
+  Info, Mail, CreditCard, PlayCircle, Coffee, X
 } from "lucide-react";
 
 // --- CONFIGURAZIONE STRUMENTI (Bordo Fisso + Neon Hover) ---
@@ -107,6 +107,7 @@ const TRANS = {
     footer: {
       subtitle: "Free Professional Suite",
       contact: "INFO & CONTACTS",
+      privacy: "Privacy Policy",
       rights: "All rights reserved.",
       coffee: "SUPPORT PROJECT"
     },
@@ -143,6 +144,7 @@ const TRANS = {
     footer: {
       subtitle: "Suite Professionale Gratuita",
       contact: "INFO & CONTATTI",
+      privacy: "Privacy Policy",
       rights: "Tutti i diritti riservati.",
       coffee: "SUPPORTA IL PROGETTO"
     },
@@ -264,15 +266,17 @@ export default function Home() {
       <footer className="py-12 border-t border-white/5 text-center mt-auto">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-left">
-            <h4 className="text-lg font-black text-white italic tracking-tighter">DIGITRIK PRO</h4>
+            <h4 className="text-lg font-black text-white italic tracking-tighter">DIGITRIK</h4>
             <p className="text-[10px] text-zinc-500 uppercase tracking-widest">{t.footer.subtitle}</p>
           </div>
-          <div className="flex gap-6 text-xs font-bold text-zinc-500">
-            {/* Pulsante che apre il Modal INFO */}
+          <div className="flex gap-6 text-xs font-bold text-zinc-500 items-center">
+            {/* Link Info (Modal) */}
             <button onClick={() => setShowInfoModal(true)} className="hover:text-white transition-colors">{t.footer.contact}</button>
+            {/* Link Privacy (Page) */}
+            <Link href="/privacy-policy" className="hover:text-white transition-colors">{t.footer.privacy}</Link>
             <span className="text-zinc-600">© 2024 {t.footer.rights}</span>
           </div>
-          {/* Pulsante che apre il Modal SUPPORT */}
+          {/* Link Support (Modal) */}
           <button onClick={() => setShowSupportModal(true)} className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold text-green-500 hover:border-green-500 transition-all">
             <Heart size={14} /> {t.footer.coffee}
           </button>
