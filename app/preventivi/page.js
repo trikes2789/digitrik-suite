@@ -7,21 +7,22 @@ import {
   FileText, Plus, Trash2, RefreshCcw, 
   User, Building2, Download, Info, Heart, 
   ArrowLeft, CreditCard, PlayCircle, X, Check, Code2, Mail, ImagePlus,
-  Coffee, Sparkles, Wand2, Globe, ShieldCheck
+  Coffee, Sparkles, Wand2, Globe, ShieldCheck, HelpCircle, Layers, BookOpen, Fingerprint
 } from 'lucide-react';
 import Link from 'next/link';
 
 // --- 1. DIZIONARIO TRADUZIONI ---
 const TRANSLATIONS = {
   en: {
+    appName: "SMART QUOTES",
     sidebar: {
       header: "Header",
       yourData: "Your Data",
       client: "Client",
       editor: "Editor",
       items: "Items & Prices",
-      info: "INFO & CONTACTS", // Uniformato
-      support: "SUPPORT PROJECT" // Uniformato
+      info: "INFO & CONTACTS",
+      support: "SUPPORT PROJECT"
     },
     headers: {
       quoteComp: "Quote Composer",
@@ -70,18 +71,16 @@ const TRANSLATIONS = {
       fileName: "File Name",
       supportDev: "Support Development",
       supportDesc: "Digitrik is free and ad-free. A coffee helps us keep it that way!",
-      
-      // INFO MODAL TRANSLATIONS (STANDARD SUITE)
       aboutTitle: "Our Mission",
       aboutText: "Digitrik Pro was born from my curiosity for programming, to simplify work for thousands. I believe in total Privacy: your files NEVER leave your browser.",
       contactTitle: "Contact Us",
       privacyTitle: "Privacy First",
       privacyText: "No servers, no cloud, no tracking. Processing happens 100% on your device.",
       rights: "All rights reserved.",
-
       donate: "Donate",
       watchAd: "Watch Ad",
-      comingSoon: "Coming Soon"
+      comingSoon: "Coming Soon",
+      didYouKnow: "Did you know?"
     },
     pdf: {
       title: "QUOTE",
@@ -102,17 +101,37 @@ const TRANSLATIONS = {
       imgError: "Please upload image files only",
       pdfOk: "PDF Generated successfully!",
       pdfErr: "PDF Error: "
+    },
+    enc: {
+        REV: { curiosity: "Reverse calculation algorithms are used in finance to extract the net amount starting from the gross total, handling infinite decimals.", type: "Math" },
+        PDF: { curiosity: "The PDF format was created by Adobe in 1993 to ensure documents looked the same on any device.", type: "History" }
+    },
+    seo: {
+      title: "The Ultimate Guide to Professional Quotes",
+      intro: "Digitrik Pro Smart Quotes is a professional tool designed to create, calculate, and export PDF quotes directly in your browser. It features a unique 'Penny-Perfect' reverse calculation engine.",
+      h1: "What is Reverse Calculation (Penny-Perfect)?",
+      p1: "Often, you agree on a round final price (e.g., €1000) with a client, but calculating the net amount + VAT to reach exactly that number is difficult due to rounding decimals.",
+      ul1: [
+        "**The Problem:** If you simply divide 1000 by 1.22 (22% VAT), you get 819.67213... which creates rounding errors in the final PDF.",
+        "**The Solution:** Our engine automatically calculates the necessary adjustment or discount to ensure the mathematical sum of Net + VAT equals exactly your Target Total.",
+        "**Privacy:** Unlike cloud accounting software, your client data and prices never leave your computer."
+      ],
+      h2: "Why use a PDF Generator?",
+      p2: "Sending a quote in Word or Excel looks unprofessional and allows the client to modify the data. A PDF is a read-only standard format that preserves your layout, fonts, and branding on any device (Mobile, Desktop, Print).",
+      h3: "Data Privacy & Security",
+      p3: "This tool operates 100% locally using JavaScript. No database stores your invoices or client lists. You are the only owner of your data."
     }
   },
   it: {
+    appName: "PREVENTIVI SMART",
     sidebar: {
       header: "Intestazione",
       yourData: "I Tuoi Dati",
       client: "Cliente",
       editor: "Editor",
       items: "Articoli & Prezzi",
-      info: "INFO & CONTATTI", // Uniformato
-      support: "SUPPORTA IL PROGETTO" // Uniformato
+      info: "INFO & CONTATTI",
+      support: "SUPPORTA IL PROGETTO"
     },
     headers: {
       quoteComp: "Composizione Preventivo",
@@ -161,18 +180,16 @@ const TRANSLATIONS = {
       fileName: "Nome File",
       supportDev: "Supporta lo Sviluppo",
       supportDesc: "Digitrik è gratis e senza pubblicità invasive. Un caffè ci aiuta a mantenerlo tale!",
-      
-      // INFO MODAL TRANSLATIONS (STANDARD SUITE)
       aboutTitle: "La nostra Mission",
       aboutText: "Digitrik Pro è nato dalla mia curiosità per la programmazione, e per semplificare il lavoro di migliaia di persone. Credo nella Privacy totale: i tuoi file non lasciano MAI il tuo browser.",
       contactTitle: "Contattaci",
       privacyTitle: "Privacy First",
       privacyText: "Nessun server, nessun cloud, nessun tracciamento. L'elaborazione avviene al 100% sul tuo dispositivo.",
       rights: "Tutti i diritti riservati.",
-
       donate: "Donazione",
       watchAd: "Guarda Spot",
-      comingSoon: "Presto Disponibile"
+      comingSoon: "Presto Disponibile",
+      didYouKnow: "Lo sapevi?"
     },
     pdf: {
       title: "PREVENTIVO",
@@ -193,6 +210,25 @@ const TRANSLATIONS = {
       imgError: "Per favore carica solo file immagine",
       pdfOk: "PDF Generato con successo!",
       pdfErr: "Errore PDF: "
+    },
+    enc: {
+        REV: { curiosity: "Gli algoritmi di calcolo inverso sono usati in finanza per scorporare l'IVA partendo dal totale, gestendo i decimali periodici.", type: "Math" },
+        PDF: { curiosity: "Il formato PDF è stato creato da Adobe nel 1993 per garantire che i documenti apparissero uguali su qualsiasi dispositivo.", type: "History" }
+    },
+    seo: {
+      title: "Guida alla Creazione di Preventivi Professionali",
+      intro: "Digitrik Pro Preventivi Smart è uno strumento professionale progettato per creare, calcolare ed esportare preventivi PDF direttamente nel browser. Include un motore unico di 'Calcolo Inverso' (Penny-Perfect).",
+      h1: "Cos'è il Calcolo Inverso (Penny-Perfect)?",
+      p1: "Spesso si concorda un prezzo tondo (es. 1000€) con il cliente, ma calcolare l'imponibile + IVA per arrivare esattamente a quella cifra è difficile a causa degli arrotondamenti.",
+      ul1: [
+        "**Il Problema:** Se dividi 1000 per 1,22 (IVA 22%), ottieni 819,67213... che crea errori di arrotondamento nel PDF finale.",
+        "**La Soluzione:** Il nostro motore calcola automaticamente l'aggiustamento o lo sconto necessario affinché la somma matematica di Imponibile + IVA dia esattamente il Totale Desiderato.",
+        "**Privacy:** A differenza dei software in cloud, i dati dei tuoi clienti e i tuoi prezzi non lasciano mai il tuo computer."
+      ],
+      h2: "Perché usare un Generatore PDF?",
+      p2: "Inviare un preventivo in Word o Excel è poco professionale e permette al cliente di modificare i dati. Il PDF è un formato standard di sola lettura che preserva il layout, i font e il tuo brand su qualsiasi dispositivo (Smartphone, PC, Stampa).",
+      h3: "Sicurezza dei Dati",
+      p3: "Questo strumento opera al 100% localmente tramite JavaScript. Nessun database salva le tue fatture o la lista clienti. Sei l'unico proprietario dei tuoi dati."
     }
   }
 };
@@ -278,6 +314,7 @@ export default function PreventiviTool() {
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [exportFilename, setExportFilename] = useState("");
+  const [trickCuriosity, setTrickCuriosity] = useState({ key: '', text: '' });
 
   // DATI PREVENTIVO
   const [company, setCompany] = useState({ name: '', address: '', city: '', contact: '', vat: '', logo: null });
@@ -320,19 +357,10 @@ export default function PreventiviTool() {
   };
 
   // --- LOGICA DRAG & DROP ---
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
+  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
   const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
+    e.preventDefault(); setIsDragging(false);
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) processLogoFile(file);
     else showToast(t.toasts.imgError, "error");
@@ -369,6 +397,9 @@ export default function PreventiviTool() {
   const handleDownloadClick = () => {
     const defaultName = `Quote_${(client.name || 'Digitrik').replace(/[^a-z0-9]/gi, '_')}`;
     setExportFilename(defaultName);
+    const keys = Object.keys(t.enc);
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    setTrickCuriosity({ key: randomKey, text: t.enc[randomKey].curiosity });
     setShowDownloadModal(true);
   };
 
@@ -473,59 +504,73 @@ export default function PreventiviTool() {
 
   const inputClass = "w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-white outline-none focus:border-blue-500 transition-colors";
 
+  // --- RENDER TOTALS (REUSABLE COMPONENT) ---
+  const RenderTotals = () => (
+     <div className="space-y-6">
+        <div className="mb-8 border-b border-white/5 pb-8">
+            <button 
+                onClick={handleDownloadClick} 
+                className="w-full py-4 bg-blue-600 text-white hover:bg-blue-500 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+            >
+                <Download size={16} /> {t.buttons.download}
+            </button>
+         </div>
+
+        <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+            <label className="flex items-center gap-2 text-green-500 font-bold uppercase text-xs mb-3">
+                <RefreshCcw size={14}/> {t.buttons.calculating}
+            </label>
+            <input 
+                type="number" step="0.01" 
+                placeholder={t.totals.targetTotal} 
+                value={forcedTotal} 
+                onChange={e => setForcedTotal(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-lg font-bold text-center text-green-400 focus:border-green-500 outline-none"
+            />
+            <p className="text-[10px] text-zinc-600 mt-2 leading-tight">{t.totals.targetDesc}</p>
+        </div>
+
+        <div className="space-y-3 pt-4 border-t border-white/5">
+            <div className="flex justify-between text-xs text-zinc-400"><span>{t.totals.subtotal}</span> <span className="text-zinc-200">{results.subtotal} €</span></div>
+            
+            {Math.abs(results.adjustment.value) > 0.009 && (
+                <div className={`flex justify-between text-xs font-bold px-2 py-1 rounded ${results.adjustment.value < 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                    <span>{results.adjustment.label}</span>
+                    <span>{results.adjustment.value < 0 ? '' : '+'}{parseFloat(results.adjustment.value).toFixed(2)} €</span>
+                </div>
+            )}
+            
+            {Math.abs(results.adjustment.value) > 0.009 && (
+                <div className="flex justify-between text-xs text-zinc-400"><span>{t.totals.net}</span> <span className="text-zinc-200">{results.finalSubtotal} €</span></div>
+            )}
+
+            <div className="flex justify-between text-xs text-zinc-400 pb-4 border-b border-white/5"><span>{t.totals.vatTotal}</span> <span className="text-zinc-200">{results.tax} €</span></div>
+
+            <div className="flex justify-between items-end pt-2">
+                <span className="text-xs font-bold text-zinc-500 uppercase">{t.totals.total}</span>
+                <span className="text-2xl font-bold text-blue-500">{results.total} <span className="text-sm text-zinc-600">€</span></span>
+            </div>
+        </div>
+     </div>
+  );
+
   if (loading) return <div className="h-screen bg-zinc-950 flex items-center justify-center text-zinc-500">Loading...</div>;
 
   return (
-    <div className="h-screen bg-zinc-950 text-zinc-100 font-sans flex overflow-hidden selection:bg-blue-500/30">
+    // HYBRID LAYOUT: min-h-screen for mobile scrolling, fixed height for desktop
+    <div className="min-h-screen lg:h-screen bg-zinc-950 text-zinc-100 font-sans flex flex-col lg:flex-row lg:overflow-hidden selection:bg-blue-500/30">
       
-      {/* INFO MODAL (STANDARD SUITE) */}
+      {/* INFO MODAL */}
       {showInfoModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in">
           <div className="bg-[#0a0a0a] border border-zinc-800 rounded-[2rem] w-[90%] max-w-lg overflow-hidden relative shadow-2xl">
-            
-            {/* Header */}
-            <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3">
-               <div className="bg-zinc-800 p-3 rounded-full text-white"><Info size={24} /></div>
-               <div><h3 className="text-xl font-black italic text-white uppercase">Info & Support</h3></div>
-               <button onClick={() => setShowInfoModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white transition-colors"><X size={20} /></button>
-            </div>
-
-            {/* Content */}
+            <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-zinc-800 p-3 rounded-full text-white"><Info size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">Info & Support</h3></div><button onClick={() => setShowInfoModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white transition-colors"><X size={20} /></button></div>
             <div className="p-8 space-y-6">
-                
-                {/* About Section */}
-                <div>
-                    <div className="flex items-center gap-2 mb-2 text-blue-500 font-bold uppercase text-xs tracking-wider">
-                        <Heart size={14} /> {t.modals.aboutTitle}
-                    </div>
-                    <p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-blue-500/20 pl-4">
-                        "{t.modals.aboutText}"
-                    </p>
-                </div>
-
-                {/* Contact Section */}
-                <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800 hover:border-blue-500/30 transition-colors">
-                     <div className="flex items-center gap-2 mb-2 text-zinc-300 font-bold uppercase text-xs tracking-wider">
-                        <Mail size={14} /> {t.modals.contactTitle}
-                    </div>
-                    <a href="mailto:trichesir@gmail.com" className="text-blue-400 hover:text-blue-300 font-mono text-sm block">trichesir@gmail.com</a>
-                </div>
-
-                {/* Privacy Badge */}
-                <div className="bg-green-900/10 rounded-xl p-4 border border-green-500/20 flex items-start gap-4">
-                    <ShieldCheck size={24} className="text-green-500 shrink-0 mt-1" />
-                    <div>
-                        <h4 className="text-green-500 font-bold uppercase text-xs tracking-wider mb-1">{t.modals.privacyTitle}</h4>
-                        <p className="text-[11px] text-green-200/70 leading-relaxed">{t.modals.privacyText}</p>
-                    </div>
-                </div>
-
+                <div><div className="flex items-center gap-2 mb-2 text-blue-500 font-bold uppercase text-xs tracking-wider"><Heart size={14} /> {t.modals.aboutTitle}</div><p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-blue-500/20 pl-4">"{t.modals.aboutText}"</p></div>
+                <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800 hover:border-blue-500/30 transition-colors"><div className="flex items-center gap-2 mb-2 text-zinc-300 font-bold uppercase text-xs tracking-wider"><Mail size={14} /> {t.modals.contactTitle}</div><a href="mailto:trichesir@gmail.com" className="text-blue-400 hover:text-blue-300 font-mono text-sm block">trichesir@gmail.com</a></div>
+                <div className="bg-green-900/10 rounded-xl p-4 border border-green-500/20 flex items-start gap-4"><ShieldCheck size={24} className="text-green-500 shrink-0 mt-1" /><div><h4 className="text-green-500 font-bold uppercase text-xs tracking-wider mb-1">{t.modals.privacyTitle}</h4><p className="text-[11px] text-green-200/70 leading-relaxed">{t.modals.privacyText}</p></div></div>
             </div>
-            
-            {/* Footer */}
-            <div className="p-4 bg-zinc-950 text-center border-t border-white/5">
-                <p className="text-[10px] text-zinc-600 uppercase tracking-widest">© 2024 DigitrikPro Team. {t.modals.rights}</p>
-            </div>
+            <div className="p-4 bg-zinc-950 text-center border-t border-white/5"><p className="text-[10px] text-zinc-600 uppercase tracking-widest">© 2024 DigitrikPro Team. {t.modals.rights}</p></div>
           </div>
         </div>
       )}
@@ -534,22 +579,10 @@ export default function PreventiviTool() {
       {showSupportModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
           <div className="bg-[#0a0a0a] border border-green-500/30 rounded-[2rem] w-[90%] max-w-2xl overflow-hidden relative">
-            <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3">
-               <div className="bg-green-500/10 p-3 rounded-full text-green-500"><Heart size={24} /></div>
-               <div><h3 className="text-xl font-black italic text-white uppercase">{t.sidebar.support}</h3></div>
-               <button onClick={() => setShowSupportModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white"><X size={20} /></button>
-            </div>
+            <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-green-500/10 p-3 rounded-full text-green-500"><Heart size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">{t.sidebar.support}</h3></div><button onClick={() => setShowSupportModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white"><X size={20} /></button></div>
             <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="p-8 border-r border-white/5 space-y-4">
-                    <h4 className="text-green-400 font-bold uppercase text-xs flex gap-2"><CreditCard size={14}/> {t.modals.donate}</h4>
-                    <div className="grid grid-cols-3 gap-2">
-                        {['1', '2', '5'].map(a => <a key={a} href={`https://www.paypal.me/triches89/${a}`} target="_blank" className="py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-center font-bold hover:border-green-500 hover:text-green-400 transition-all">{a}€</a>)}
-                    </div>
-                </div>
-                <div className="p-8 space-y-4 bg-zinc-950/30">
-                    <h4 className="text-blue-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> {t.modals.watchAd}</h4>
-                    <button disabled className="w-full py-3 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-bold uppercase cursor-not-allowed">{t.modals.comingSoon}</button>
-                </div>
+                <div className="p-8 border-r border-white/5 space-y-4"><h4 className="text-green-400 font-bold uppercase text-xs flex gap-2"><CreditCard size={14}/> {t.modals.donate}</h4><div className="grid grid-cols-3 gap-2">{['1', '2', '5'].map(a => <a key={a} href={`https://www.paypal.me/triches89/${a}`} target="_blank" className="py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-center font-bold hover:border-green-500 hover:text-green-400 transition-all">{a}€</a>)}</div></div>
+                <div className="p-8 space-y-4 bg-zinc-950/30"><h4 className="text-blue-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> {t.modals.watchAd}</h4><button disabled className="w-full py-3 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-bold uppercase cursor-not-allowed">{t.modals.comingSoon}</button></div>
             </div>
           </div>
         </div>
@@ -561,50 +594,29 @@ export default function PreventiviTool() {
           <div className="bg-[#0a0a0a] border border-blue-600/30 rounded-[2rem] w-[90%] max-w-lg p-8 shadow-[0_0_50px_rgba(37,99,235,0.1)] relative">
             <div className="flex items-center gap-3 mb-6">
               <div className="bg-blue-600/10 p-3 rounded-full text-blue-500"><Wand2 size={24} /></div>
-              <div>
-                  <h3 className="text-xl font-black italic text-white uppercase tracking-wider">{t.modals.ready}</h3>
-                  <p className="text-[11px] text-gray-500 font-bold uppercase">{t.modals.chooseName}</p>
-              </div>
+              <div><h3 className="text-xl font-black italic text-white uppercase tracking-wider">{t.modals.ready}</h3><p className="text-[11px] text-gray-500 font-bold uppercase">{t.modals.chooseName}</p></div>
               <button onClick={() => setShowDownloadModal(false)} className="absolute top-6 right-6 text-gray-600 hover:text-white transition-colors"><X size={20} /></button>
             </div>
             
             <div className="space-y-2 mb-8">
               <label className="text-xs font-bold text-gray-400 uppercase ml-2">{t.modals.fileName}</label>
               <div className="relative">
-                <input 
-                    type="text" 
-                    value={exportFilename} 
-                    onChange={(e) => setExportFilename(e.target.value)} 
-                    onKeyDown={(e) => e.key === 'Enter' && confirmDownload()} 
-                    autoFocus 
-                    className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white font-medium outline-none focus:border-blue-600 transition-all shadow-inner" 
-                />
+                <input type="text" value={exportFilename} onChange={(e) => setExportFilename(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && confirmDownload()} autoFocus className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white font-medium outline-none focus:border-blue-600 transition-all shadow-inner" />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-xs font-bold pointer-events-none">.PDF</span>
               </div>
             </div>
 
-            {/* SEZIONE DONAZIONE */}
+            <div className="bg-blue-900/10 border border-blue-600/10 rounded-2xl p-5 mb-6 flex gap-4">
+              <Sparkles className="text-blue-500 shrink-0 mt-0.5" size={18} />
+              <div className="space-y-1">
+                <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">{t.modals.didYouKnow} ({trickCuriosity.key})</span>
+                <p className="text-xs text-gray-300 italic leading-relaxed">{trickCuriosity.text}</p>
+              </div>
+            </div>
+
             <div className="mb-8 bg-green-900/10 border border-green-500/20 p-5 rounded-2xl flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                    <Sparkles className="text-green-500 shrink-0" size={18} />
-                    <div>
-                        <span className="text-[10px] font-black text-green-400 uppercase tracking-widest block">{t.modals.supportDev}</span>
-                        <p className="text-xs text-gray-400 leading-tight">{t.modals.supportDesc}</p>
-                    </div>
-                </div>
-                <div className="flex gap-2">
-                    {['1', '2', '5'].map(amount => (
-                        <a 
-                            key={amount} 
-                            href={`https://www.paypal.me/triches89/${amount}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 py-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-green-500 text-white font-bold text-center text-xs transition-all hover:text-green-400 hover:bg-green-900/20"
-                        >
-                            🍩 {amount}€
-                        </a>
-                    ))}
-                </div>
+                <div className="flex items-center gap-3"><Sparkles className="text-green-500 shrink-0" size={18} /><div><span className="text-[10px] font-black text-green-400 uppercase tracking-widest block">{t.modals.supportDev}</span><p className="text-xs text-gray-400 leading-tight">{t.modals.supportDesc}</p></div></div>
+                <div className="flex gap-2">{['1', '2', '5'].map(amount => (<a key={amount} href={`https://www.paypal.me/triches89/${amount}`} target="_blank" className="flex-1 py-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-green-500 text-white font-bold text-center text-xs transition-all hover:text-green-400 hover:bg-green-900/20">🍩 {amount}€</a>))}</div>
             </div>
 
             <div className="flex gap-3">
@@ -615,61 +627,47 @@ export default function PreventiviTool() {
         </div>
       )}
 
-      {/* LEFT SIDEBAR */}
-      <aside className="w-64 border-r border-white/5 bg-zinc-950 flex flex-col p-4 z-20 font-sans">
+      {/* LEFT SIDEBAR (Nav) - Top on Mobile, Sidebar on Desktop */}
+      <aside className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-white/5 bg-zinc-950 flex flex-col p-4 z-20 shrink-0">
         
-        {/* --- LOGO STANDARD --- */}
-        <div className="mb-8 px-2 flex items-center gap-2">
+        <div className="mb-6 px-2 flex items-center gap-2">
           <Link href="/" className="w-8 h-8 bg-zinc-800/50 hover:bg-blue-600/20 rounded-lg flex items-center justify-center transition-colors group">
             <ArrowLeft size={18} className="text-zinc-400 group-hover:text-blue-400 transition-colors" />
           </Link>
           <div className="flex flex-col">
             <h1 className="text-xl font-black italic tracking-tighter text-white leading-none">DIGITRIK PRO</h1>
-            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] leading-none mt-1">TOOL PREVENTIVI</span>
+            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] leading-none mt-1">{t.appName}</span>
           </div>
         </div>
 
-        {/* --- LANGUAGE TOGGLE --- */}
         <div className="flex bg-zinc-900/50 rounded-lg p-1 mb-8 border border-zinc-800/50">
-          <button onClick={() => setLang('en')} className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md flex items-center justify-center gap-1 transition-all ${lang === 'en' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}>
-             <Globe size={10} /> EN
-          </button>
-          <button onClick={() => setLang('it')} className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md flex items-center justify-center gap-1 transition-all ${lang === 'it' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}>
-             <Globe size={10} /> IT
-          </button>
+          <button onClick={() => setLang('en')} className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md flex items-center justify-center gap-1 transition-all ${lang === 'en' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}><Globe size={10} /> EN</button>
+          <button onClick={() => setLang('it')} className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md flex items-center justify-center gap-1 transition-all ${lang === 'it' ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}><Globe size={10} /> IT</button>
         </div>
         
-        <nav className="flex-1 space-y-1">
-          <SectionTitle icon={Building2} title={t.sidebar.header} />
+        <nav className="flex-1 grid grid-cols-3 lg:block gap-1">
+          <div className="col-span-3 lg:mb-0"><SectionTitle icon={Building2} title={t.sidebar.header} /></div>
           <NavItem active={activeTab === 'company'} onClick={() => setActiveTab('company')} icon={Building2} label={t.sidebar.yourData} />
           <NavItem active={activeTab === 'client'} onClick={() => setActiveTab('client')} icon={User} label={t.sidebar.client} />
-          
-          <div className="h-8" />
-
-          <SectionTitle icon={FileText} title={t.sidebar.editor} />
-          <NavItem active={activeTab === 'editor'} onClick={() => setActiveTab('editor')} icon={FileText} label={t.sidebar.items} />
+          <NavItem active={activeTab === 'editor'} onClick={() => setActiveTab('editor')} icon={FileText} label={t.sidebar.editor} />
         </nav>
 
-        <div className="mt-auto space-y-1">
-            <button onClick={() => setShowInfoModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all text-xs font-bold uppercase tracking-wide group">
-                <Info size={16} className="group-hover:text-blue-400 transition-colors"/> {t.sidebar.info}
-            </button>
-            <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-green-600/80 hover:text-green-400 hover:bg-green-900/10 transition-all text-xs font-bold uppercase tracking-wide group">
-                <Heart size={16} className="group-hover:scale-110 transition-transform"/> {t.sidebar.support}
-            </button>
+        <div className="mt-6 lg:mt-auto space-y-1 hidden lg:block">
+            <button onClick={() => setShowInfoModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all text-xs font-bold uppercase tracking-wide group"><Info size={16} className="group-hover:text-blue-400 transition-colors"/> {t.sidebar.info}</button>
+            <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-green-600/80 hover:text-green-400 hover:bg-green-900/10 transition-all text-xs font-bold uppercase tracking-wide group"><Heart size={16} className="group-hover:scale-110 transition-transform"/> {t.sidebar.support}</button>
         </div>
       </aside>
 
       {/* CENTER MAIN */}
-      <main className="flex-1 flex flex-col relative bg-zinc-900/50 font-sans">
-        <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-10">
+      <main className="flex-1 flex flex-col relative bg-zinc-900/50 font-sans h-auto lg:h-full lg:overflow-hidden">
+        <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-10 shrink-0">
           <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">
             {activeTab === 'editor' ? t.headers.quoteComp : activeTab === 'company' ? t.headers.senderData : t.headers.clientData}
           </h2>
           <div className="text-[10px] font-bold text-zinc-500 uppercase px-3 py-1 bg-zinc-900 rounded-full border border-white/5">{items.length} {t.headers.rows}</div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-visible lg:overflow-y-auto p-4 lg:p-8 scrollbar-thin scrollbar-thumb-zinc-800">
           
           {/* COMPANY TAB */}
           {activeTab === 'company' && (
@@ -679,11 +677,7 @@ export default function PreventiviTool() {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer transition-all group ${
-                      isDragging 
-                        ? 'border-blue-500 bg-blue-500/10 scale-[0.99]' 
-                        : 'border-zinc-800 hover:border-blue-500 hover:bg-blue-500/5'
-                  }`}
+                  className={`border-2 border-dashed rounded-2xl h-40 flex flex-col items-center justify-center cursor-pointer transition-all group ${isDragging ? 'border-blue-500 bg-blue-500/10 scale-[0.99]' : 'border-zinc-800 hover:border-blue-500 hover:bg-blue-500/5'}`}
                >
                   <input type="file" ref={logoInputRef} hidden accept="image/*" onChange={handleLogoUpload} />
                   {company.logo ? (
@@ -695,12 +689,8 @@ export default function PreventiviTool() {
                       </div>
                   ) : (
                       <div className="text-center pointer-events-none">
-                          <div className={`p-3 rounded-full inline-flex mb-3 transition-transform ${isDragging ? 'scale-110 bg-blue-500 text-white' : 'bg-zinc-900 text-zinc-500 group-hover:scale-110 group-hover:text-blue-500'}`}>
-                             <ImagePlus size={24} />
-                          </div>
-                          <p className={`text-xs font-bold uppercase ${isDragging ? 'text-blue-400' : 'text-zinc-500'}`}>
-                             {isDragging ? t.fields.dropLogo : t.fields.dragLogo}
-                          </p>
+                          <div className={`p-3 rounded-full inline-flex mb-3 transition-transform ${isDragging ? 'scale-110 bg-blue-500 text-white' : 'bg-zinc-900 text-zinc-500 group-hover:scale-110 group-hover:text-blue-500'}`}><ImagePlus size={24} /></div>
+                          <p className={`text-xs font-bold uppercase ${isDragging ? 'text-blue-400' : 'text-zinc-500'}`}>{isDragging ? t.fields.dropLogo : t.fields.dragLogo}</p>
                       </div>
                   )}
                </div>
@@ -732,14 +722,8 @@ export default function PreventiviTool() {
                 <div className="space-y-4 bg-zinc-950 p-6 rounded-2xl border border-white/5">
                    <h3 className="text-xs font-bold text-blue-500 uppercase mb-4">Document</h3>
                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-[10px] text-zinc-500 uppercase font-bold block mb-2">{t.fields.date}</label>
-                            <input type="date" value={docInfo.date} onChange={e => setDocInfo({...docInfo, date: e.target.value})} className={inputClass} />
-                        </div>
-                        <div>
-                            <label className="text-[10px] text-zinc-500 uppercase font-bold block mb-2">{t.fields.validity}</label>
-                            <input type="text" value={docInfo.validity} onChange={e => setDocInfo({...docInfo, validity: e.target.value})} className={inputClass} />
-                        </div>
+                        <div><label className="text-[10px] text-zinc-500 uppercase font-bold block mb-2">{t.fields.date}</label><input type="date" value={docInfo.date} onChange={e => setDocInfo({...docInfo, date: e.target.value})} className={inputClass} /></div>
+                        <div><label className="text-[10px] text-zinc-500 uppercase font-bold block mb-2">{t.fields.validity}</label><input type="text" value={docInfo.validity} onChange={e => setDocInfo({...docInfo, validity: e.target.value})} className={inputClass} /></div>
                    </div>
                 </div>
              </div>
@@ -748,9 +732,9 @@ export default function PreventiviTool() {
           {/* EDITOR TAB */}
           {activeTab === 'editor' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-               {/* Tabella Righe */}
-               <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
-                 <table className="w-full text-left">
+               {/* Tabella Righe (Scrollabile orizzontalmente su mobile) */}
+               <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-x-auto">
+                 <table className="w-full text-left min-w-[500px]">
                     <thead className="bg-zinc-900/50 border-b border-white/5">
                         <tr>
                             <th className="p-4 text-[10px] font-bold text-zinc-500 uppercase w-5/12">{t.pdf.colDesc}</th>
@@ -785,67 +769,63 @@ export default function PreventiviTool() {
                <button onClick={addItem} className="w-full py-3 border border-dashed border-zinc-800 hover:border-blue-500 hover:bg-blue-500/5 rounded-xl text-zinc-500 hover:text-blue-500 text-xs font-bold uppercase transition-all flex items-center justify-center gap-2"><Plus size={16}/> {t.buttons.addRow}</button>
             </div>
           )}
-        </div>
-        
-        {/* SEO SECTION */}
-        <div className="border-t border-white/5 p-8 text-zinc-500 max-w-4xl mx-auto space-y-4 font-sans">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2"><Code2 size={16} /> Privacy & Speed</h2>
-            <p className="text-xs leading-relaxed text-zinc-600">
-                Digitrik Pro Quote Generator works 100% in your browser. No data is sent to servers.
-            </p>
-        </div>
 
+          {/* MOBILE ONLY: TOTALS SECTION (Moved here for mobile layout) */}
+          <div className="lg:hidden mt-8 bg-zinc-950 border border-white/5 p-6 rounded-3xl shadow-sm">
+             <SectionTitle icon={CreditCard} title={t.totals.total} />
+             <RenderTotals />
+          </div>
+
+          {/* SEO SECTION */}
+          <div className="mt-12 pt-12 border-t border-white/5 text-zinc-400">
+                <div className="flex items-center gap-2 mb-6">
+                    <BookOpen size={20} className="text-blue-500"/>
+                    <h2 className="text-2xl font-black text-white tracking-tight">{t.seo.title}</h2>
+                </div>
+                
+                <div className="prose prose-invert prose-sm max-w-none">
+                    <p className="leading-relaxed mb-8 text-zinc-300">{t.seo.intro}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                            <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <HelpCircle size={18} className="text-blue-500"/> {t.seo.h1}
+                            </h3>
+                            <p className="mb-4 text-xs leading-relaxed">{t.seo.p1}</p>
+                            <ul className="space-y-3">
+                                {t.seo.ul1.map((item, idx) => (
+                                    <li key={idx} className="flex items-start gap-2 text-xs leading-relaxed">
+                                        <div className="min-w-[4px] h-[4px] mt-1.5 rounded-full bg-blue-500/50"></div>
+                                        <span>
+                                            {item.includes('**') ? <><strong className="text-zinc-200">{item.split('**')[1]}</strong>{item.split('**')[2]}</> : item}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                            </div>
+
+                            <div className="space-y-6">
+                            <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5">
+                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <Layers size={18} className="text-blue-500"/> {t.seo.h2}
+                                </h3>
+                                <p className="text-xs leading-relaxed">{t.seo.p2}</p>
+                            </div>
+                            <div className="bg-blue-900/10 p-6 rounded-2xl border border-blue-500/10">
+                                <h3 className="text-lg font-bold text-blue-400 mb-2 flex items-center gap-2"><Fingerprint size={16}/> {t.seo.h3}</h3>
+                                <p className="text-xs leading-relaxed text-blue-100/70">{t.seo.p3}</p>
+                            </div>
+                            </div>
+                    </div>
+                </div>
+          </div>
+
+        </div>
       </main>
 
-      {/* RIGHT SIDEBAR */}
-      <aside className="w-80 border-l border-white/5 bg-zinc-950 p-6 flex flex-col overflow-y-auto font-sans">
-         <div className="mb-8 border-b border-white/5 pb-8">
-            <button 
-                onClick={handleDownloadClick} 
-                className="w-full py-4 bg-blue-600 text-white hover:bg-blue-500 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-            >
-                <Download size={16} /> {t.buttons.download}
-            </button>
-         </div>
-
-         {/* CALCOLATRICE */}
-         <div className="space-y-6">
-            <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
-                <label className="flex items-center gap-2 text-green-500 font-bold uppercase text-xs mb-3">
-                    <RefreshCcw size={14}/> {t.buttons.calculating}
-                </label>
-                <input 
-                    type="number" step="0.01" 
-                    placeholder={t.totals.targetTotal} 
-                    value={forcedTotal} 
-                    onChange={e => setForcedTotal(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-lg font-bold text-center text-green-400 focus:border-green-500 outline-none"
-                />
-                <p className="text-[10px] text-zinc-600 mt-2 leading-tight">{t.totals.targetDesc}</p>
-            </div>
-
-            <div className="space-y-3 pt-4 border-t border-white/5">
-                <div className="flex justify-between text-xs text-zinc-400"><span>{t.totals.subtotal}</span> <span className="text-zinc-200">{results.subtotal} €</span></div>
-                
-                {Math.abs(results.adjustment.value) > 0.009 && (
-                    <div className={`flex justify-between text-xs font-bold px-2 py-1 rounded ${results.adjustment.value < 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                        <span>{results.adjustment.label}</span>
-                        <span>{results.adjustment.value < 0 ? '' : '+'}{parseFloat(results.adjustment.value).toFixed(2)} €</span>
-                    </div>
-                )}
-                
-                {Math.abs(results.adjustment.value) > 0.009 && (
-                    <div className="flex justify-between text-xs text-zinc-400"><span>{t.totals.net}</span> <span className="text-zinc-200">{results.finalSubtotal} €</span></div>
-                )}
-
-                <div className="flex justify-between text-xs text-zinc-400 pb-4 border-b border-white/5"><span>{t.totals.vatTotal}</span> <span className="text-zinc-200">{results.tax} €</span></div>
-
-                <div className="flex justify-between items-end pt-2">
-                    <span className="text-xs font-bold text-zinc-500 uppercase">{t.totals.total}</span>
-                    <span className="text-2xl font-bold text-blue-500">{results.total} <span className="text-sm text-zinc-600">€</span></span>
-                </div>
-            </div>
-         </div>
+      {/* RIGHT SIDEBAR (Desktop Only) */}
+      <aside className="hidden lg:flex w-80 border-l border-white/5 bg-zinc-950 p-6 flex-col overflow-y-auto shrink-0">
+         <RenderTotals />
       </aside>
 
       {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}

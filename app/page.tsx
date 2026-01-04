@@ -3,333 +3,311 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { 
-  Calculator, 
-  FileText, 
-  ShieldCheck, 
-  ArrowRight, 
-  Layers, 
-  Globe, 
-  Heart,
-  Check as CheckIcon,
-  Image as ImageIcon,
-  QrCode,
-  ScanLine,
-  Ghost // <--- NUOVA ICONA PER GHOST PIXEL
+  Calculator, FileText, ShieldCheck, ArrowRight, Layers, 
+  Globe, Heart, Check, Image as ImageIcon, QrCode, 
+  ScanLine, Ghost, Cpu, Zap, MousePointerClick,
+  Info, X, Mail, CreditCard, PlayCircle, Coffee
 } from "lucide-react";
 
-// --- DEFINIZIONE TIPI ---
+// --- CONFIGURAZIONE STRUMENTI (Bordo Fisso + Neon Hover) ---
+const TOOLS = [
+  {
+    id: 'pdf',
+    title: { en: "PDF Master", it: "PDF Master" },
+    desc: { en: "Merge, Convert, and Watermark documents.", it: "Unisci, Converti e proteggi documenti." },
+    color: "text-red-500",
+    bg: "bg-red-500/10",
+    border: "border-red-500", 
+    glow: "hover:shadow-[0_0_50px_-12px_rgba(239,68,68,0.6)]", 
+    icon: FileText,
+    link: "/pdf-tools"
+  },
+  {
+    id: 'quotes',
+    title: { en: "Smart Quotes", it: "Preventivi Smart" },
+    desc: { en: "Create invoices with penny-perfect reverse calc.", it: "Crea preventivi con calcolo inverso perfetto." },
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    border: "border-blue-500",
+    glow: "hover:shadow-[0_0_50px_-12px_rgba(59,130,246,0.6)]",
+    icon: Calculator,
+    link: "/preventivi"
+  },
+  {
+    id: 'images',
+    title: { en: "Image Studio", it: "Image Studio" },
+    desc: { en: "Compress, Crop and Convert locally.", it: "Comprimi, Ritaglia e Converti in locale." },
+    color: "text-green-500",
+    bg: "bg-green-500/10",
+    border: "border-green-500",
+    glow: "hover:shadow-[0_0_50px_-12px_rgba(34,197,94,0.6)]",
+    icon: ImageIcon,
+    link: "/image-tools"
+  },
+  {
+    id: 'qr',
+    title: { en: "QR Creator", it: "QR Creator" },
+    desc: { en: "Generate WiFi, vCard and URL codes.", it: "Genera codici WiFi, vCard e Link eterni." },
+    color: "text-purple-500",
+    bg: "bg-purple-500/10",
+    border: "border-purple-500",
+    glow: "hover:shadow-[0_0_50px_-12px_rgba(168,85,247,0.6)]",
+    icon: QrCode,
+    link: "/qr-code"
+  },
+  {
+    id: 'barcode',
+    title: { en: "Barcode Pro", it: "Barcode Pro" },
+    desc: { en: "EAN-13, UPC and Code128 generator.", it: "Generatore EAN-13, UPC e Code128." },
+    color: "text-cyan-500",
+    bg: "bg-cyan-500/10",
+    border: "border-cyan-500",
+    glow: "hover:shadow-[0_0_50px_-12px_rgba(6,182,212,0.6)]",
+    icon: ScanLine,
+    link: "/barcode-generator"
+  },
+  {
+    id: 'ghost',
+    title: { en: "Ghost Pixel", it: "Ghost Pixel" },
+    desc: { en: "Hide secrets inside images (Steganography).", it: "Nascondi segreti nelle foto (Steganografia)." },
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    border: "border-amber-500",
+    glow: "hover:shadow-[0_0_50px_-12px_rgba(245,158,11,0.6)]",
+    icon: Ghost,
+    link: "/ghost-pixel"
+  }
+];
+
+// --- TRADUZIONI ---
 type Language = 'en' | 'it';
 
-// --- DIZIONARIO TRADUZIONI ---
-const TRANSLATIONS = {
+const TRANS = {
   en: {
     hero: {
-      tag: "Privacy First Technology",
+      tag: "Privacy First Suite",
+      title: "DIGITRIK",
       subtitle: "The productivity suite that respects your data.",
-      highlight: "No uploads, no servers, no cost.",
-      desc: "All computing power happens directly in your browser.",
-      ctaStart: "Start Now",
-      ctaMission: "Discover Mission"
+      desc: "No uploads. No servers. 100% Local Processing.",
+      cta: "Explore Tools"
     },
-    tools: {
-      title: "Available Tools",
-      preventivi: {
-        title: "Smart Quotes",
-        desc: "Create professional PDF quotes. Includes 'Penny-Perfect' reverse calculation for exact totals.",
-        cta: "Open Tool"
-      },
-      pdf: {
-        title: "PDF Master Suite",
-        desc: "The Swiss Army knife for your documents. Merge, convert, watermark, and protect your PDFs.",
-        cta: "Open Tool"
-      },
-      image: {
-        title: "Image Studio",
-        desc: "Compress, Resize, Convert, and Crop your images directly in browser. Supports HEIC.",
-        cta: "Open Tool"
-      },
-      qr: {
-        title: "QR Creator Pro",
-        desc: "Generate professional QR Codes for WiFi, Links, and Contacts. Customize colors and logos.",
-        cta: "Open Tool"
-      },
-      barcode: {
-        title: "Barcode Pro",
-        desc: "Create EAN, UPC, and Code128 barcodes. Perfect for retail, logistics, and inventory.",
-        cta: "Open Tool"
-      },
-      ghost: {
-        title: "Ghost Pixel",
-        desc: "Hide secret messages inside images using LSB steganography. 100% private and local.",
-        cta: "Open Tool"
-      },
-      comingSoon: {
-        title: "Coming Soon",
-        desc: "New tools arriving..."
-      }
-    },
-    mission: {
-      title: "Our Mission",
-      text1: "Digitrik Pro was born from curiosity for programming and to simplify work for thousands dealing with digital documents daily.",
-      text2: "My goal is to build a set of **free, accessible digital tools** for everyone, with no barriers.",
-      privacyTitle: "Privacy First",
-      privacyText: "I believe in total Privacy. Unlike other services, here your files **NEVER leave your browser**.",
-      bullets: [
-        "No upload to external servers",
-        "No hidden databases",
-        "100% Local processing"
+    toolsTitle: "Available Tools",
+    seo: {
+      title: "Why Digitrik Pro?",
+      p1: "In a web full of paid services and ad-filled sites, Digitrik Pro stands out for a simple philosophy: **Your Browser is the Server**.",
+      p2: "We use advanced WebAssembly technologies to process PDFs, Images, and Data directly on your device. This means your sensitive files never leave your computer, guaranteeing military-grade privacy.",
+      h2: "Continuous Evolution",
+      p3: "This project is not static. We are constantly adding new modules based on community feedback. From PDF management to Steganography, our goal is to create the ultimate Swiss Army Knife for digital workers.",
+      list: [
+        "**Zero-Knowledge Privacy:** What happens on your PC, stays on your PC.",
+        "**Open to Feedback:** We listen to our users to build better tools.",
+        "**Always Free:** Professional tools accessible to everyone."
       ]
     },
     footer: {
       subtitle: "Free Professional Suite",
       contact: "INFO & CONTACTS",
-      privacy: "Privacy Policy",
       rights: "All rights reserved.",
       coffee: "SUPPORT PROJECT"
+    },
+    modals: {
+      aboutTitle: "Info & Support",
+      aboutText: "Digitrik Pro is a free, privacy-first suite. If you find these tools useful, consider supporting the development.",
+      contactTitle: "Contact Us",
+      donateTitle: "Buy us a coffee",
+      adTitle: "Watch an Ad",
+      adButton: "Coming Soon"
     }
   },
   it: {
     hero: {
-      tag: "Tecnologia Privacy First",
+      tag: "Suite Privacy First",
+      title: "DIGITRIK",
       subtitle: "La suite di produttività che rispetta i tuoi dati.",
-      highlight: "Nessun upload, nessun server, nessun costo.",
-      desc: "Tutta la potenza di calcolo avviene direttamente nel tuo browser.",
-      ctaStart: "Inizia Subito",
-      ctaMission: "Scopri la Mission"
+      desc: "Nessun upload. Nessun server. Elaborazione Locale al 100%.",
+      cta: "Esplora Strumenti"
     },
-    tools: {
-      title: "Strumenti Disponibili",
-      preventivi: {
-        title: "Preventivi Smart",
-        desc: "Crea preventivi professionali in PDF. Include il calcolo inverso 'Penny-Perfect' per totali esatti.",
-        cta: "Apri Tool"
-      },
-      pdf: {
-        title: "PDF Master Suite",
-        desc: "Il coltellino svizzero per i tuoi documenti. Unisci, converti, aggiungi watermark e proteggi i tuoi PDF.",
-        cta: "Apri Tool"
-      },
-      image: {
-        title: "Image Studio",
-        desc: "Comprimi, Ridimensiona, Converti e Ritaglia direttamente nel browser. Supporta HEIC.",
-        cta: "Apri Tool"
-      },
-      qr: {
-        title: "QR Creator Pro",
-        desc: "Genera QR Code per WiFi, Link e Contatti. Personalizza colori e logo. Eterni e Gratuiti.",
-        cta: "Apri Tool"
-      },
-      barcode: {
-        title: "Barcode Pro",
-        desc: "Crea codici a barre EAN, UPC e Code128. Perfetto per vendita, logistica e inventario.",
-        cta: "Apri Tool"
-      },
-      ghost: {
-        title: "Ghost Pixel",
-        desc: "Nascondi messaggi segreti dentro le immagini usando la steganografia LSB. 100% privato.",
-        cta: "Apri Tool"
-      },
-      comingSoon: {
-        title: "Coming Soon",
-        desc: "Nuovi strumenti in arrivo..."
-      }
-    },
-    mission: {
-      title: "La nostra Mission",
-      text1: "Digitrik Pro è nato dalla mia curiosità per la programmazione, e per semplificare il lavoro di migliaia di persone che trattano con i documenti digitali ogni giorno.",
-      text2: "Il mio obiettivo è costruire una serie di **tool digitali gratuiti e accessibili a tutti**, senza barriere all'ingresso.",
-      privacyTitle: "Privacy First",
-      privacyText: "Credo nella Privacy totale. A differenza di altri servizi online, qui i tuoi file **non lasciano MAI il tuo browser**.",
-      bullets: [
-        "Nessun upload su server esterni",
-        "Nessun database nascosto",
-        "Elaborazione locale al 100%"
+    toolsTitle: "Strumenti Disponibili",
+    seo: {
+      title: "Perché scegliere Digitrik Pro?",
+      p1: "In un web pieno di servizi a pagamento e siti pieni di pubblicità invasiva, Digitrik Pro si distingue per una filosofia semplice: **Il Tuo Browser è il Server**.",
+      p2: "Utilizziamo tecnologie avanzate (WebAssembly) per elaborare PDF, Immagini e Dati direttamente sul tuo dispositivo. Questo significa che i tuoi file sensibili non lasciano mai il tuo computer, garantendo una privacy di livello militare.",
+      h2: "Evoluzione Continua",
+      p3: "Questo progetto non è statico. Aggiungiamo costantemente nuovi moduli basati sui feedback della community. Dalla gestione PDF alla Steganografia, il nostro obiettivo è creare il Coltellino Svizzero definitivo per i lavoratori digitali.",
+      list: [
+        "**Privacy Zero-Knowledge:** Quello che succede sul tuo PC, resta sul tuo PC.",
+        "**Aperto ai Consigli:** Ascoltiamo i nostri utenti per costruire tool migliori.",
+        "**Sempre Gratuito:** Strumenti professionali accessibili a tutti."
       ]
     },
     footer: {
       subtitle: "Suite Professionale Gratuita",
       contact: "INFO & CONTATTI",
-      privacy: "Privacy Policy",
       rights: "Tutti i diritti riservati.",
       coffee: "SUPPORTA IL PROGETTO"
+    },
+    modals: {
+      aboutTitle: "Info & Supporto",
+      aboutText: "Digitrik Pro è una suite gratuita e privacy-first. Se trovi utili questi strumenti, considera di supportare lo sviluppo.",
+      contactTitle: "Contattaci",
+      donateTitle: "Offrici un caffè",
+      adTitle: "Guarda uno Spot",
+      adButton: "Presto Disponibile"
     }
   }
 };
 
 export default function Home() {
-  const [lang, setLang] = useState<Language>('en'); 
-  const t = TRANSLATIONS[lang];
+  const [lang, setLang] = useState<Language>('en');
+  const t = TRANS[lang];
+
+  // MODAL STATE
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
 
   return (
     <main className="flex flex-col min-h-screen relative bg-zinc-950 text-zinc-100 font-sans selection:bg-blue-500/30">
       
-      {/* --- LANGUAGE TOGGLE --- */}
-      <div className="absolute top-6 right-6 z-50">
-        <div className="flex bg-zinc-900/80 backdrop-blur-md rounded-full p-1 border border-zinc-800">
-          <button 
-            onClick={() => setLang('en')} 
-            className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-full flex items-center gap-1 transition-all ${lang === 'en' ? 'bg-zinc-700 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
-          >
-             <Globe size={10} /> EN
-          </button>
-          <button 
-            onClick={() => setLang('it')} 
-            className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-full flex items-center gap-1 transition-all ${lang === 'it' ? 'bg-zinc-700 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
-          >
-             <Globe size={10} /> IT
-          </button>
+      {/* LANGUAGE TOGGLE FIXED */}
+      <div className="fixed top-6 right-6 z-50">
+        <div className="flex bg-zinc-900/80 backdrop-blur-md rounded-full p-1 border border-zinc-800 shadow-xl">
+          <button onClick={() => setLang('en')} className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-full flex items-center gap-1 transition-all ${lang === 'en' ? 'bg-zinc-700 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}><Globe size={10} /> EN</button>
+          <button onClick={() => setLang('it')} className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-full flex items-center gap-1 transition-all ${lang === 'it' ? 'bg-zinc-700 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}><Globe size={10} /> IT</button>
         </div>
       </div>
 
       {/* --- HERO SECTION --- */}
-      <section className="relative px-6 pt-24 pb-20 md:pt-32 md:pb-28 max-w-6xl mx-auto w-full text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-8">
-          <ShieldCheck size={14} /> {t.hero.tag}
+      <section className="relative px-6 pt-32 pb-20 md:pt-40 md:pb-28 max-w-5xl mx-auto text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-widest mb-8 animate-in fade-in slide-in-from-top-4">
+          <ShieldCheck size={12} className="text-green-500" /> {t.hero.tag}
         </div>
         
-        <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white mb-6">
-          DIGITRIK <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">PRO</span>
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {t.hero.title} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">PRO</span>
         </h1>
         
-        <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10">
-          {t.hero.subtitle} 
-          <span className="text-zinc-200 font-medium"> {t.hero.highlight}</span> 
-          {' ' + t.hero.desc}
+        <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
+          {t.hero.subtitle} <br/>
+          <span className="text-zinc-200 font-medium"> {t.hero.desc}</span>
         </p>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-          <Link href="#tools" className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold transition-all shadow-lg shadow-blue-900/20 flex items-center gap-2">
-            {t.hero.ctaStart} <ArrowRight size={18} />
+        <div className="flex justify-center animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <Link href="#tools" className="px-8 py-4 bg-white text-black hover:bg-zinc-200 rounded-full font-black text-sm uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center gap-2">
+            {t.hero.cta} <ArrowRight size={16} />
           </Link>
-          <a href="#mission" className="px-8 py-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 rounded-full font-bold transition-all">
-            {t.hero.ctaMission}
-          </a>
         </div>
       </section>
 
       {/* --- TOOLS GRID --- */}
       <section id="tools" className="px-6 py-20 max-w-6xl mx-auto w-full">
         <h2 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-8 flex items-center gap-2">
-          <Layers size={16} /> {t.tools.title}
+          <Layers size={16} /> {t.toolsTitle}
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {TOOLS.map((tool) => (
+            <Link key={tool.id} href={tool.link} className={`group relative bg-zinc-900/40 border rounded-3xl p-8 transition-all hover:bg-zinc-900 hover:-translate-y-1 ${tool.border} ${tool.glow}`}>
+              <div className={`absolute top-6 right-6 p-2 rounded-xl ${tool.bg} ${tool.color} transition-transform group-hover:scale-110`}>
+                <tool.icon size={24} />
+              </div>
+              <div className="mt-8">
+                <h3 className="text-xl font-bold text-white mb-2">{tool.title[lang]}</h3>
+                <p className="text-sm text-zinc-500 leading-relaxed mb-6">{tool.desc[lang]}</p>
+                <div className={`text-xs font-black uppercase tracking-wider flex items-center gap-2 ${tool.color}`}>
+                  OPEN TOOL <ArrowRight size={12} />
+                </div>
+              </div>
+            </Link>
+          ))}
           
-          <Link href="/preventivi" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-blue-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><Calculator size={100} /></div>
-            <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 mb-6 group-hover:scale-110 transition-transform"><Calculator size={24} /></div>
-            <h3 className="text-xl font-bold text-white mb-2">{t.tools.preventivi.title}</h3>
-            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">{t.tools.preventivi.desc}</p>
-            <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider">{t.tools.preventivi.cta} <ArrowRight size={14} /></div>
-          </Link>
-
-          <Link href="/pdf-tools" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-red-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><FileText size={100} /></div>
-            <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 mb-6 group-hover:scale-110 transition-transform"><FileText size={24} /></div>
-            <h3 className="text-xl font-bold text-white mb-2">{t.tools.pdf.title}</h3>
-            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">{t.tools.pdf.desc}</p>
-            <div className="flex items-center gap-2 text-xs font-bold text-red-400 uppercase tracking-wider">{t.tools.pdf.cta} <ArrowRight size={14} /></div>
-          </Link>
-
-          <Link href="/image-tools" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-green-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><ImageIcon size={100} /></div>
-            <div className="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-500 mb-6 group-hover:scale-110 transition-transform"><ImageIcon size={24} /></div>
-            <h3 className="text-xl font-bold text-white mb-2">{t.tools.image.title}</h3>
-            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">{t.tools.image.desc}</p>
-            <div className="flex items-center gap-2 text-xs font-bold text-green-400 uppercase tracking-wider">{t.tools.image.cta} <ArrowRight size={14} /></div>
-          </Link>
-
-          <Link href="/qr-code" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-purple-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><QrCode size={100} /></div>
-            <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-500 mb-6 group-hover:scale-110 transition-transform"><QrCode size={24} /></div>
-            <h3 className="text-xl font-bold text-white mb-2">{t.tools.qr.title}</h3>
-            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">{t.tools.qr.desc}</p>
-            <div className="flex items-center gap-2 text-xs font-bold text-purple-400 uppercase tracking-wider">{t.tools.qr.cta} <ArrowRight size={14} /></div>
-          </Link>
-
-          <Link href="/barcode-generator" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-cyan-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity"><ScanLine size={100} /></div>
-            <div className="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-500 mb-6 group-hover:scale-110 transition-transform"><ScanLine size={24} /></div>
-            <h3 className="text-xl font-bold text-white mb-2">{t.tools.barcode.title}</h3>
-            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">{t.tools.barcode.desc}</p>
-            <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider">{t.tools.barcode.cta} <ArrowRight size={14} /></div>
-          </Link>
-
-          {/* CARD 6: GHOST PIXEL (AMBER) */}
-          <Link href="/ghost-pixel" className="group relative bg-zinc-900/50 border border-zinc-800 hover:border-amber-500/50 rounded-3xl p-8 transition-all hover:bg-zinc-900 overflow-hidden">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Ghost size={100} />
-            </div>
-            <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 mb-6 group-hover:scale-110 transition-transform">
-              <Ghost size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">{t.tools.ghost.title}</h3>
-            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
-              {t.tools.ghost.desc}
-            </p>
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider group-hover:text-amber-300">
-              {t.tools.ghost.cta} <ArrowRight size={14} />
-            </div>
-          </Link>
-
+          {/* Card "Coming Soon" */}
           <div className="group relative bg-zinc-950/30 border border-zinc-800/50 border-dashed rounded-3xl p-8 flex flex-col items-center justify-center text-center opacity-70">
-             <h3 className="text-lg font-bold text-zinc-500 uppercase tracking-widest">{t.tools.comingSoon.title}</h3>
-             <p className="text-xs text-zinc-600 mt-2">{t.tools.comingSoon.desc}</p>
+             <h3 className="text-lg font-bold text-zinc-500 uppercase tracking-widest">Coming Soon</h3>
+             <p className="text-xs text-zinc-600 mt-2">More tools arriving...</p>
           </div>
-
         </div>
       </section>
 
-      {/* --- MISSION --- */}
-      <section id="mission" className="bg-zinc-900/30 border-y border-white/5 py-24">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-            <div>
-              <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3"><Globe size={24} className="text-green-500" /> {t.mission.title}</h2>
-              <p className="text-zinc-400 leading-relaxed text-sm mb-6">{t.mission.text1}</p>
-              <p className="text-zinc-400 leading-relaxed text-sm">
-                 {lang === 'en' ? (
-                    <>My goal is to build a set of <strong className="text-zinc-200">free, accessible digital tools</strong> for everyone, with no barriers.</>
-                 ) : (
-                    <>Il mio obiettivo è costruire una serie di <strong className="text-zinc-200">tool digitali gratuiti e accessibili a tutti</strong>, senza barriere all'ingresso.</>
-                 )}
-              </p>
+      {/* --- SEO / EVOLUTION CONTENT --- */}
+      <section className="px-6 py-20 bg-zinc-900/30 border-t border-white/5">
+         <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-2 mb-8">
+                <MousePointerClick size={24} className="text-blue-500"/>
+                <h2 className="text-2xl font-black text-white tracking-tight">{t.seo.title}</h2>
             </div>
-            <div className="bg-zinc-950 p-8 rounded-3xl border border-zinc-800 relative overflow-hidden">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><ShieldCheck size={20} className="text-blue-500" /> {t.mission.privacyTitle}</h3>
-              <p className="text-zinc-400 text-xs leading-relaxed mb-4">
-                 {lang === 'en' ? (
-                    <>I believe in total Privacy. Unlike other services, here your files <strong className="text-white">NEVER leave your browser</strong>.</>
-                 ) : (
-                    <>Credo nella Privacy totale. A differenza di altri servizi online, qui i tuoi file <strong className="text-white">non lasciano MAI il tuo browser</strong>.</>
-                 )}
-              </p>
-              <ul className="space-y-2 text-xs text-zinc-500">
-                {t.mission.bullets.map((bullet: string, idx: number) => (
-                    <li key={idx} className="flex items-center gap-2"><CheckIcon size={12} className="text-green-500"/> {bullet}</li>
-                ))}
-              </ul>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-zinc-400 text-sm leading-relaxed">
+                <div className="space-y-6">
+                    <p>{t.seo.p1}</p>
+                    <div className="p-6 bg-zinc-950 rounded-2xl border border-white/5">
+                        <Zap size={20} className="text-yellow-500 mb-3" />
+                        <p className="text-xs text-zinc-300">{t.seo.p2}</p>
+                    </div>
+                </div>
+                <div className="space-y-6">
+                    <h3 className="text-white font-bold text-lg flex items-center gap-2"><Cpu size={18} className="text-purple-500"/> {t.seo.h2}</h3>
+                    <p>{t.seo.p3}</p>
+                    <ul className="space-y-3">
+                        {t.seo.list.map((item, i) => (
+                            <li key={i} className="flex items-start gap-3">
+                                <div className="min-w-[4px] h-[4px] mt-2 rounded-full bg-blue-500"></div>
+                                <span>{item.includes('**') ? <><strong className="text-white">{item.split('**')[1]}</strong>{item.split('**')[2]}</> : item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
-          </div>
-        </div>
+         </div>
       </section>
 
       {/* --- FOOTER --- */}
       <footer className="py-12 border-t border-white/5 text-center mt-auto">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-left">
-            <h4 className="text-lg font-black text-white italic tracking-tighter">DIGITRIK</h4>
+            <h4 className="text-lg font-black text-white italic tracking-tighter">DIGITRIK PRO</h4>
             <p className="text-[10px] text-zinc-500 uppercase tracking-widest">{t.footer.subtitle}</p>
           </div>
           <div className="flex gap-6 text-xs font-bold text-zinc-500">
-            <a href="mailto:trichesir@gmail.com" className="hover:text-white transition-colors">{t.footer.contact}</a>
+            {/* Pulsante che apre il Modal INFO */}
+            <button onClick={() => setShowInfoModal(true)} className="hover:text-white transition-colors">{t.footer.contact}</button>
             <span className="text-zinc-600">© 2024 {t.footer.rights}</span>
           </div>
-          <a href="https://www.paypal.me/triches89" target="_blank" className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold text-green-500 hover:border-green-500 transition-all">
+          {/* Pulsante che apre il Modal SUPPORT */}
+          <button onClick={() => setShowSupportModal(true)} className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold text-green-500 hover:border-green-500 transition-all">
             <Heart size={14} /> {t.footer.coffee}
-          </a>
+          </button>
         </div>
       </footer>
+
+      {/* --- INFO MODAL --- */}
+      {showInfoModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-[#0a0a0a] border border-zinc-800 rounded-[2rem] w-[90%] max-w-lg overflow-hidden relative shadow-2xl">
+            <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-zinc-800 p-3 rounded-full text-white"><Info size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">{t.modals.aboutTitle}</h3></div><button onClick={() => setShowInfoModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white transition-colors"><X size={20} /></button></div>
+            <div className="p-8 space-y-6">
+                <div><p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-zinc-800 pl-4">"{t.modals.aboutText}"</p></div>
+                <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800 hover:border-blue-500/30 transition-colors"><div className="flex items-center gap-2 mb-2 text-zinc-300 font-bold uppercase text-xs tracking-wider"><Mail size={14} /> {t.modals.contactTitle}</div><a href="mailto:trichesir@gmail.com" className="text-blue-400 hover:text-blue-300 font-mono text-sm block">trichesir@gmail.com</a></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- SUPPORT MODAL --- */}
+      {showSupportModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-[#0a0a0a] border border-green-500/30 rounded-[2rem] w-[90%] max-w-2xl overflow-hidden relative">
+            <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-green-500/10 p-3 rounded-full text-green-500"><Coffee size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">{t.footer.coffee}</h3></div><button onClick={() => setShowSupportModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white"><X size={20} /></button></div>
+            <div className="grid grid-cols-1 md:grid-cols-2">
+                <div className="p-8 border-r border-white/5 space-y-4">
+                    <h4 className="text-green-400 font-bold uppercase text-xs flex gap-2"><CreditCard size={14}/> {t.modals.donateTitle}</h4>
+                    <div className="grid grid-cols-3 gap-2">{['1', '2', '5'].map(a => <a key={a} href={`https://www.paypal.me/triches89/${a}`} target="_blank" className="py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-center font-bold hover:border-green-500 hover:text-green-400 transition-all">{a}€</a>)}</div>
+                </div>
+                <div className="p-8 space-y-4 bg-zinc-950/30"><h4 className="text-purple-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> {t.modals.adTitle}</h4><button disabled className="w-full py-3 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-bold uppercase cursor-not-allowed">{t.modals.adButton}</button></div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }

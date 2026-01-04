@@ -11,14 +11,14 @@ import {
   Feather, Layers, Printer, Ghost, Lock, Settings, LayoutTemplate, 
   Image as IconImage, Shield, FileOutput, UploadCloud, Grid3X3, List,
   Info, Mail, ShieldCheck, Heart, FolderOpen, Coffee, PlayCircle, CreditCard,
-  User, Globe, Code2, ArrowLeft
+  User, Globe, Code2, ArrowLeft, BookOpen, HelpCircle, Fingerprint
 } from 'lucide-react';
 import Link from 'next/link';
 
 // --- TRANSLATIONS & DATA ---
 const TRANSLATIONS = {
   it: {
-    appName: "TOOL PDF",
+    appName: "PDF MASTER",
     workspace: "Spazio di Lavoro",
     files: "Gestione File",
     layout: "Layout & Export",
@@ -100,24 +100,29 @@ const TRANSLATIONS = {
     adTitle: "Guarda uno Spot",
     adDesc: "30 secondi del tuo tempo per supportarci gratis.",
     adButton: "Guarda Video (Presto disponibile)",
-    seoTitle: "Digitrik Pro: Il Tuo Coltellino Svizzero per PDF",
-    seoDesc: "Digitrik Pro è una <strong>suite online gratuita</strong> progettata per semplificare la gestione dei documenti digitali. A differenza di altri servizi, la nostra tecnologia funziona interamente nel tuo browser: i tuoi file <strong>non vengono mai caricati su server esterni</strong>, garantendo una privacy assoluta. Puoi convertire immagini in PDF, unire documenti, aggiungere filigrane (watermark), numerare le pagine e pulire i metadati sensibili in pochi click.",
-    seoAuthorTitle: "Chi c'è dietro?",
-    seoAuthorText: "Mi chiamo <strong>Andrea Triches</strong> e sono lo sviluppatore di Digitrik Pro. Questo progetto non è il prodotto di una grande azienda, ma il frutto della mia <strong>passione per la programmazione</strong> e per l'open web. Ho creato questo strumento perché credo che manipolare un PDF non debba essere difficile, costoso o rischioso per la privacy.",
-    seoVisionTitle: "La Visione",
-    seoVisionText: "Digitrik Pro è solo l'inizio. Il mio obiettivo è costruire una serie di <strong>tool digitali gratuiti e accessibili a tutti</strong>, senza barriere all'ingresso. Questo spazio è un laboratorio in continua evoluzione, dove la sicurezza dell'utente e la semplicità d'uso vengono prima di tutto. Grazie per far parte di questo viaggio.",
     enc: {
-      AI: { desc: "Vettoriale Adobe.", curiosity: "Il formato AI di Adobe è essenzialmente un PDF modificabile mascherato. Sorprendentemente, se cambi l'estensione da .ai a .pdf, molti visualizzatori riusciranno ad aprirlo mostrando il contenuto vettoriale intatto.", type: "Vettoriale" },
-      CSV: { desc: "Dati testuali.", curiosity: "Creato nel 1972, il CSV è il formato dati più antico ancora in uso. Nonostante la sua semplicità, è la spina dorsale dello scambio dati mondiale perché leggibile da qualsiasi macchina.", type: "Dati" },
-      DOCX: { desc: "Word XML.", curiosity: "Il moderno formato DOCX è in realtà un archivio compresso. Se cambi l'estensione in .zip ed estrai il contenuto, troverai cartelle piene di file XML e immagini separate.", type: "Documento" },
-      JPG: { desc: "Foto compressa.", curiosity: "Il formato JPEG usa una compressione 'lossy' che elimina dati invisibili all'occhio umano. Ogni volta che salvi di nuovo una JPG, la qualità diminuisce leggermente, creando artefatti digitali.", type: "Immagine" },
-      PDF: { desc: "Portable Document.", curiosity: "Inventato nel 1993 per scambiare documenti su sistemi diversi. Oggi è uno standard ISO aperto così complesso che la sua documentazione tecnica supera le mille pagine di specifiche.", type: "Universale" },
-      PNG: { desc: "Web Lossless.", curiosity: "Sviluppato per sostituire le GIF, il PNG offre una compressione senza perdita. È l'unico formato web diffuso che supporta la trasparenza alpha, permettendo contorni sfumati perfetti su qualsiasi sfondo.", type: "Immagine" },
-      TXT: { desc: "Testo puro.", curiosity: "Il formato più puro esistente, privo di qualsiasi formattazione o stile. Essendo composto solo da caratteri ASCII o Unicode, un file TXT sarà leggibile tra 100 anni su qualsiasi computer.", type: "Testo" }
+      PDF: { curiosity: "Il formato PDF è stato inventato nel 1993. Prima di allora, scambiare documenti formattati tra computer diversi era quasi impossibile.", type: "Storia" },
+      GHOST: { curiosity: "I metadati PDF possono contenere la versione esatta del software usato, il nome del PC e persino le coordinate GPS di dove è stato creato.", type: "Privacy" }
+    },
+    seo: {
+      title: "Guida Completa alla Gestione PDF",
+      intro: "Digitrik Pro PDF Master è una suite professionale progettata per manipolare documenti digitali direttamente nel browser. A differenza dei convertitori online tradizionali, qui i tuoi file non vengono mai caricati su un server esterno, garantendo privacy totale.",
+      h1: "Convertire, Unire e Proteggere PDF",
+      p1: "La gestione documentale richiede strumenti flessibili. Ecco cosa puoi fare con questa suite:",
+      ul1: [
+        "**Merge (Unione):** Combina più file PDF o immagini (JPG, PNG) in un unico documento ordinato. Ideale per report e presentazioni.",
+        "**Conversione Immagini:** Trasforma le tue scansioni o foto in un PDF multipagina pronto per la stampa o l'invio via PEC.",
+        "**Watermark (Filigrana):** Proteggi la tua proprietà intellettuale applicando testi (es. 'RISERVATO') o il tuo logo aziendale su tutte le pagine.",
+        "**Ghost Mode:** Una funzione esclusiva che pulisce i metadati sensibili (autore, software di creazione) per rendere il file anonimo."
+      ],
+      h2: "Perché l'elaborazione locale è più sicura?",
+      p2: "La maggior parte dei siti di 'PDF gratuiti' carica i tuoi documenti sui loro server cloud per elaborarli. Questo comporta rischi di data breach o utilizzo non autorizzato dei dati. Digitrik Pro utilizza la potenza del tuo processore (tramite WebAssembly e JavaScript) per modificare il file direttamente sul tuo dispositivo.",
+      h3: "Compressione e Qualità",
+      p3: "Quando crei un PDF da immagini, la dimensione può esplodere. Il nostro motore 'Balanced Compression' ottimizza automaticamente le immagini per mantenere un testo leggibile riducendo il peso del file fino al 70%."
     }
   },
   en: {
-    appName: "TOOL PDF",
+    appName: "PDF MASTER",
     workspace: "Workspace",
     files: "File Manager",
     layout: "Layout & Export",
@@ -199,20 +204,25 @@ const TRANSLATIONS = {
     adTitle: "Watch an Ad",
     adDesc: "30 seconds of your time to support us for free.",
     adButton: "Watch Video (Coming Soon)",
-    seoTitle: "Digitrik Pro: Your Swiss Army Knife for PDFs",
-    seoDesc: "Digitrik Pro is a free online suite designed to simplify digital document management. Unlike other services, our technology runs entirely in your browser: your files never get uploaded to external servers, ensuring absolute privacy. You can convert images to PDF, merge documents, add watermarks, number pages, and clean sensitive metadata in just a few clicks.",
-    seoAuthorTitle: "Who's behind this?",
-    seoAuthorText: "My name is Andrea Triches and I am the developer of Digitrik Pro. This project is not the product of a large corporation, but the result of my passion for programming and the open web. I created this tool because I believe manipulating a PDF shouldn't be difficult, expensive, or risky for privacy.",
-    seoVisionTitle: "The Vision",
-    seoVisionText: "Digitrik Pro is just the beginning. My goal is to build a series of free and accessible digital tools for everyone, with no barriers to entry. This space is an ever-evolving laboratory where user security and ease of use come first. Thank you for being part of this journey.",
     enc: {
-      AI: { desc: "Adobe Vector.", curiosity: "Adobe's AI format is essentially a disguised editable PDF. Surprisingly, if you simply rename the extension from .ai to .pdf, many standard viewers can open it and display the vector content.", type: "Vector" },
-      CSV: { desc: "Text Data.", curiosity: "Created way back in 1972, CSV remains the oldest data format still in wide use today. Despite its simplicity, it is the backbone of global data exchange because machines read it easily.", type: "Data" },
-      DOCX: { desc: "Word XML.", curiosity: "The modern DOCX format is actually a compressed archive in disguise. If you rename the extension to .zip and extract it, you will find folders full of XML code and images.", type: "Document" },
-      JPG: { desc: "Compressed Photo.", curiosity: "JPEG uses 'lossy' compression that discards data invisible to the human eye. However, every time you re-save a JPG file, quality degrades slightly, creating digital artifacts known as 'generation loss'.", type: "Image" },
-      PDF: { desc: "Portable Document.", curiosity: "Invented by Adobe in 1993 to exchange documents across different systems. It is now an open ISO standard so complex that its full technical documentation exceeds one thousand pages of specifications.", type: "Universal" },
-      PNG: { desc: "Web Lossless.", curiosity: "Developed to replace GIFs, PNG offers lossless compression. It is the only widely used web format supporting alpha transparency, allowing for smooth, anti-aliased edges on any background color without jagged lines.", type: "Image" },
-      TXT: { desc: "Pure Text.", curiosity: "The purest format in existence, stripped of all formatting or style. Composed solely of ASCII or Unicode characters, a TXT file will remain readable one hundred years from now on any computer.", type: "Text" }
+      PDF: { curiosity: "PDF format was invented in 1993. Before that, exchanging formatted documents between different computers was nearly impossible.", type: "History" },
+      GHOST: { curiosity: "PDF metadata can contain the exact software version used, the PC name, and even GPS coordinates of where it was created.", type: "Privacy" }
+    },
+    seo: {
+      title: "Ultimate Guide to PDF Management",
+      intro: "Digitrik Pro PDF Master is a professional suite designed to manipulate digital documents directly in your browser. Unlike traditional online converters, your files are never uploaded to an external server here, ensuring total privacy.",
+      h1: "Convert, Merge, and Protect PDFs",
+      p1: "Document management requires flexible tools. Here's what you can do with this suite:",
+      ul1: [
+        "**Merge:** Combine multiple PDF files or images (JPG, PNG) into a single ordered document. Ideal for reports and presentations.",
+        "**Image Conversion:** Transform your scans or photos into a multi-page PDF ready for printing or email.",
+        "**Watermark:** Protect your intellectual property by applying text (e.g., 'CONFIDENTIAL') or your corporate logo on all pages.",
+        "**Ghost Mode:** An exclusive feature that cleans sensitive metadata (author, creation software) to make the file anonymous."
+      ],
+      h2: "Why is local processing safer?",
+      p2: "Most 'free PDF' sites upload your documents to their cloud servers to process them. This entails risks of data breaches or unauthorized data usage. Digitrik Pro uses your processor's power (via WebAssembly and JavaScript) to modify the file directly on your device.",
+      h3: "Compression and Quality",
+      p3: "When creating a PDF from images, size can explode. Our 'Balanced Compression' engine automatically optimizes images to keep text readable while reducing file size by up to 70%."
     }
   }
 };
@@ -239,7 +249,7 @@ const compressImage = (file, quality = 0.7, scale = 1) => {
 // --- UI COMPONENTS ---
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className="flex items-center gap-2 mb-4 text-zinc-400 uppercase tracking-widest text-[10px] font-bold px-2">
-    <Icon size={14} className="text-blue-500" />
+    <Icon size={14} className="text-red-500" />
     {title}
   </div>
 );
@@ -249,12 +259,12 @@ const SmartSlider = ({ label, value, min, max, step = 1, unit = "", onChange }) 
     <div className="group">
       <div className="flex justify-between text-[11px] font-medium mb-2 text-zinc-400 group-hover:text-zinc-200 transition-colors">
         <span>{label}</span>
-        <span className="text-blue-400 font-mono">{value}{unit}</span>
+        <span className="text-red-400 font-mono">{value}{unit}</span>
       </div>
       <input 
         type="range" min={min} max={max} step={step} value={value} 
         onChange={(e) => onChange(e.target.value)} 
-        className="w-full h-1.5 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all" 
+        className="w-full h-1.5 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-red-500 hover:accent-red-400 transition-all" 
       />
     </div>
   );
@@ -272,7 +282,7 @@ const AlignSelector = ({ value, onChange }) => (
         onClick={() => onChange(opt.id)}
         className={`flex-1 flex items-center justify-center py-1.5 rounded-md transition-all ${
           value === opt.id 
-            ? 'bg-zinc-800 text-blue-400 shadow-sm' 
+            ? 'bg-zinc-800 text-red-400 shadow-sm' 
             : 'text-zinc-600 hover:text-zinc-400'
         }`}
       >
@@ -285,26 +295,26 @@ const AlignSelector = ({ value, onChange }) => (
 const Toggle = ({ label, checked, onChange, icon: Icon, subLabel }) => (
   <div 
     onClick={() => onChange(!checked)}
-    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all duration-300 group ${checked ? 'bg-blue-500/10 border-blue-500/50' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'}`}
+    className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all duration-300 group ${checked ? 'bg-red-500/10 border-red-500/50' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'}`}
   >
     <div className="flex items-center gap-3">
-      <div className={`p-2 rounded-lg ${checked ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-500 group-hover:text-zinc-300'}`}>
+      <div className={`p-2 rounded-lg ${checked ? 'bg-red-500 text-white' : 'bg-zinc-800 text-zinc-500 group-hover:text-zinc-300'}`}>
         {Icon ? <Icon size={16} /> : <Check size={16} />}
       </div>
       <div>
-        <span className={`block text-xs font-bold ${checked ? 'text-blue-400' : 'text-zinc-300'}`}>{label}</span>
+        <span className={`block text-xs font-bold ${checked ? 'text-red-400' : 'text-zinc-300'}`}>{label}</span>
         {subLabel && <span className="text-[10px] text-zinc-500 block">{subLabel}</span>}
       </div>
     </div>
-    <div className={`w-8 h-4 rounded-full relative transition-colors duration-300 ${checked ? 'bg-blue-500' : 'bg-zinc-700'}`}>
+    <div className={`w-8 h-4 rounded-full relative transition-colors duration-300 ${checked ? 'bg-red-500' : 'bg-zinc-700'}`}>
       <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform duration-300 ${checked ? 'translate-x-4' : 'translate-x-0'}`} />
     </div>
   </div>
 );
 
 const Toast = ({ message, type, onClose }) => (
-  <div className={`fixed bottom-8 right-8 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-md border animate-in slide-in-from-bottom-5 fade-in duration-300 ${type === 'error' ? 'bg-red-950/80 border-red-500/30 text-red-200' : 'bg-zinc-900/90 border-blue-500/30 text-zinc-100'}`}>
-    {type === 'error' ? <ShieldAlert size={20} className="text-red-500" /> : <Check size={20} className="text-blue-500" />}
+  <div className={`fixed bottom-8 right-8 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-md border animate-in slide-in-from-bottom-5 fade-in duration-300 ${type === 'error' ? 'bg-red-950/80 border-red-500/30 text-red-200' : 'bg-zinc-900/90 border-red-500/30 text-zinc-100'}`}>
+    {type === 'error' ? <ShieldAlert size={20} className="text-red-500" /> : <Check size={20} className="text-red-500" />}
     <div className="text-sm font-medium">{message}</div>
     <button onClick={onClose}><X size={14} className="opacity-50 hover:opacity-100" /></button>
   </div>
@@ -636,303 +646,18 @@ export default function DigitrikPro() {
   const NavItem = ({ id, icon: Icon, label }) => (
     <button 
       onClick={() => setActiveTab(id)}
-      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all mb-1 ${activeTab === id ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'}`}
+      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all mb-1 ${activeTab === id ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'}`}
     >
       <Icon size={18} />
       <span className="text-xs font-bold tracking-wide uppercase">{label}</span>
     </button>
   );
 
-  return (
-    <div className="h-screen bg-zinc-950 text-zinc-100 font-sans flex overflow-hidden selection:bg-blue-500/30">
-      {/* CDN LOADER */}
-      <Script 
-        src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" 
-        strategy="afterInteractive" 
-        onLoad={() => setIsSdkReady(true)}
-      />
-
-      {/* RENAME MODAL */}
-      {showRenameModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
-          <div className="bg-[#0a0a0a] border border-blue-600/30 rounded-[2rem] w-[90%] max-w-lg p-8 shadow-[0_0_50px_rgba(37,99,235,0.1)] relative">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-blue-600/10 p-3 rounded-full text-blue-500"><Wand2 size={24} /></div>
-              <div><h3 className="text-xl font-black italic text-white uppercase tracking-wider">{t.finalTrick}</h3><p className="text-[11px] text-gray-500 font-bold uppercase">{t.chooseName}</p></div>
-              <button onClick={() => setShowRenameModal(false)} className="absolute top-6 right-6 text-gray-600 hover:text-white transition-colors"><X size={20} /></button>
-            </div>
-            <div className="space-y-2 mb-8">
-              <label className="text-xs font-bold text-gray-400 uppercase ml-2">{t.fileName}</label>
-              <div className="relative">
-                <input type="text" value={tempFilename} onChange={(e) => setTempFilename(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleConfirmDownload()} autoFocus className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white font-medium outline-none focus:border-blue-600 transition-all shadow-inner" />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-xs font-bold pointer-events-none">.PDF</span>
-              </div>
-            </div>
-            <div className="bg-blue-900/10 border border-blue-600/10 rounded-2xl p-5 mb-6 flex gap-4">
-              <Sparkles className="text-blue-500 shrink-0 mt-0.5" size={18} />
-              <div className="space-y-1">
-                <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">{t.didYouKnow} ({trickCuriosity.key})</span>
-                <p className="text-xs text-gray-300 italic leading-relaxed">{trickCuriosity.text}</p>
-              </div>
-            </div>
-            
-            {/* SUPPORT BUTTON IN MODAL */}
-            <div className="mb-8 bg-green-500/10 border border-green-500/30 p-4 rounded-2xl flex items-center justify-center group hover:bg-green-500/20 transition-all cursor-pointer" onClick={() => setShowSupportModal(true)}>
-              <button 
-                className="text-sm uppercase font-black text-green-500 group-hover:text-green-400 flex items-center gap-3 transition-colors"
-              >
-                <Heart size={18} className="animate-pulse" /> {t.supportBtn}
-              </button>
-            </div>
-
-            <div className="flex gap-3">
-              <button onClick={() => setShowRenameModal(false)} className="flex-1 py-4 rounded-xl border border-white/5 hover:bg-white/5 text-gray-400 font-bold text-xs uppercase tracking-widest transition-all">{t.cancel}</button>
-              <button onClick={handleConfirmDownload} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2"><Check size={16} /> {t.confirm}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* INFO MODAL */}
-      {showInfoModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in">
-          <div className="bg-[#0a0a0a] border border-zinc-800 rounded-[2rem] w-[90%] max-w-lg overflow-hidden shadow-2xl relative">
-            <div className="p-8 border-b border-white/5 bg-zinc-950/50">
-                <div className="flex items-center gap-3">
-                    <div className="bg-zinc-800 p-3 rounded-full text-white"><Info size={24} /></div>
-                    <div>
-                        <h3 className="text-xl font-black italic text-white uppercase tracking-wider">Info & Support</h3>
-                        <p className="text-[11px] text-gray-500 font-bold uppercase">DigitrikPro Team</p>
-                    </div>
-                    <button onClick={() => setShowInfoModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white transition-colors"><X size={20} /></button>
-                </div>
-            </div>
-            <div className="p-8 space-y-6">
-                <div>
-                    <div className="flex items-center gap-2 mb-2 text-blue-500 font-bold uppercase text-xs tracking-wider">
-                        <Heart size={14} /> {t.aboutTitle}
-                    </div>
-                    <p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-blue-500/20 pl-4">"{t.aboutText}"</p>
-                </div>
-                <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800 hover:border-blue-500/30 transition-colors">
-                     <div className="flex items-center gap-2 mb-2 text-zinc-300 font-bold uppercase text-xs tracking-wider">
-                        <Mail size={14} /> {t.contactTitle}
-                    </div>
-                    <a href="mailto:trichesir@gmail.com" className="text-blue-400 hover:text-blue-300 font-mono text-sm block">trichesir@gmail.com</a>
-                </div>
-                <div className="bg-green-900/10 rounded-xl p-4 border border-green-500/20 flex items-start gap-4">
-                    <ShieldCheck size={24} className="text-green-500 shrink-0 mt-1" />
-                    <div>
-                        <h4 className="text-green-500 font-bold uppercase text-xs tracking-wider mb-1">{t.privacyTitle}</h4>
-                        <p className="text-[11px] text-green-200/70 leading-relaxed">{t.privacyText}</p>
-                    </div>
-                </div>
-            </div>
-            <div className="p-4 bg-zinc-950 text-center border-t border-white/5">
-                <p className="text-[10px] text-zinc-600 uppercase tracking-widest">© 2024 DigitrikPro Team. {t.rights}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SUPPORT MODAL */}
-      {showSupportModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in">
-          <div className="bg-[#0a0a0a] border border-green-500/30 rounded-[2rem] w-[90%] max-w-2xl overflow-hidden shadow-[0_0_50px_rgba(34,197,94,0.1)] relative">
-            <div className="p-8 border-b border-white/5 bg-zinc-950/50">
-                <div className="flex items-center gap-3">
-                    <div className="bg-green-500/10 p-3 rounded-full text-green-500"><Coffee size={24} /></div>
-                    <div>
-                        <h3 className="text-xl font-black italic text-white uppercase">{t.supportTitle}</h3>
-                        <p className="text-[11px] text-gray-500 font-bold uppercase">{t.supportSub}</p>
-                    </div>
-                    <button onClick={() => setShowSupportModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white transition-colors"><X size={20} /></button>
-                </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="p-8 border-b md:border-b-0 md:border-r border-white/5 space-y-4">
-                    <div className="mb-4">
-                        <h4 className="flex items-center gap-2 text-green-400 font-bold uppercase text-xs tracking-wider mb-1"><CreditCard size={14} /> {t.donateTitle}</h4>
-                        <p className="text-[11px] text-gray-400">{t.donateDesc}</p>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                        {['1', '2', '5'].map(amount => (
-                            <a key={amount} href={`https://www.paypal.me/triches89/${amount}`} target="_blank" rel="noopener noreferrer" className="py-3 rounded-xl border border-zinc-800 bg-zinc-900/50 text-white font-black hover:border-green-500 hover:text-green-400 transition-all shadow-sm flex items-center justify-center">{amount}€</a>
-                        ))}
-                    </div>
-                    <a href="https://www.paypal.me/triches89" target="_blank" rel="noopener noreferrer" className="w-full py-3 rounded-xl bg-green-600 text-white font-bold text-xs uppercase tracking-widest hover:bg-green-500 transition-all mt-2 block text-center">PayPal</a>
-                </div>
-                <div className="p-8 space-y-4 bg-zinc-950/30">
-                    <div className="mb-4">
-                        <h4 className="flex items-center gap-2 text-blue-400 font-bold uppercase text-xs tracking-wider mb-1"><PlayCircle size={14} /> {t.adTitle}</h4>
-                        <p className="text-[11px] text-gray-400">{t.adDesc}</p>
-                    </div>
-                    <div className="h-24 bg-black/50 border border-zinc-800 border-dashed rounded-xl flex items-center justify-center text-zinc-600 text-xs font-medium">Ad Placeholder</div>
-                    <button disabled className="w-full py-3 rounded-xl border border-zinc-800 text-zinc-500 font-bold text-xs uppercase tracking-widest cursor-not-allowed opacity-50">{t.adButton}</button>
-                </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* LEFT SIDEBAR */}
-      <aside className="w-64 border-r border-white/5 bg-zinc-950 flex flex-col p-4 z-20">
-        
-        {/* --- LOGO STANDARD --- */}
-        <div className="mb-8 px-2 flex items-center gap-2">
-          <Link href="/" className="w-8 h-8 bg-zinc-800/50 hover:bg-blue-600/20 rounded-lg flex items-center justify-center transition-colors group">
-            <ArrowLeft size={18} className="text-zinc-400 group-hover:text-blue-400 transition-colors" />
-          </Link>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-black italic tracking-tighter text-white leading-none">DIGITRIK PRO</h1>
-            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] leading-none mt-1">{t.appName}</span>
-          </div>
-        </div>
-        
-        {/* LANG SWITCHER */}
-        <div className="flex bg-zinc-900 rounded-lg p-1 mb-6 border border-zinc-800">
-          <button onClick={() => setLang('it')} className={`flex-1 py-1 text-[10px] font-bold uppercase rounded ${lang === 'it' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>IT</button>
-          <button onClick={() => setLang('en')} className={`flex-1 py-1 text-[10px] font-bold uppercase rounded ${lang === 'en' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>EN</button>
-        </div>
-
-        <nav className="flex-1">
-          <SectionTitle icon={LayoutTemplate} title={t.workspace} />
-          <NavItem id="files" icon={FileText} label={t.files} />
-          <NavItem id="layout" icon={Settings} label={t.layout} />
-          <div className="h-6" />
-          <SectionTitle icon={Shield} title={t.branding} />
-          <NavItem id="watermark" icon={ImageIcon} label={t.watermark} />
-          <NavItem id="security" icon={Lock} label={t.security} />
-        </nav>
-
-        {/* INFO BUTTON */}
-        <button 
-          onClick={() => setShowInfoModal(true)}
-          className="flex items-center gap-3 p-3 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all mb-1 text-xs font-bold uppercase tracking-wide border border-transparent hover:border-zinc-800"
-        >
-          <Info size={16} /> {t.infoMenu}
-        </button>
-
-        {/* SUPPORT BUTTON */}
-        <button 
-          onClick={() => setShowSupportModal(true)}
-          className="flex items-center gap-3 p-3 rounded-xl text-green-600/80 hover:text-green-400 hover:bg-green-900/10 transition-all mb-4 text-xs font-bold uppercase tracking-wide border border-transparent hover:border-green-500/20"
-        >
-          <Heart size={16} /> {t.supportBtn}
-        </button>
-
-        <div className={`mt-auto p-4 rounded-2xl border ${health.status === 'crit' ? 'bg-red-950/20 border-red-500/20' : 'bg-zinc-900 border-white/5'}`}>
-          <div className="flex justify-between items-end mb-2"><span className="text-[10px] font-bold text-zinc-500 uppercase">{t.health}</span><span className={`text-xs font-black ${health.status === 'ok' ? 'text-green-500' : 'text-yellow-500'}`}>{health.score}%</span></div>
-          <div className="w-full h-1 bg-zinc-800 rounded-full mb-3 overflow-hidden"><div className={`h-full transition-all duration-500 ${health.status === 'ok' ? 'bg-green-500' : 'bg-yellow-500'}`} style={{width: `${health.score}%`}} /></div>
-          <div className="flex items-center gap-2 text-[10px] text-zinc-400"><Activity size={12} /> {t.weight}: <span className="text-zinc-200">{health.size} MB</span></div>
-        </div>
-      </aside>
-
-      {/* CENTER */}
-      <main className="flex-1 flex flex-col relative bg-zinc-900/50">
-        <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-10">
-          <div className="flex items-center gap-4"><h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">{activeTab === 'files' ? t.fileManager : activeTab === 'layout' ? t.layoutConfig : activeTab === 'watermark' ? t.brandingConfig : t.securityConfig}</h2></div>
-          <div className="flex items-center gap-3"><div className="text-[10px] font-bold text-zinc-500 uppercase px-3 py-1 bg-zinc-900 rounded-full border border-white/5">{files.length} {t.filesLoaded}</div></div>
-        </header>
-        <div className="flex-1 overflow-y-auto p-8">
-          <div {...getRootProps()} onClick={files.length === 0 ? open : undefined} className={`relative border-2 border-dashed rounded-[2rem] transition-all duration-300 group ${isDragActive ? 'border-blue-500 bg-blue-500/5 scale-[0.99]' : 'border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/50'}`}>
-            <input {...getInputProps()} />
-            {files.length === 0 ? (
-              <div className="h-64 flex flex-col items-center justify-center text-center p-10 cursor-pointer">
-                <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-2xl"><UploadCloud size={32} className="text-zinc-600 group-hover:text-blue-500 transition-colors" /></div>
-                <h3 className="text-lg font-bold text-zinc-300">{t.dropTitle}</h3>
-                <p className="text-sm text-zinc-500 mt-2 max-w-xs">{t.dropDesc}</p>
-                <div className="mt-6 flex items-center gap-2 text-xs font-bold text-blue-500 uppercase tracking-widest bg-blue-500/10 px-4 py-2 rounded-full border border-blue-500/20 hover:bg-blue-500/20 transition-all"><FolderOpen size={14} /> {t.browse}</div>
-              </div>
-            ) : (
-              <div className="p-8">
-                <DragDropContext onDragEnd={(res) => { if(!res.destination) return; const items = Array.from(files); const [reordered] = items.splice(res.source.index, 1); items.splice(res.destination.index, 0, reordered); setFiles(items); }}>
-                  <Droppable droppableId="list" direction="vertical">
-                    {(provided) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-col gap-3">
-                        {files.map((f, i) => (
-                          <Draggable key={f.id} draggableId={f.id} index={i}>
-                            {(provided, snapshot) => (
-                              <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`bg-zinc-950 border border-white/5 p-4 rounded-xl flex items-center gap-4 group hover:border-blue-500/30 transition-all ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-blue-500 rotate-2' : ''}`}>
-                                <span className="text-zinc-500 font-mono text-xs font-bold w-6 text-center shrink-0">{i + 1}.</span>
-                                <div className="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center shrink-0"><FileText size={20} className="text-blue-500" /></div>
-                                <div className="min-w-0 flex-1 pr-2"><p className="text-xs font-bold text-zinc-200 truncate">{f.file.name}</p><p className="text-[10px] text-zinc-500 font-mono">{(f.file.size/1024).toFixed(1)} KB</p></div>
-                                <button 
-                                  onClick={(e) => { e.stopPropagation(); setFiles(files.filter(x => x.id !== f.id)); }} 
-                                  className="p-2 hover:bg-red-500/10 hover:text-red-500 text-zinc-600 rounded-lg transition-colors shrink-0 z-10"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                        <div onClick={open} className="border border-dashed border-zinc-800 rounded-xl flex flex-row gap-3 items-center justify-center p-4 hover:bg-zinc-900/50 transition-colors cursor-pointer text-zinc-600 hover:text-zinc-400 mt-2"><Plus size={20} /><span className="text-[10px] font-bold uppercase">{t.add}</span></div>
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
-              </div>
-            )}
-          </div>
-          {previewUrl && (
-            <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <button onClick={() => setIsPreviewOpen(!isPreviewOpen)} className="w-full flex justify-between items-center mb-4 px-2 group">
-                <div className="flex items-center gap-2"><div className="text-zinc-400 uppercase tracking-widest text-[10px] font-bold flex items-center gap-2 group-hover:text-blue-500 transition-colors">{isPreviewOpen ? <Eye size={14} /> : <EyeOff size={14} />} {t.preview} {isPreviewOpen ? '' : t.previewHidden}</div></div>
-                <span className="text-[10px] text-zinc-500 bg-zinc-900 px-2 py-1 rounded">{t.rendering}</span>
-              </button>
-              {isPreviewOpen && (
-                <div className="bg-zinc-950 rounded-2xl border border-white/5 overflow-hidden shadow-2xl relative h-[500px]">
-                  <iframe src={`${previewUrl}#toolbar=0&navpanes=0`} className="w-full h-full opacity-90 hover:opacity-100 transition-opacity" />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* --- NUOVA SEZIONE SEO / CHI SONO (DINAMICA) --- */}
-          <div className="mt-12 border-t border-white/5 pt-8 text-zinc-500 max-w-4xl mx-auto space-y-6 pb-20">
-             <div>
-                <h2 className="text-lg font-black uppercase tracking-wider text-zinc-300 mb-2 flex items-center gap-2">
-                   <Code2 size={20} className="text-blue-500" /> {t.seoTitle}
-                </h2>
-                <p 
-                    className="text-xs leading-relaxed text-zinc-400"
-                    dangerouslySetInnerHTML={{ __html: t.seoDesc }} 
-                />
-             </div>
-
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                   <h3 className="text-sm font-bold uppercase tracking-wide text-zinc-300 mb-1 flex items-center gap-2">
-                      <User size={16} className="text-green-500" /> {t.seoAuthorTitle}
-                   </h3>
-                   <p 
-                        className="text-xs leading-relaxed text-zinc-400"
-                        dangerouslySetInnerHTML={{ __html: t.seoAuthorText }}
-                   />
-                </div>
-                <div>
-                   <h3 className="text-sm font-bold uppercase tracking-wide text-zinc-300 mb-1 flex items-center gap-2">
-                      <Globe size={16} className="text-purple-500" /> {t.seoVisionTitle}
-                   </h3>
-                   <p 
-                        className="text-xs leading-relaxed text-zinc-400"
-                        dangerouslySetInnerHTML={{ __html: t.seoVisionText }}
-                   />
-                </div>
-             </div>
-          </div>
-          {/* --- FINE SEZIONE SEO --- */}
-
-        </div>
-      </main>
-
-      {/* RIGHT SIDEBAR */}
-      <aside className="w-80 border-l border-white/5 bg-zinc-950 p-6 flex flex-col overflow-y-auto">
-        
-        {/* --- MOVED TOP: EXPORT & CONSOLE --- */}
-        <div className="mb-8 border-b border-white/5 pb-8">
+  // --- RENDER CONFIGURATION PANEL (REUSABLE) ---
+  const RenderConfiguration = () => (
+    <div className="space-y-8 pb-10">
+      {/* EXPORT SECTION (Top of Sidebar) */}
+      <div className="mb-8 border-b border-white/5 pb-8">
           <div className="flex bg-zinc-900 p-1 rounded-lg mb-4">
             {[
               {id:'web', l:'Web', i:Feather, factor: 0.3},
@@ -948,7 +673,7 @@ export default function DigitrikPro() {
                   <c.i size={14} /> 
                   <span className="text-[10px] font-bold uppercase">{c.l}</span>
                 </div>
-                <span className={`text-[9px] font-mono ${config.compression === c.id ? 'text-blue-400' : 'text-zinc-600'}`}>
+                <span className={`text-[9px] font-mono ${config.compression === c.id ? 'text-red-400' : 'text-zinc-600'}`}>
                   ~{getEstimatedSize(c.factor)} MB
                 </span>
               </button>
@@ -957,7 +682,7 @@ export default function DigitrikPro() {
           <button 
             onClick={handleExportClick} 
             disabled={!isSdkReady || isProcessing || files.length === 0} 
-            className="w-full py-4 bg-green-600 text-white hover:bg-green-500 disabled:bg-zinc-800 disabled:text-zinc-600 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-900/20 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full py-4 bg-red-600 text-white hover:bg-red-500 disabled:bg-zinc-800 disabled:text-zinc-600 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-900/20 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
           >
             {!isSdkReady ? (
               <span className="flex items-center gap-2 text-zinc-500"><RefreshCcw className="animate-spin" size={16} /> {t.loadingCore}</span>
@@ -967,10 +692,9 @@ export default function DigitrikPro() {
               <span className="flex items-center gap-2"><Wand2 size={16} /> {t.exportBtn}</span>
             )}
           </button>
-        </div>
+      </div>
 
-        <div className="flex-1 space-y-8">
-          {activeTab === 'files' && (
+      {activeTab === 'files' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-2">
               <div>
                 <h3 className="text-sm font-bold text-white mb-1">{t.mainAction}</h3>
@@ -991,7 +715,7 @@ export default function DigitrikPro() {
               {config.action === 'estrai' && (
                 <div className="p-4 bg-zinc-900 rounded-xl border border-zinc-800">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase mb-2 block">{t.rangeLabel}</label>
-                  <input type="text" placeholder="E.g. 1, 3-5" value={config.extractRange} onChange={e => setConfig({...config, extractRange: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-white focus:border-blue-500 outline-none" />
+                  <input type="text" placeholder="E.g. 1, 3-5" value={config.extractRange} onChange={e => setConfig({...config, extractRange: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-xs text-white focus:border-red-500 outline-none" />
                 </div>
               )}
             </div>
@@ -1062,7 +786,7 @@ export default function DigitrikPro() {
               <SectionTitle icon={RotateCw} title={t.rotation} />
               <div className="grid grid-cols-4 gap-2">
                 {[0, 90, 180, 270].map(deg => (
-                  <button key={deg} onClick={() => setConfig({...config, rotation: deg})} className={`py-2 rounded-lg text-xs font-bold border transition-all ${config.rotation === deg ? 'bg-blue-600 border-blue-600 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'}`}>{deg}°</button>
+                  <button key={deg} onClick={() => setConfig({...config, rotation: deg})} className={`py-2 rounded-lg text-xs font-bold border transition-all ${config.rotation === deg ? 'bg-red-600 border-red-600 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'}`}>{deg}°</button>
                 ))}
               </div>
             </div>
@@ -1072,7 +796,7 @@ export default function DigitrikPro() {
             <div className="space-y-6 animate-in fade-in slide-in-from-right-2">
               <SectionTitle icon={Tag} title={t.textWatermark} />
               <div className="p-4 bg-zinc-900 rounded-xl border border-zinc-800 space-y-4">
-                <input type="text" placeholder={t.watermarkPlace} value={config.watermarkText} onChange={e => setConfig({...config, watermarkText: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs font-bold text-white outline-none focus:border-blue-500" />
+                <input type="text" placeholder={t.watermarkPlace} value={config.watermarkText} onChange={e => setConfig({...config, watermarkText: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs font-bold text-white outline-none focus:border-red-500" />
                 <div className="space-y-2">
                   <Toggle label={t.optRibbon} checked={config.useWatermark} onChange={v => setConfig({...config, useWatermark: v})} icon={Sparkles} />
                   <Toggle label={t.optGrid} checked={config.useGrid} onChange={v => setConfig({...config, useGrid: v})} icon={Grid3X3} />
@@ -1087,7 +811,7 @@ export default function DigitrikPro() {
                 <div className="flex flex-col items-center gap-2">
                   {config.logoFile ? (
                     <>
-                      <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-500"><Check size={20}/></div>
+                      <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center text-red-500"><Check size={20}/></div>
                       <span className="text-xs font-bold text-white">{config.logoFile.name}</span>
                     </>
                   ) : (
@@ -1126,7 +850,233 @@ export default function DigitrikPro() {
               )}
             </div>
           )}
+    </div>
+  );
+
+  return (
+    // LAYOUT HYBRID: Fixed on Desktop, Scrolling on Mobile
+    <div className="min-h-screen lg:h-screen bg-zinc-950 text-zinc-100 font-sans flex flex-col lg:flex-row lg:overflow-hidden selection:bg-red-500/30">
+      
+      {/* CDN LOADER */}
+      <Script 
+        src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" 
+        strategy="afterInteractive" 
+        onLoad={() => setIsSdkReady(true)}
+      />
+
+      {/* RENAME MODAL */}
+      {showRenameModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
+          <div className="bg-[#0a0a0a] border border-red-600/30 rounded-[2rem] w-[90%] max-w-lg p-8 shadow-[0_0_50px_rgba(220,38,38,0.1)] relative">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-red-600/10 p-3 rounded-full text-red-500"><Wand2 size={24} /></div>
+              <div><h3 className="text-xl font-black italic text-white uppercase tracking-wider">{t.finalTrick}</h3><p className="text-[11px] text-gray-500 font-bold uppercase">{t.chooseName}</p></div>
+              <button onClick={() => setShowRenameModal(false)} className="absolute top-6 right-6 text-gray-600 hover:text-white transition-colors"><X size={20} /></button>
+            </div>
+            <div className="space-y-2 mb-8">
+              <label className="text-xs font-bold text-gray-400 uppercase ml-2">{t.fileName}</label>
+              <div className="relative">
+                <input type="text" value={tempFilename} onChange={(e) => setTempFilename(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleConfirmDownload()} autoFocus className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white font-medium outline-none focus:border-red-600 transition-all shadow-inner" />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-xs font-bold pointer-events-none">.PDF</span>
+              </div>
+            </div>
+            <div className="bg-red-900/10 border border-red-600/10 rounded-2xl p-5 mb-6 flex gap-4">
+              <Sparkles className="text-red-500 shrink-0 mt-0.5" size={18} />
+              <div className="space-y-1">
+                <span className="text-[10px] font-black text-red-400 uppercase tracking-widest block">{t.didYouKnow} ({trickCuriosity.key})</span>
+                <p className="text-xs text-gray-300 italic leading-relaxed">{trickCuriosity.text}</p>
+              </div>
+            </div>
+            <div className="mb-8 bg-green-500/10 border border-green-500/30 p-4 rounded-2xl flex items-center justify-center group hover:bg-green-500/20 transition-all cursor-pointer" onClick={() => setShowSupportModal(true)}>
+              <button className="text-sm uppercase font-black text-green-500 group-hover:text-green-400 flex items-center gap-3 transition-colors"><Heart size={18} className="animate-pulse" /> {t.supportBtn}</button>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setShowRenameModal(false)} className="flex-1 py-4 rounded-xl border border-white/5 hover:bg-white/5 text-gray-400 font-bold text-xs uppercase tracking-widest transition-all">{t.cancel}</button>
+              <button onClick={handleConfirmDownload} className="flex-1 py-4 bg-red-600 hover:bg-red-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-red-900/20 transition-all flex items-center justify-center gap-2"><Check size={16} /> {t.confirm}</button>
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* INFO MODAL */}
+      {showInfoModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-[#0a0a0a] border border-zinc-800 rounded-[2rem] w-[90%] max-w-lg overflow-hidden relative shadow-2xl">
+            <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-zinc-800 p-3 rounded-full text-white"><Info size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">Info & Support</h3></div><button onClick={() => setShowInfoModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white transition-colors"><X size={20} /></button></div>
+            <div className="p-8 space-y-6">
+                <div><div className="flex items-center gap-2 mb-2 text-red-500 font-bold uppercase text-xs tracking-wider"><Heart size={14} /> {t.aboutTitle}</div><p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-red-500/20 pl-4">{t.aboutText}</p></div>
+                <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800 hover:border-red-500/30 transition-colors"><div className="flex items-center gap-2 mb-2 text-zinc-300 font-bold uppercase text-xs tracking-wider"><Mail size={14} /> {t.contactTitle}</div><a href="mailto:trichesir@gmail.com" className="text-red-400 hover:text-red-300 font-mono text-sm block">trichesir@gmail.com</a></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUPPORT MODAL */}
+      {showSupportModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-[#0a0a0a] border border-green-500/30 rounded-[2rem] w-[90%] max-w-2xl overflow-hidden relative">
+            <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-green-500/10 p-3 rounded-full text-green-500"><Coffee size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">{t.supportTitle}</h3></div><button onClick={() => setShowSupportModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white"><X size={20} /></button></div>
+            <div className="grid grid-cols-1 md:grid-cols-2">
+                <div className="p-8 border-r border-white/5 space-y-4"><h4 className="text-green-400 font-bold uppercase text-xs flex gap-2"><CreditCard size={14}/> {t.donateTitle}</h4><div className="grid grid-cols-3 gap-2">{['1', '2', '5'].map(a => <a key={a} href={`https://www.paypal.me/triches89/${a}`} target="_blank" className="py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-center font-bold hover:border-green-500 hover:text-green-400 transition-all">{a}€</a>)}</div></div><div className="p-8 space-y-4 bg-zinc-950/30"><h4 className="text-red-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> {t.adTitle}</h4><button disabled className="w-full py-3 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-bold uppercase cursor-not-allowed">{t.adButton}</button></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LEFT SIDEBAR (Nav) */}
+      <aside className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-white/5 bg-zinc-950 flex flex-col p-4 z-20 shrink-0">
+        
+        <div className="mb-8 px-2 flex items-center gap-2">
+          <Link href="/" className="w-8 h-8 bg-zinc-800/50 hover:bg-red-600/20 rounded-lg flex items-center justify-center transition-colors group">
+            <ArrowLeft size={18} className="text-zinc-400 group-hover:text-red-400 transition-colors" />
+          </Link>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-black italic tracking-tighter text-white leading-none">DIGITRIK PRO</h1>
+            <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.3em] leading-none mt-1">{t.appName}</span>
+          </div>
+        </div>
+        
+        <div className="flex bg-zinc-900 rounded-lg p-1 mb-6 border border-zinc-800">
+          <button onClick={() => setLang('it')} className={`flex-1 py-1 text-[10px] font-bold uppercase rounded ${lang === 'it' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>IT</button>
+          <button onClick={() => setLang('en')} className={`flex-1 py-1 text-[10px] font-bold uppercase rounded ${lang === 'en' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>EN</button>
+        </div>
+
+        <nav className="flex-1 grid grid-cols-2 lg:block gap-1">
+          <div className="col-span-2 lg:mb-0"><SectionTitle icon={LayoutTemplate} title={t.workspace} /></div>
+          <NavItem id="files" icon={FileText} label={t.files} />
+          <NavItem id="layout" icon={Settings} label={t.layout} />
+          <div className="hidden lg:block h-6" />
+          <div className="col-span-2 lg:mb-0 mt-4 lg:mt-0"><SectionTitle icon={Shield} title={t.branding} /></div>
+          <NavItem id="watermark" icon={ImageIcon} label={t.watermark} />
+          <NavItem id="security" icon={Lock} label={t.security} />
+        </nav>
+
+        <div className="mt-6 lg:mt-auto space-y-1 hidden lg:block">
+             <button onClick={() => setShowInfoModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all text-xs font-bold uppercase tracking-wide group"><Info size={16} /> {t.infoMenu}</button>
+             <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-green-600/80 hover:text-green-400 hover:bg-green-900/10 transition-all text-xs font-bold uppercase tracking-wide group"><Heart size={16} /> {t.supportBtn}</button>
+        </div>
+
+        <div className={`mt-4 lg:mt-4 p-4 rounded-2xl border hidden lg:block ${health.status === 'crit' ? 'bg-red-950/20 border-red-500/20' : 'bg-zinc-900 border-white/5'}`}>
+          <div className="flex justify-between items-end mb-2"><span className="text-[10px] font-bold text-zinc-500 uppercase">{t.health}</span><span className={`text-xs font-black ${health.status === 'ok' ? 'text-green-500' : 'text-yellow-500'}`}>{health.score}%</span></div>
+          <div className="w-full h-1 bg-zinc-800 rounded-full mb-3 overflow-hidden"><div className={`h-full transition-all duration-500 ${health.status === 'ok' ? 'bg-green-500' : 'bg-yellow-500'}`} style={{width: `${health.score}%`}} /></div>
+          <div className="flex items-center gap-2 text-[10px] text-zinc-400"><Activity size={12} /> {t.weight}: <span className="text-zinc-200">{health.size} MB</span></div>
+        </div>
+      </aside>
+
+      {/* CENTER */}
+      <main className="flex-1 flex flex-col relative bg-zinc-900/50 h-auto lg:h-full lg:overflow-hidden">
+        <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 lg:px-8 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-10 shrink-0">
+          <div className="flex items-center gap-4"><h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">{activeTab === 'files' ? t.fileManager : activeTab === 'layout' ? t.layoutConfig : activeTab === 'watermark' ? t.brandingConfig : t.securityConfig}</h2></div>
+          <div className="flex items-center gap-3"><div className="text-[10px] font-bold text-zinc-500 uppercase px-3 py-1 bg-zinc-900 rounded-full border border-white/5">{files.length} {t.filesLoaded}</div></div>
+        </header>
+        
+        <div className="flex-1 overflow-y-visible lg:overflow-y-auto p-4 lg:p-8 scrollbar-thin scrollbar-thumb-zinc-800">
+          <div {...getRootProps()} onClick={files.length === 0 ? open : undefined} className={`relative border-2 border-dashed rounded-[2rem] transition-all duration-300 group ${isDragActive ? 'border-red-500 bg-red-500/5 scale-[0.99]' : 'border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/50'}`}>
+            <input {...getInputProps()} />
+            {files.length === 0 ? (
+              <div className="h-64 flex flex-col items-center justify-center text-center p-10 cursor-pointer">
+                <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-2xl"><UploadCloud size={32} className="text-zinc-600 group-hover:text-red-500 transition-colors" /></div>
+                <h3 className="text-lg font-bold text-zinc-300">{t.dropTitle}</h3>
+                <p className="text-sm text-zinc-500 mt-2 max-w-xs">{t.dropDesc}</p>
+                <div className="mt-6 flex items-center gap-2 text-xs font-bold text-red-500 uppercase tracking-widest bg-red-500/10 px-4 py-2 rounded-full border border-red-500/20 hover:bg-red-500/20 transition-all"><FolderOpen size={14} /> {t.browse}</div>
+              </div>
+            ) : (
+              <div className="p-8">
+                <DragDropContext onDragEnd={(res) => { if(!res.destination) return; const items = Array.from(files); const [reordered] = items.splice(res.source.index, 1); items.splice(res.destination.index, 0, reordered); setFiles(items); }}>
+                  <Droppable droppableId="list" direction="vertical">
+                    {(provided) => (
+                      <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-col gap-3">
+                        {files.map((f, i) => (
+                          <Draggable key={f.id} draggableId={f.id} index={i}>
+                            {(provided, snapshot) => (
+                              <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`bg-zinc-950 border border-white/5 p-4 rounded-xl flex items-center gap-4 group hover:border-red-500/30 transition-all ${snapshot.isDragging ? 'shadow-2xl ring-2 ring-red-500 rotate-2' : ''}`}>
+                                <span className="text-zinc-500 font-mono text-xs font-bold w-6 text-center shrink-0">{i + 1}.</span>
+                                <div className="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center shrink-0"><FileText size={20} className="text-red-500" /></div>
+                                <div className="min-w-0 flex-1 pr-2"><p className="text-xs font-bold text-zinc-200 truncate">{f.file.name}</p><p className="text-[10px] text-zinc-500 font-mono">{(f.file.size/1024).toFixed(1)} KB</p></div>
+                                <button onClick={(e) => { e.stopPropagation(); setFiles(files.filter(x => x.id !== f.id)); }} className="p-2 hover:bg-red-500/10 hover:text-red-500 text-zinc-600 rounded-lg transition-colors shrink-0 z-10"><Trash2 size={16} /></button>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                        <div onClick={open} className="border border-dashed border-zinc-800 rounded-xl flex flex-row gap-3 items-center justify-center p-4 hover:bg-zinc-900/50 transition-colors cursor-pointer text-zinc-600 hover:text-zinc-400 mt-2"><Plus size={20} /><span className="text-[10px] font-bold uppercase">{t.add}</span></div>
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              </div>
+            )}
+          </div>
+
+          {previewUrl && (
+            <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <button onClick={() => setIsPreviewOpen(!isPreviewOpen)} className="w-full flex justify-between items-center mb-4 px-2 group">
+                <div className="flex items-center gap-2"><div className="text-zinc-400 uppercase tracking-widest text-[10px] font-bold flex items-center gap-2 group-hover:text-red-500 transition-colors">{isPreviewOpen ? <Eye size={14} /> : <EyeOff size={14} />} {t.preview} {isPreviewOpen ? '' : t.previewHidden}</div></div>
+                <span className="text-[10px] text-zinc-500 bg-zinc-900 px-2 py-1 rounded">{t.rendering}</span>
+              </button>
+              {isPreviewOpen && (
+                <div className="bg-zinc-950 rounded-2xl border border-white/5 overflow-hidden shadow-2xl relative h-[500px]">
+                  <iframe src={`${previewUrl}#toolbar=0&navpanes=0`} className="w-full h-full opacity-90 hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* MOBILE CONTROLS (Only visible on Mobile/Tablet) */}
+          <div className="lg:hidden w-full bg-zinc-950 border border-white/5 p-6 rounded-3xl shadow-sm mt-8">
+              <SectionTitle icon={Settings} title={t.layout} />
+              <RenderConfiguration />
+          </div>
+
+          {/* --- SEO CONTENT SECTION (AdSense Optimized) --- */}
+          <div className="mt-12 pt-12 border-t border-white/5 text-zinc-400">
+                <div className="flex items-center gap-2 mb-6">
+                    <BookOpen size={20} className="text-red-500"/>
+                    <h2 className="text-2xl font-black text-white tracking-tight">{t.seo.title}</h2>
+                </div>
+                
+                <div className="prose prose-invert prose-sm max-w-none">
+                    <p className="leading-relaxed mb-8 text-zinc-300">{t.seo.intro}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                            <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <HelpCircle size={18} className="text-red-500"/> {t.seo.h1}
+                            </h3>
+                            <p className="mb-4 text-xs leading-relaxed">{t.seo.p1}</p>
+                            <ul className="space-y-3">
+                                {t.seo.ul1.map((item, idx) => (
+                                    <li key={idx} className="flex items-start gap-2 text-xs leading-relaxed">
+                                        <div className="min-w-[4px] h-[4px] mt-1.5 rounded-full bg-red-500/50"></div>
+                                        <span>
+                                            {item.includes('**') ? <><strong className="text-zinc-200">{item.split('**')[1]}</strong>{item.split('**')[2]}</> : item}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                            </div>
+
+                            <div className="space-y-6">
+                            <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5">
+                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <Layers size={18} className="text-red-500"/> {t.seo.h2}
+                                </h3>
+                                <p className="text-xs leading-relaxed">{t.seo.p2}</p>
+                            </div>
+                            <div className="bg-red-900/10 p-6 rounded-2xl border border-red-500/10">
+                                <h3 className="text-lg font-bold text-red-400 mb-2 flex items-center gap-2"><Fingerprint size={16}/> {t.seo.h3}</h3>
+                                <p className="text-xs leading-relaxed text-red-100/70">{t.seo.p3}</p>
+                            </div>
+                            </div>
+                    </div>
+                </div>
+          </div>
+        </div>
+      </main>
+
+      {/* RIGHT SIDEBAR (Desktop Only) */}
+      <aside className="hidden lg:flex w-80 border-l border-white/5 bg-zinc-950 p-6 flex-col overflow-y-auto shrink-0">
+         <RenderConfiguration />
       </aside>
 
       {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}

@@ -8,7 +8,7 @@ import {
   Download, Settings, Image as ImageIcon, Palette, 
   ArrowLeft, Info, Heart, Check, X, CreditCard, PlayCircle, 
   RefreshCcw, Smartphone, ShieldCheck, Share2, Printer,
-  Wand2, Sparkles, Coffee 
+  Wand2, Sparkles, Coffee, BookOpen, HelpCircle, Layers, Fingerprint
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -73,6 +73,21 @@ const TRANSLATIONS = {
       ERROR: { curiosity: "Grazie alla correzione Reed-Solomon, un QR Code può essere letto anche se è danneggiato fino al 30%.", type: "Tech" },
       PATTERNS: { curiosity: "I tre quadrati agli angoli si chiamano 'Finder Patterns' e servono allo scanner per capire l'orientamento.", type: "Design" },
       INVERTED: { curiosity: "I QR Code possono essere invertiti (bianco su nero), ma alcuni scanner vecchi potrebbero faticare a leggerli.", type: "Tip" }
+    },
+    seo: {
+      title: "Guida Completa ai QR Code Professionali",
+      intro: "Digitrik Pro QR Creator è uno strumento avanzato per generare codici QR statici ad alta definizione direttamente nel browser. A differenza dei generatori 'dinamici' che scadono dopo un mese, i nostri QR code sono eterni, gratuiti e rispettano la tua privacy.",
+      h1: "QR Statici vs Dinamici: Qual è la differenza?",
+      p1: "Quando crei un QR Code, è fondamentale capire come vengono salvati i dati.",
+      ul1: [
+        "**QR Statico (Digitrik):** I dati (es. il link del sito) sono scritti direttamente dentro i pixel del codice. Non scadrà mai e funzionerà per sempre, anche se Digitrik dovesse chiudere. È l'opzione migliore per biglietti da visita e menu.",
+        "**QR Dinamico:** Il codice contiene un link breve (es. bit.ly/123) che reindirizza al tuo sito. Spesso questi servizi diventano a pagamento dopo un periodo di prova, e se smetti di pagare il QR smette di funzionare.",
+        "**Privacy:** Generando il codice localmente, nessuno può tracciare chi scansiona il tuo codice o raccogliere i dati dei tuoi utenti."
+      ],
+      h2: "Livelli di Correzione Errore (Reed-Solomon)",
+      p2: "I QR Code possiedono una tecnologia di ridondanza dati chiamata Reed-Solomon. Puoi scegliere tra 4 livelli: L (7%), M (15%), Q (25%) e H (30%). Se intendi inserire un **Logo al centro** del QR, devi impostare il livello su 'H' (High), in modo che i dati coperti dal logo vengano recuperati grazie alla ridondanza.",
+      h3: "Personalizzazione e Design",
+      p3: "Per garantire che il tuo QR sia scansionabile, assicurati sempre che ci sia un alto contrasto tra il colore dei moduli (scuro) e lo sfondo (chiaro). I QR 'invertiti' (bianco su nero) sono eleganti ma alcuni vecchi scanner potrebbero avere difficoltà a leggerli."
     }
   },
   en: {
@@ -134,6 +149,21 @@ const TRANSLATIONS = {
       ERROR: { curiosity: "Thanks to Reed-Solomon error correction, a QR Code can still be read even if 30% of it is damaged.", type: "Tech" },
       PATTERNS: { curiosity: "The three squares in the corners are called 'Finder Patterns' and help the scanner determine orientation.", type: "Design" },
       INVERTED: { curiosity: "QR Codes can be inverted (white on black), though some older scanners might struggle with them.", type: "Tip" }
+    },
+    seo: {
+      title: "Ultimate Guide to Professional QR Codes",
+      intro: "Digitrik Pro QR Creator is an advanced tool for generating high-definition static QR codes directly in your browser. Unlike 'dynamic' generators that expire after a month, our QR codes are eternal, free, and respect your privacy.",
+      h1: "Static vs Dynamic QR Codes: What's the difference?",
+      p1: "When creating a QR Code, it is crucial to understand how data is stored.",
+      ul1: [
+        "**Static QR (Digitrik):** Data (e.g., website link) is encoded directly into the code's pixels. It will never expire and will work forever, even if Digitrik shuts down. Best for business cards and menus.",
+        "**Dynamic QR:** The code contains a short link (e.g., bit.ly/123) that redirects to your site. These services often become paid after a trial period, and if you stop paying, the QR stops working.",
+        "**Privacy:** By generating the code locally, no one can track who scans your code or collect your users' data."
+      ],
+      h2: "Error Correction Levels (Reed-Solomon)",
+      p2: "QR Codes possess a data redundancy technology called Reed-Solomon. You can choose from 4 levels: L (7%), M (15%), Q (25%), and H (30%). If you plan to insert a **Logo in the center** of the QR, you must set the level to 'H' (High), so that the data covered by the logo can be recovered thanks to redundancy.",
+      h3: "Customization and Design",
+      p3: "To ensure your QR is scannable, always ensure high contrast between the module color (dark) and the background (light). 'Inverted' QRs (white on black) are stylish but some older scanners might struggle to read them."
     }
   }
 };
@@ -141,7 +171,7 @@ const TRANSLATIONS = {
 // --- COMPONENTS ---
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className="flex items-center gap-2 mb-4 text-zinc-500 uppercase tracking-widest text-[10px] font-bold px-2">
-    <Icon size={14} className="text-blue-500" />
+    <Icon size={14} className="text-purple-500" />
     {title}
   </div>
 );
@@ -149,7 +179,7 @@ const SectionTitle = ({ icon: Icon, title }) => (
 const NavItem = ({ active, onClick, icon: Icon, label }) => (
   <button 
     onClick={onClick}
-    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all mb-1 border ${active ? 'bg-blue-600/10 border-blue-500/50 text-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.1)]' : 'border-transparent text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}`}
+    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all mb-1 border ${active ? 'bg-purple-600/10 border-purple-500/50 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.1)]' : 'border-transparent text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}`}
   >
     <Icon size={18} />
     <span className="text-xs font-bold tracking-wide uppercase">{label}</span>
@@ -164,7 +194,7 @@ export default function QRCreator() {
   // STATE: CONTENT
   const [activeType, setActiveType] = useState('url');
   const [content, setContent] = useState({
-    url: 'https://digitrik-suite.vercel.app',
+    url: 'www.digitrikpro.com',
     ssid: '', password: '', encryption: 'WPA', hidden: false,
     firstName: '', lastName: '', phone: '', email: '', org: '',
     emailTo: '', emailSub: '', emailBody: '',
@@ -288,6 +318,61 @@ export default function QRCreator() {
   };
   const { getRootProps, getInputProps } = useDropzone({ onDrop: onLogoDrop, accept: {'image/*': []}, multiple: false });
 
+  // --- REUSABLE DESIGN CONTROLS (Used in Sidebar Desktop & Mobile Bottom) ---
+  const DesignControls = () => (
+    <div className="space-y-6">
+        {/* Colors */}
+        <div className="grid grid-cols-2 gap-4">
+            <div>
+                <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.fgColor}</label>
+                <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+                    <input type="color" value={design.fgColor} onChange={e => setDesign({...design, fgColor: e.target.value})} className="h-8 w-8 rounded cursor-pointer bg-transparent border-none"/>
+                    <span className="text-xs font-mono text-zinc-400">{design.fgColor}</span>
+                </div>
+            </div>
+            <div>
+                <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.bgColor}</label>
+                <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+                    <input type="color" value={design.bgColor} onChange={e => setDesign({...design, bgColor: e.target.value})} className="h-8 w-8 rounded cursor-pointer bg-transparent border-none"/>
+                    <span className="text-xs font-mono text-zinc-400">{design.bgColor}</span>
+                </div>
+            </div>
+        </div>
+
+        {/* Error Correction */}
+        <div>
+            <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.errLevel}</label>
+            <div className="flex bg-zinc-900 p-1 rounded-lg border border-zinc-800">
+                {['L', 'M', 'Q', 'H'].map(lvl => (
+                    <button key={lvl} onClick={() => setDesign({...design, errorCorrection: lvl})} className={`flex-1 py-2 text-xs font-bold rounded ${design.errorCorrection === lvl ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>{lvl}</button>
+                ))}
+            </div>
+            <p className="text-[9px] text-zinc-600 mt-2 leading-relaxed">{t.controls.errDesc}</p>
+        </div>
+
+        <hr className="border-white/5" />
+
+        {/* Logo Upload */}
+        <div>
+            <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.logo}</label>
+            <div {...getRootProps()} className="border border-dashed border-zinc-800 rounded-xl p-6 text-center cursor-pointer hover:bg-zinc-900/50 transition-all">
+                <input {...getInputProps()} />
+                {design.logoUrl ? (
+                    <div className="relative inline-block group">
+                        <img src={design.logoUrl} className="h-16 w-16 object-contain" />
+                        <button onClick={(e) => { e.stopPropagation(); setDesign({...design, logo: null, logoUrl: null, errorCorrection: 'M'}); }} className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X size={12}/></button>
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center gap-2 text-zinc-500">
+                        <ImageIcon size={24} />
+                        <span className="text-[10px] font-bold uppercase">{t.controls.uploadLogo}</span>
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
+  );
+
   // --- RENDER INPUTS ---
   const renderInputs = () => {
       switch(activeType) {
@@ -295,8 +380,8 @@ export default function QRCreator() {
               return (
                   <div className="space-y-4">
                       <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
-                          <label className="text-[10px] font-bold text-blue-400 uppercase mb-2 block">{t.labels.enterUrl}</label>
-                          <input type="text" value={content.url} onChange={e => setContent({...content, url: e.target.value})} placeholder="https://..." className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-white outline-none focus:border-blue-500 transition-colors" />
+                          <label className="text-[10px] font-bold text-purple-400 uppercase mb-2 block">{t.labels.enterUrl}</label>
+                          <input type="text" value={content.url} onChange={e => setContent({...content, url: e.target.value})} placeholder="https://..." className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-white outline-none focus:border-purple-500 transition-colors" />
                       </div>
                   </div>
               );
@@ -342,17 +427,18 @@ export default function QRCreator() {
   };
 
   return (
-    <div className="h-screen bg-zinc-950 text-zinc-100 font-sans flex overflow-hidden selection:bg-blue-500/30">
+    // HYBRID LAYOUT: min-h-screen for mobile scrolling, fixed h-screen for desktop
+    <div className="min-h-screen lg:h-screen bg-zinc-950 text-zinc-100 font-sans flex flex-col lg:flex-row lg:overflow-hidden selection:bg-purple-500/30">
       
-      {/* SIDEBAR LEFT */}
-      <aside className="w-64 border-r border-white/5 bg-zinc-950 flex flex-col p-4 z-20 overflow-y-auto">
+      {/* SIDEBAR LEFT (Nav) */}
+      <aside className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-white/5 bg-zinc-950 flex flex-col p-4 z-20 shrink-0">
         <div className="mb-6 px-2 flex items-center gap-2">
-          <Link href="/" className="w-8 h-8 bg-zinc-800/50 hover:bg-blue-600/20 rounded-lg flex items-center justify-center transition-colors group">
-            <ArrowLeft size={18} className="text-zinc-400 group-hover:text-blue-400" />
+          <Link href="/" className="w-8 h-8 bg-zinc-800/50 hover:bg-purple-600/20 rounded-lg flex items-center justify-center transition-colors group">
+            <ArrowLeft size={18} className="text-zinc-400 group-hover:text-purple-400" />
           </Link>
           <div className="flex flex-col">
             <h1 className="text-xl font-black italic tracking-tighter text-white leading-none">DIGITRIK PRO</h1>
-            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] leading-none mt-1">{t.appName}</span>
+            <span className="text-[10px] font-black text-purple-500 uppercase tracking-[0.3em] leading-none mt-1">{t.appName}</span>
           </div>
         </div>
 
@@ -361,8 +447,8 @@ export default function QRCreator() {
           <button onClick={() => setLang('en')} className={`flex-1 py-1 text-[10px] font-bold uppercase rounded ${lang === 'en' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>EN</button>
         </div>
 
-        <nav className="space-y-1 mb-6">
-            <SectionTitle icon={QrCode} title="Type" />
+        <nav className="space-y-1 mb-6 lg:mb-auto grid grid-cols-2 lg:block gap-1">
+            <div className="col-span-2 lg:mb-0"><SectionTitle icon={QrCode} title="Type" /></div>
             <NavItem active={activeType === 'url'} onClick={() => setActiveType('url')} icon={LinkIcon} label={t.nav.url} />
             <NavItem active={activeType === 'wifi'} onClick={() => setActiveType('wifi')} icon={Wifi} label={t.nav.wifi} />
             <NavItem active={activeType === 'vcard'} onClick={() => setActiveType('vcard')} icon={UserSquare} label={t.nav.vcard} />
@@ -370,24 +456,24 @@ export default function QRCreator() {
             <NavItem active={activeType === 'text'} onClick={() => setActiveType('text')} icon={Type} label={t.nav.text} />
         </nav>
 
-        <div className="mt-auto space-y-1">
-            <button onClick={() => setShowInfoModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all text-xs font-bold uppercase tracking-wide group"><Info size={16} className="group-hover:text-blue-400"/> {t.infoBtn}</button>
+        <div className="mt-6 lg:mt-auto space-y-1 hidden lg:block">
+            <button onClick={() => setShowInfoModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all text-xs font-bold uppercase tracking-wide group"><Info size={16} className="group-hover:text-purple-400"/> {t.infoBtn}</button>
             <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-green-600/80 hover:text-green-400 hover:bg-green-900/10 transition-all text-xs font-bold uppercase tracking-wide group"><Heart size={16} className="group-hover:scale-110 transition-transform"/> {t.supportBtn}</button>
         </div>
       </aside>
 
       {/* CENTER WORKSPACE */}
-      <main className="flex-1 flex flex-col relative bg-zinc-900/50">
-        <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-10">
-            <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">{t.appName} <span className="text-blue-500">/</span> {t.nav[activeType]}</h2>
+      <main className="flex-1 flex flex-col relative bg-zinc-900/50 h-auto lg:h-full lg:overflow-hidden">
+        <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-10 shrink-0">
+            <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">{t.appName} <span className="text-purple-500">/</span> {t.nav[activeType]}</h2>
         </header>
 
-        <div className="flex-1 p-8 overflow-y-auto">
+        <div className="flex-1 p-4 lg:p-8 overflow-y-visible lg:overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
             <div className="max-w-3xl mx-auto flex flex-col gap-8 pb-12">
                 
                 {/* 1. INPUT DATA AREA */}
                 <div className="w-full bg-zinc-950 border border-white/5 p-6 rounded-3xl shadow-sm">
-                    <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2"><Smartphone size={20} className="text-blue-500"/> Input Data</h3>
+                    <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2"><Smartphone size={20} className="text-purple-500"/> Input Data</h3>
                     {renderInputs()}
                 </div>
 
@@ -405,80 +491,84 @@ export default function QRCreator() {
                         )}
                     </div>
                     
-                    <button onClick={handleDownloadClick} className="mt-8 px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-900/30 flex items-center gap-3 transition-all hover:-translate-y-1">
+                    <button onClick={handleDownloadClick} className="mt-8 px-10 py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-full font-black text-sm uppercase tracking-widest shadow-lg shadow-purple-900/30 flex items-center gap-3 transition-all hover:-translate-y-1">
                         <Download size={18} /> {t.actions.download}
                     </button>
+                </div>
+
+                {/* 3. MOBILE ONLY CONTROLS (Moved here) */}
+                <div className="lg:hidden w-full bg-zinc-950 border border-white/5 p-6 rounded-3xl shadow-sm mt-4">
+                     <SectionTitle icon={Palette} title={t.controls.design} />
+                     <DesignControls />
+                </div>
+
+                {/* 4. SEO CONTENT */}
+                <div className="mt-12 pt-12 border-t border-white/5 text-zinc-400">
+                    <div className="flex items-center gap-2 mb-6">
+                        <BookOpen size={20} className="text-purple-500"/>
+                        <h2 className="text-2xl font-black text-white tracking-tight">{t.seo.title}</h2>
+                    </div>
+                    
+                    <div className="prose prose-invert prose-sm max-w-none">
+                        <p className="leading-relaxed mb-8 text-zinc-300">{t.seo.intro}</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                             <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5">
+                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <HelpCircle size={18} className="text-purple-500"/> {t.seo.h1}
+                                </h3>
+                                <p className="mb-4 text-xs leading-relaxed">{t.seo.p1}</p>
+                                <ul className="space-y-3">
+                                    {t.seo.ul1.map((item, idx) => {
+                                        const [bold, rest] = item.split('**').filter(s => s.trim() !== '');
+                                        const hasBold = item.includes('**');
+                                        return (
+                                            <li key={idx} className="flex items-start gap-2 text-xs leading-relaxed">
+                                                <div className="min-w-[4px] h-[4px] mt-1.5 rounded-full bg-purple-500/50"></div>
+                                                <span>
+                                                    {hasBold ? <strong className="text-zinc-200">{bold}</strong> : null}
+                                                    {hasBold ? rest : item}
+                                                </span>
+                                            </li>
+                                        )
+                                    })}
+                                </ul>
+                             </div>
+
+                             <div className="space-y-6">
+                                <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5">
+                                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                        <Layers size={18} className="text-purple-500"/> {t.seo.h2}
+                                    </h3>
+                                    <p className="text-xs leading-relaxed">{t.seo.p2}</p>
+                                </div>
+                                <div className="bg-purple-900/10 p-6 rounded-2xl border border-purple-500/10">
+                                    <h3 className="text-lg font-bold text-purple-400 mb-2 flex items-center gap-2"><Fingerprint size={16}/> {t.seo.h3}</h3>
+                                    <p className="text-xs leading-relaxed text-purple-100/70">{t.seo.p3}</p>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
         </div>
       </main>
 
-      {/* RIGHT SIDEBAR (DESIGN) */}
-      <aside className="w-80 border-l border-white/5 bg-zinc-950 p-6 flex flex-col overflow-y-auto">
+      {/* RIGHT SIDEBAR (DESIGN - DESKTOP ONLY) */}
+      <aside className="hidden lg:flex w-80 border-l border-white/5 bg-zinc-950 p-6 flex-col overflow-y-auto shrink-0">
         <SectionTitle icon={Palette} title={t.controls.design} />
-        
-        <div className="space-y-6 animate-in slide-in-from-right-4 fade-in">
-            {/* Colors */}
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.fgColor}</label>
-                    <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
-                        <input type="color" value={design.fgColor} onChange={e => setDesign({...design, fgColor: e.target.value})} className="h-8 w-8 rounded cursor-pointer bg-transparent border-none"/>
-                        <span className="text-xs font-mono text-zinc-400">{design.fgColor}</span>
-                    </div>
-                </div>
-                <div>
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.bgColor}</label>
-                    <div className="flex items-center gap-2 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
-                        <input type="color" value={design.bgColor} onChange={e => setDesign({...design, bgColor: e.target.value})} className="h-8 w-8 rounded cursor-pointer bg-transparent border-none"/>
-                        <span className="text-xs font-mono text-zinc-400">{design.bgColor}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Error Correction */}
-            <div>
-                <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.errLevel}</label>
-                <div className="flex bg-zinc-900 p-1 rounded-lg border border-zinc-800">
-                    {['L', 'M', 'Q', 'H'].map(lvl => (
-                        <button key={lvl} onClick={() => setDesign({...design, errorCorrection: lvl})} className={`flex-1 py-2 text-xs font-bold rounded ${design.errorCorrection === lvl ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>{lvl}</button>
-                    ))}
-                </div>
-                <p className="text-[9px] text-zinc-600 mt-2 leading-relaxed">{t.controls.errDesc}</p>
-            </div>
-
-            <hr className="border-white/5" />
-
-            {/* Logo Upload */}
-            <div>
-                <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.logo}</label>
-                <div {...getRootProps()} className="border border-dashed border-zinc-800 rounded-xl p-6 text-center cursor-pointer hover:bg-zinc-900/50 transition-all">
-                    <input {...getInputProps()} />
-                    {design.logoUrl ? (
-                        <div className="relative inline-block group">
-                            <img src={design.logoUrl} className="h-16 w-16 object-contain" />
-                            <button onClick={(e) => { e.stopPropagation(); setDesign({...design, logo: null, logoUrl: null, errorCorrection: 'M'}); }} className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X size={12}/></button>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center gap-2 text-zinc-500">
-                            <ImageIcon size={24} />
-                            <span className="text-[10px] font-bold uppercase">{t.controls.uploadLogo}</span>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+        <DesignControls />
       </aside>
 
       {/* --- RENAME / DOWNLOAD MODAL --- */}
       {showDownloadModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
-          <div className="bg-[#0a0a0a] border border-blue-600/30 rounded-[2rem] w-[90%] max-w-lg p-8 shadow-[0_0_50px_rgba(37,99,235,0.1)] relative">
+          <div className="bg-[#0a0a0a] border border-purple-600/30 rounded-[2rem] w-[90%] max-w-lg p-8 shadow-[0_0_50px_rgba(168,85,247,0.1)] relative">
             
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="bg-blue-600/10 p-3 rounded-full text-blue-500"><Wand2 size={24} /></div>
+              <div className="bg-purple-600/10 p-3 rounded-full text-purple-500"><Wand2 size={24} /></div>
               <div><h3 className="text-xl font-black italic text-white uppercase tracking-wider">{t.modals.ready}</h3><p className="text-[11px] text-gray-500 font-bold uppercase">{t.modals.chooseName}</p></div>
               <button onClick={() => setShowDownloadModal(false)} className="absolute top-6 right-6 text-gray-600 hover:text-white transition-colors"><X size={20} /></button>
             </div>
@@ -487,16 +577,16 @@ export default function QRCreator() {
             <div className="space-y-2 mb-8">
               <label className="text-xs font-bold text-gray-400 uppercase ml-2">{t.modals.fileName}</label>
               <div className="relative">
-                <input type="text" value={exportFilename} onChange={(e) => setExportFilename(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && confirmDownload()} autoFocus className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white font-medium outline-none focus:border-blue-600 transition-all shadow-inner" />
+                <input type="text" value={exportFilename} onChange={(e) => setExportFilename(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && confirmDownload()} autoFocus className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white font-medium outline-none focus:border-purple-600 transition-all shadow-inner" />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-xs font-bold pointer-events-none">.PNG</span>
               </div>
             </div>
 
             {/* Did you know? */}
-            <div className="bg-blue-900/10 border border-blue-600/10 rounded-2xl p-5 mb-6 flex gap-4">
-              <Sparkles className="text-blue-500 shrink-0 mt-0.5" size={18} />
+            <div className="bg-purple-900/10 border border-purple-600/10 rounded-2xl p-5 mb-6 flex gap-4">
+              <Sparkles className="text-purple-500 shrink-0 mt-0.5" size={18} />
               <div className="space-y-1">
-                <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">{t.modals.didYouKnow} ({trickCuriosity.key})</span>
+                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest block">{t.modals.didYouKnow} ({trickCuriosity.key})</span>
                 <p className="text-xs text-gray-300 italic leading-relaxed">{trickCuriosity.text}</p>
               </div>
             </div>
@@ -509,7 +599,7 @@ export default function QRCreator() {
             {/* Actions */}
             <div className="flex gap-3">
               <button onClick={() => setShowDownloadModal(false)} className="flex-1 py-4 rounded-xl border border-white/5 hover:bg-white/5 text-gray-400 font-bold text-xs uppercase tracking-widest transition-all">{t.modals.cancel}</button>
-              <button onClick={confirmDownload} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2"><Check size={16} /> {t.actions.downloadNow}</button>
+              <button onClick={confirmDownload} className="flex-1 py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-purple-900/20 transition-all flex items-center justify-center gap-2"><Check size={16} /> {t.actions.downloadNow}</button>
             </div>
           </div>
         </div>
@@ -521,7 +611,7 @@ export default function QRCreator() {
           <div className="bg-[#0a0a0a] border border-zinc-800 rounded-[2rem] w-[90%] max-w-lg overflow-hidden relative shadow-2xl">
             <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-zinc-800 p-3 rounded-full text-white"><Info size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">Info & Support</h3></div><button onClick={() => setShowInfoModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white transition-colors"><X size={20} /></button></div>
             <div className="p-8 space-y-6">
-                <div><div className="flex items-center gap-2 mb-2 text-blue-500 font-bold uppercase text-xs tracking-wider"><Heart size={14} /> {t.modals.aboutTitle}</div><p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-blue-500/20 pl-4">{t.modals.aboutText}</p></div>
+                <div><div className="flex items-center gap-2 mb-2 text-purple-500 font-bold uppercase text-xs tracking-wider"><Heart size={14} /> {t.modals.aboutTitle}</div><p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-purple-500/20 pl-4">{t.modals.aboutText}</p></div>
             </div>
           </div>
         </div>
@@ -536,7 +626,7 @@ export default function QRCreator() {
                     <h4 className="text-green-400 font-bold uppercase text-xs flex gap-2"><CreditCard size={14}/> {t.modals.donateTitle}</h4>
                     <div className="grid grid-cols-3 gap-2">{['1', '2', '5'].map(a => <a key={a} href={`https://www.paypal.me/triches89/${a}`} target="_blank" className="py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-center font-bold hover:border-green-500 hover:text-green-400 transition-all">{a}€</a>)}</div>
                 </div>
-                <div className="p-8 space-y-4 bg-zinc-950/30"><h4 className="text-blue-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> {t.modals.adTitle}</h4><button disabled className="w-full py-3 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-bold uppercase cursor-not-allowed">{t.modals.adButton}</button></div>
+                <div className="p-8 space-y-4 bg-zinc-950/30"><h4 className="text-purple-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> {t.modals.adButton}</h4><button disabled className="w-full py-3 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-bold uppercase cursor-not-allowed">Watch Ad (Soon)</button></div>
             </div>
           </div>
         </div>

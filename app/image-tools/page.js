@@ -10,7 +10,8 @@ import {
   Zap, ShieldCheck, Mail, Coffee, CreditCard, PlayCircle, 
   Code2, Sparkles, RefreshCcw, Crop as CropIcon, 
   Trash2, FileImage, LayoutGrid, Wand2, 
-  RotateCw, FlipHorizontal, FlipVertical, Square, RectangleHorizontal, RectangleVertical
+  RotateCw, FlipHorizontal, FlipVertical, Square, RectangleHorizontal, RectangleVertical,
+  BookOpen, HelpCircle, Fingerprint
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -37,6 +38,7 @@ const TRANSLATIONS = {
       cancelCrop: "Annulla"
     },
     controls: {
+      title: "Impostazioni",
       quality: "Qualità Compressione",
       format: "Formato Output",
       width: "Larghezza (px)",
@@ -84,6 +86,21 @@ const TRANSLATIONS = {
       WEBP: { curiosity: "Invented by Google, WebP è il 30% più leggero del JPEG a parità di qualità. È il futuro del web.", type: "Web" },
       PIXEL: { curiosity: "Un'immagine 4K contiene oltre 8 milioni di pixel. Ognuno di essi è composto da 3 canali: Rosso, Verde e Blu.", type: "Tech" },
       EXIF: { curiosity: "Le tue foto contengono dati nascosti (EXIF) come la fotocamera usata e a volte la posizione GPS. Digitrik li rimuove per la tua privacy.", type: "Privacy" }
+    },
+    seo: {
+      title: "Guida Completa all'Ottimizzazione Immagini",
+      intro: "Digitrik Pro Image Studio è una suite all-in-one per la gestione delle immagini digitali. A differenza dei convertitori tradizionali, questo strumento lavora al 100% nel tuo browser, garantendo che le tue foto personali non vengano mai caricate su server esterni.",
+      h1: "Compressione Lossy vs Lossless: Quale scegliere?",
+      p1: "Quando riduci il peso di un'immagine, devi scegliere tra qualità e dimensione.",
+      ul1: [
+        "**JPEG (Lossy):** Ideale per fotografie. Elimina dati invisibili all'occhio umano. Riduce il peso fino all'80% con perdita di qualità minima.",
+        "**PNG (Lossless):** Perfetto per grafiche, loghi e screenshot. Mantiene ogni singolo pixel e supporta la trasparenza, ma genera file più pesanti.",
+        "**WebP:** Il formato moderno di Google. Offre la qualità del JPEG e la trasparenza del PNG, ma con un peso inferiore del 30%. È lo standard per il web moderno."
+      ],
+      h2: "Ridimensionamento e DPI",
+      p2: "Ridimensionare un'immagine (Resize) significa cambiare il numero effettivo di pixel. Se devi stampare una foto, assicurati di avere almeno 300 DPI (Punti per pollice). Per il web, 72 DPI sono sufficienti, ma è più importante guardare la risoluzione in pixel (es. 1920x1080 per il Full HD).",
+      h3: "Privacy e Metadati EXIF",
+      p3: "Ogni volta che scatti una foto con lo smartphone, nel file vengono salvati dati nascosti (EXIF): modello del telefono, data, ora e spesso le coordinate GPS esatte. Image Studio rimuove automaticamente questi dati durante la compressione per proteggere la tua privacy."
     }
   },
   en: {
@@ -107,6 +124,7 @@ const TRANSLATIONS = {
       cancelCrop: "Cancel"
     },
     controls: {
+      title: "Settings",
       quality: "Compression Quality",
       format: "Output Format",
       width: "Width (px)",
@@ -154,6 +172,21 @@ const TRANSLATIONS = {
       WEBP: { curiosity: "Invented by Google, WebP is 30% smaller than JPEG at the same quality. It is the future of the web.", type: "Web" },
       PIXEL: { curiosity: "A 4K image contains over 8 million pixels. Each one consists of 3 channels: Red, Green, and Blue.", type: "Tech" },
       EXIF: { curiosity: "Your photos contain hidden data (EXIF) like the camera model and sometimes GPS location. Digitrik removes them for your privacy.", type: "Privacy" }
+    },
+    seo: {
+      title: "Ultimate Guide to Image Optimization",
+      intro: "Digitrik Pro Image Studio is an all-in-one suite for digital image management. Unlike traditional converters, this tool works 100% in your browser, ensuring your personal photos are never uploaded to external servers.",
+      h1: "Lossy vs Lossless Compression: Which to choose?",
+      p1: "When reducing image file size, you must choose between quality and size.",
+      ul1: [
+        "**JPEG (Lossy):** Ideal for photography. Eliminates data invisible to the human eye. Reduces size by up to 80% with minimal quality loss.",
+        "**PNG (Lossless):** Perfect for graphics, logos, and screenshots. Retains every single pixel and supports transparency, but generates larger files.",
+        "**WebP:** Google's modern format. Offers JPEG quality and PNG transparency but is 30% smaller. It is the standard for the modern web."
+      ],
+      h2: "Resizing and DPI",
+      p2: "Resizing an image means changing the actual number of pixels. If you need to print a photo, ensure you have at least 300 DPI (Dots Per Inch). For the web, 72 DPI is sufficient, but pixel resolution (e.g., 1920x1080 for Full HD) is more important.",
+      h3: "Privacy and EXIF Metadata",
+      p3: "Every time you take a photo with your smartphone, hidden data (EXIF) is saved in the file: phone model, date, time, and often exact GPS coordinates. Image Studio automatically removes this data during compression to protect your privacy."
     }
   }
 };
@@ -166,18 +199,12 @@ const ASPECT_RATIOS = [
     { label: '9:16', value: 9/16, icon: RectangleVertical },
     { label: '4:3', value: 4/3, icon: RectangleHorizontal },
     { label: '3:4', value: 3/4, icon: RectangleVertical },
-    { label: '3:2', value: 3/2, icon: RectangleHorizontal },
-    { label: '2:3', value: 2/3, icon: RectangleVertical },
-    { label: '7:5', value: 7/5, icon: RectangleHorizontal },
-    { label: '5:7', value: 5/7, icon: RectangleVertical },
-    { label: '5:4', value: 5/4, icon: RectangleHorizontal },
-    { label: '4:5', value: 4/5, icon: RectangleVertical },
 ];
 
 // --- COMPONENTS ---
 const SectionTitle = ({ icon: Icon, title }) => (
   <div className="flex items-center gap-2 mb-4 text-zinc-500 uppercase tracking-widest text-[10px] font-bold px-2">
-    <Icon size={14} className="text-blue-500" />
+    <Icon size={14} className="text-green-500" />
     {title}
   </div>
 );
@@ -185,7 +212,7 @@ const SectionTitle = ({ icon: Icon, title }) => (
 const NavItem = ({ active, onClick, icon: Icon, label }) => (
   <button 
     onClick={onClick}
-    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all mb-1 border ${active ? 'bg-blue-600/10 border-blue-500/50 text-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.1)]' : 'border-transparent text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}`}
+    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all mb-1 border ${active ? 'bg-green-600/10 border-green-500/50 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.1)]' : 'border-transparent text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'}`}
   >
     <Icon size={18} />
     <span className="text-xs font-bold tracking-wide uppercase">{label}</span>
@@ -196,12 +223,12 @@ const Slider = ({ label, value, min, max, step=1, onChange, unit="" }) => (
   <div className="mb-4">
     <div className="flex justify-between text-[10px] uppercase font-bold text-zinc-500 mb-2">
       <span>{label}</span>
-      <span className="text-blue-400">{value}{unit}</span>
+      <span className="text-green-400">{value}{unit}</span>
     </div>
     <input 
       type="range" min={min} max={max} step={step} value={value} 
       onChange={(e) => onChange(parseFloat(e.target.value))}
-      className="w-full h-1.5 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400"
+      className="w-full h-1.5 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-green-500 hover:accent-green-400"
     />
   </div>
 );
@@ -333,37 +360,30 @@ export default function ImageStudio() {
 
   // 3. APPLY CROP (Physical Cut)
   const applyCrop = useCallback(async () => {
-    // If no crop selected but in crop tab, we might want to just exit
     if (!completedCrop || !imgRef.current) {
         setActiveTab('compress');
         return;
     }
-
     const image = imgRef.current;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
-
     const pixelRatio = window.devicePixelRatio;
     canvas.width = Math.floor(completedCrop.width * scaleX * pixelRatio);
     canvas.height = Math.floor(completedCrop.height * scaleY * pixelRatio);
-
     ctx.scale(pixelRatio, pixelRatio);
     ctx.imageSmoothingQuality = 'high';
-
     const cropX = completedCrop.x * scaleX;
     const cropY = completedCrop.y * scaleY;
     const cropWidth = completedCrop.width * scaleX;
     const cropHeight = completedCrop.height * scaleY;
-
     ctx.drawImage(image, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
 
     canvas.toBlob((blob) => {
         if (!blob) return;
         const newUrl = URL.createObjectURL(blob);
-        setCurrentUrl(newUrl); // Update Base
+        setCurrentUrl(newUrl); 
         setSettings(prev => ({
             ...prev,
             width: canvas.width,
@@ -395,11 +415,8 @@ export default function ImageStudio() {
 
     canvas.width = finalWidth;
     canvas.height = finalHeight;
-
-    // Draw Base
     ctx.drawImage(img, 0, 0, finalWidth, finalHeight);
 
-    // Watermark
     if (settings.wmType === 'text' && settings.wmText) {
         const fontSize = Math.max(12, settings.wmSize); 
         ctx.font = `bold ${fontSize}px Arial, sans-serif`;
@@ -425,7 +442,6 @@ export default function ImageStudio() {
         const logo = new Image();
         logo.src = settings.wmLogoUrl;
         await new Promise(r => logo.onload = r);
-        
         ctx.globalAlpha = settings.wmOpacity;
         const scaleFactor = settings.wmSize / 100; 
         const logoW = finalWidth * scaleFactor;
@@ -467,9 +483,6 @@ export default function ImageStudio() {
     return () => clearTimeout(timer);
   }, [settings, currentUrl, processImage, activeTab]);
 
-
-  // --- HANDLERS ---
-
   const onDrop = useCallback(async (acceptedFiles) => {
     setLoadingMsg("Loading...");
     
@@ -501,11 +514,8 @@ export default function ImageStudio() {
             id: Math.random().toString(36).substr(2, 9)
         });
     }
-    
     setFiles(prev => [...prev, ...newFiles]);
-    if (activeFileIndex === null && newFiles.length > 0) {
-        setActiveFileIndex(files.length); 
-    }
+    if (activeFileIndex === null && newFiles.length > 0) setActiveFileIndex(files.length); 
     setLoadingMsg("");
   }, [files, activeFileIndex, t]);
 
@@ -517,9 +527,7 @@ export default function ImageStudio() {
 
   const onLogoDrop = useCallback(accepted => {
       const file = accepted[0];
-      if (file) {
-          setSettings(prev => ({ ...prev, wmLogoFile: file, wmLogoUrl: URL.createObjectURL(file) }));
-      }
+      if (file) setSettings(prev => ({ ...prev, wmLogoFile: file, wmLogoUrl: URL.createObjectURL(file) }));
   }, []);
   const { getRootProps: getLogoProps, getInputProps: getLogoInput } = useDropzone({ onDrop: onLogoDrop, accept: {'image/*': []}, multiple: false });
 
@@ -527,12 +535,7 @@ export default function ImageStudio() {
       setCurrentUrl(activeFileObj.url);
       const img = new Image();
       img.onload = () => {
-          setSettings({ 
-              ...defaultSettings, 
-              width: img.width, 
-              height: img.height,
-              aspectRatio: img.width / img.height 
-          });
+          setSettings({ ...defaultSettings, width: img.width, height: img.height, aspectRatio: img.width / img.height });
       };
       img.src = activeFileObj.url;
   };
@@ -594,34 +597,118 @@ export default function ImageStudio() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // --- REUSABLE TOOL CONTROLS (Used in Sidebar Desktop & Main Body Mobile) ---
+  const ToolControls = () => (
+    <div className="animate-in slide-in-from-right-4 fade-in">
+        <SectionTitle icon={Sliders} title={t.controls.title} />
+        
+        {activeTab === 'crop' && (
+            <div className="space-y-6">
+                <div className="p-4 bg-zinc-900 rounded-xl border border-zinc-800 text-center space-y-3">
+                    <CropIcon size={32} className="mx-auto text-green-500" />
+                    <p className="text-xs text-zinc-400 leading-relaxed">{t.controls.cropInfo}</p>
+                </div>
+                <div>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.transform}</label>
+                    <div className="grid grid-cols-3 gap-2">
+                        <button onClick={() => applyTransform('rotate90')} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all flex items-center justify-center"><RotateCw size={18}/></button>
+                        <button onClick={() => applyTransform('flipH')} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all flex items-center justify-center"><FlipHorizontal size={18}/></button>
+                        <button onClick={() => applyTransform('flipV')} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all flex items-center justify-center"><FlipVertical size={18}/></button>
+                    </div>
+                </div>
+                <div>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.ratios}</label>
+                    <div className="grid grid-cols-3 gap-2">
+                        {ASPECT_RATIOS.map((r, i) => (
+                            <button key={i} onClick={() => setCropAspect(r.value)} className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg border transition-all ${cropAspect === r.value ? 'bg-green-600 border-green-600 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'}`}>
+                                <r.icon size={14} className="mb-1" /><span className="text-[9px] font-bold uppercase">{r.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {activeTab !== 'crop' && (
+            <div className="mb-6">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.format}</label>
+                <div className="grid grid-cols-3 gap-2">{['jpeg', 'png', 'webp'].map(fmt => (<button key={fmt} onClick={() => setSettings({...settings, format: `image/${fmt}`})} className={`py-2 rounded-lg text-[10px] font-bold uppercase border transition-all ${settings.format.includes(fmt) ? 'bg-green-600 border-green-600 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'}`}>{fmt}</button>))}</div>
+            </div>
+        )}
+
+        {activeTab === 'compress' && (
+            <div className="space-y-6">
+                <Slider label={t.controls.quality} value={Math.round(settings.quality * 100)} min={1} max={100} onChange={(v) => setSettings({...settings, quality: v/100})} unit="%" />
+                <div className="p-4 bg-green-900/10 border border-green-500/20 rounded-xl"><div className="flex items-center gap-2 text-green-400 font-bold text-xs mb-1"><Zap size={14} /> Smart Compression</div><p className="text-[10px] text-green-200/60 leading-relaxed">Metadata removed automatically.</p></div>
+            </div>
+        )}
+
+        {activeTab === 'resize' && (
+            <div className="space-y-4">
+                <div><label className="text-[10px] font-bold text-zinc-500 uppercase mb-1 block">{t.controls.width}</label><input type="number" value={Math.round(settings.width)} onChange={(e) => handleResize('w', parseInt(e.target.value))} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-xs text-white" /></div>
+                <div><label className="text-[10px] font-bold text-zinc-500 uppercase mb-1 block">{t.controls.height}</label><input type="number" value={Math.round(settings.height)} onChange={(e) => handleResize('h', parseInt(e.target.value))} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-xs text-white" /></div>
+                <div className="flex items-center gap-2"><input type="checkbox" checked={settings.maintainRatio} onChange={(e) => setSettings({...settings, maintainRatio: e.target.checked})} className="accent-green-500"/><span className="text-xs text-zinc-400">{t.controls.maintainRatio}</span></div>
+            </div>
+        )}
+
+        {activeTab === 'watermark' && (
+            <div className="space-y-6">
+                <div className="flex bg-zinc-900 p-1 rounded-lg border border-zinc-800">
+                    <button onClick={() => setSettings({...settings, wmType: 'text'})} className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded ${settings.wmType === 'text' ? 'bg-zinc-700 text-white' : 'text-zinc-500'}`}>{t.controls.wmText}</button>
+                    <button onClick={() => setSettings({...settings, wmType: 'image'})} className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded ${settings.wmType === 'image' ? 'bg-zinc-700 text-white' : 'text-zinc-500'}`}>{t.controls.wmImage}</button>
+                </div>
+                {settings.wmType === 'text' ? (
+                    <div className="space-y-4 animate-in fade-in">
+                        <input type="text" placeholder={t.controls.text} value={settings.wmText} onChange={(e) => setSettings({...settings, wmText: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-xs text-white"/>
+                        <div className="flex items-center gap-2"><input type="color" value={settings.wmColor} onChange={(e) => setSettings({...settings, wmColor: e.target.value})} className="h-8 w-8 bg-transparent border-0 rounded cursor-pointer"/><span className="text-xs text-zinc-400">{t.controls.color}</span></div>
+                    </div>
+                ) : (
+                    <div className="space-y-4 animate-in fade-in">
+                        <div {...getLogoProps()} className="border border-dashed border-zinc-700 rounded-xl p-6 text-center hover:bg-zinc-900/50 cursor-pointer">
+                            <input {...getLogoInput()} />
+                            {settings.wmLogoUrl ? (<div className="flex flex-col items-center"><img src={settings.wmLogoUrl} className="h-10 object-contain mb-2" /><span className="text-[10px] text-green-500">Logo Caricato</span></div>) : (<div className="flex flex-col items-center text-zinc-500"><FileImage size={24} className="mb-2" /><span className="text-[10px] font-bold uppercase">{t.controls.dragLogo}</span></div>)}
+                        </div>
+                    </div>
+                )}
+                <hr className="border-white/5" />
+                <Slider label={t.controls.size} value={settings.wmSize} min={5} max={200} onChange={(v) => setSettings({...settings, wmSize: v})} unit={settings.wmType === 'text' ? 'px' : '%'} />
+                <Slider label={t.controls.opacity} value={Math.round(settings.wmOpacity * 100)} min={0} max={100} onChange={(v) => setSettings({...settings, wmOpacity: v/100})} unit="%" />
+                <div className="flex items-center gap-2 p-3 bg-zinc-900 rounded-xl border border-zinc-800"><input type="checkbox" checked={settings.wmTiled} onChange={(e) => setSettings({...settings, wmTiled: e.target.checked})} className="accent-green-500 w-4 h-4"/><span className="text-xs font-bold text-zinc-400">{t.controls.tiled}</span></div>
+            </div>
+        )}
+    </div>
+  );
+
   return (
-    <div className="h-screen bg-zinc-950 text-zinc-100 font-sans flex overflow-hidden selection:bg-blue-500/30">
+    // HYBRID LAYOUT: min-h-screen for mobile scrolling, fixed height for desktop
+    <div className="min-h-screen lg:h-screen bg-zinc-950 text-zinc-100 font-sans flex flex-col lg:flex-row lg:overflow-hidden selection:bg-green-500/30">
       
-      {/* SIDEBAR LEFT */}
-      <aside className="w-64 border-r border-white/5 bg-zinc-950 flex flex-col p-4 z-20 overflow-y-auto">
+      {/* SIDEBAR LEFT (TOOLS) - Visible on Mobile as Top Menu or Sidebar depending on pref. Keeping as Sidebar for now but Full Width */}
+      <aside className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-white/5 bg-zinc-950 flex flex-col p-4 z-20 shrink-0">
         <div className="mb-6 px-2 flex items-center gap-2">
-          <Link href="/" className="w-8 h-8 bg-zinc-800/50 hover:bg-blue-600/20 rounded-lg flex items-center justify-center transition-colors group">
-            <ArrowLeft size={18} className="text-zinc-400 group-hover:text-blue-400" />
+          <Link href="/" className="w-8 h-8 bg-zinc-800/50 hover:bg-green-600/20 rounded-lg flex items-center justify-center transition-colors group">
+            <ArrowLeft size={18} className="text-zinc-400 group-hover:text-green-400" />
           </Link>
           <div className="flex flex-col">
             <h1 className="text-xl font-black italic tracking-tighter text-white leading-none">DIGITRIK PRO</h1>
-            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] leading-none mt-1">IMAGE STUDIO</span>
+            <span className="text-[10px] font-black text-green-500 uppercase tracking-[0.3em] leading-none mt-1">IMAGE STUDIO</span>
           </div>
         </div>
 
-        <nav className="space-y-1 mb-6">
-            <SectionTitle icon={Sliders} title="Tools" />
+        <nav className="grid grid-cols-2 lg:flex lg:flex-col gap-1 mb-6">
+            <div className="col-span-2 lg:col-span-1"><SectionTitle icon={Sliders} title="Tools" /></div>
             <NavItem active={activeTab === 'compress'} onClick={() => setActiveTab('compress')} icon={Zap} label={t.nav.compress} />
             <NavItem active={activeTab === 'crop'} onClick={() => setActiveTab('crop')} icon={CropIcon} label={t.nav.crop} />
             <NavItem active={activeTab === 'resize'} onClick={() => setActiveTab('resize')} icon={Maximize} label={t.nav.resize} />
             <NavItem active={activeTab === 'watermark'} onClick={() => setActiveTab('watermark')} icon={Type} label={t.nav.watermark} />
         </nav>
 
-        <div className="flex-1 overflow-y-auto mb-4">
+        {/* File List - Hidden on Mobile to save space, shown on Desktop, OR kept compact */}
+        <div className="hidden lg:block flex-1 overflow-y-auto mb-4">
             <SectionTitle icon={LayoutGrid} title={t.controls.fileList} />
             <div className="space-y-2">
                 {files.map((f, i) => (
-                    <div key={f.id} onClick={() => setActiveFileIndex(i)} className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer border transition-all ${i === activeFileIndex ? 'bg-zinc-900 border-blue-500/50' : 'hover:bg-zinc-900/50 border-transparent'}`}>
+                    <div key={f.id} onClick={() => setActiveFileIndex(i)} className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer border transition-all ${i === activeFileIndex ? 'bg-zinc-900 border-green-500/50' : 'hover:bg-zinc-900/50 border-transparent'}`}>
                         <div className="w-10 h-10 bg-black rounded-lg overflow-hidden shrink-0 border border-white/10"><img src={f.url} className="w-full h-full object-cover" /></div>
                         <div className="min-w-0"><p className={`text-xs font-bold truncate ${i === activeFileIndex ? 'text-white' : 'text-zinc-500'}`}>{f.file.name}</p><p className="text-[10px] text-zinc-600">{formatSize(f.file.size)}</p></div>
                     </div>
@@ -630,38 +717,39 @@ export default function ImageStudio() {
             </div>
         </div>
 
-        <div className="mt-auto space-y-1">
-            <button onClick={() => setShowInfoModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all text-xs font-bold uppercase tracking-wide group"><Info size={16} className="group-hover:text-blue-400"/> {t.infoBtn}</button>
+        <div className="mt-6 lg:mt-auto space-y-1 grid grid-cols-2 lg:block gap-2">
+            <button onClick={() => setShowInfoModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-all text-xs font-bold uppercase tracking-wide group"><Info size={16} className="group-hover:text-green-400"/> {t.infoBtn}</button>
             <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-3 rounded-xl text-green-600/80 hover:text-green-400 hover:bg-green-900/10 transition-all text-xs font-bold uppercase tracking-wide group"><Heart size={16} className="group-hover:scale-110 transition-transform"/> {t.supportBtn}</button>
         </div>
       </aside>
 
       {/* CENTER WORKSPACE */}
-      <main className="flex-1 flex flex-col relative bg-zinc-900/50">
-        <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-10">
-            <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">{t.appName} <span className="text-blue-500">/</span> {t.nav[activeTab]}</h2>
+      <main className="flex-1 flex flex-col relative bg-zinc-900/50 h-auto lg:h-full lg:overflow-hidden">
+        <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 lg:px-8 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-10 shrink-0">
+            <h2 className="text-sm font-bold text-zinc-300 uppercase tracking-wider">{t.appName} <span className="text-green-500">/</span> {t.nav[activeTab]}</h2>
             {activeFileObj && (
                 <div className="flex gap-4 text-[10px] font-mono text-zinc-500">
-                    <span>ORIGINAL: <span className="text-zinc-300">{formatSize(fileStats.original)}</span></span>
-                    <span>NEW: <span className="text-green-400">{formatSize(fileStats.processed)}</span></span>
-                    <span className="text-blue-500 font-bold">{fileStats.original > 0 ? Math.round((1 - fileStats.processed/fileStats.original) * 100) : 0}% SAVED</span>
+                    <span className="hidden sm:inline">ORIGINAL: <span className="text-zinc-300">{formatSize(fileStats.original)}</span></span>
+                    <span className="hidden sm:inline">NEW: <span className="text-green-400">{formatSize(fileStats.processed)}</span></span>
+                    <span className="text-green-500 font-bold">{fileStats.original > 0 ? Math.round((1 - fileStats.processed/fileStats.original) * 100) : 0}% SAVED</span>
                 </div>
             )}
         </header>
 
-        <div className="flex-1 p-8 flex items-center justify-center overflow-hidden">
+        <div className="flex-1 p-4 lg:p-8 flex flex-col items-center overflow-y-visible lg:overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800">
             {loadingMsg ? (
-                <div className="text-center animate-pulse"><RefreshCcw className="animate-spin mx-auto mb-4 text-blue-500" size={40} /><p className="text-zinc-400 font-bold">{loadingMsg}</p></div>
+                <div className="text-center animate-pulse mt-20"><RefreshCcw className="animate-spin mx-auto mb-4 text-green-500" size={40} /><p className="text-zinc-400 font-bold">{loadingMsg}</p></div>
             ) : !activeFileObj ? (
-                <div {...getRootProps()} className={`w-full max-w-2xl h-96 border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center cursor-pointer transition-all ${isDragActive ? 'border-blue-500 bg-blue-500/10' : 'border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900'}`}>
+                <div {...getRootProps()} className={`w-full max-w-2xl h-96 border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center cursor-pointer transition-all mt-10 ${isDragActive ? 'border-green-500 bg-green-500/10' : 'border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900'}`}>
                     <input {...getInputProps()} />
-                    <div className="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center mb-6 shadow-xl"><UploadCloud size={40} className="text-blue-500" /></div>
+                    <div className="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center mb-6 shadow-xl"><UploadCloud size={40} className="text-green-500" /></div>
                     <h3 className="text-xl font-bold text-white mb-2">{t.actions.drop}</h3>
                     <p className="text-sm text-zinc-500">{t.actions.dropSub}</p>
                 </div>
             ) : (
-                <div className="relative w-full h-full flex flex-col">
-                    <div className="relative w-full flex-1 bg-zinc-950/50 rounded-2xl border border-white/5 overflow-hidden shadow-2xl flex items-center justify-center p-4">
+                <div className="w-full max-w-5xl flex flex-col gap-8 pb-12">
+                    {/* WORKSPACE AREA */}
+                    <div className="relative w-full aspect-square lg:aspect-video bg-zinc-950/50 rounded-2xl border border-white/5 overflow-hidden shadow-2xl flex items-center justify-center p-4">
                         {activeTab === 'crop' ? (
                             <div className="max-h-full max-w-full overflow-auto flex items-center justify-center">
                                 <ReactCrop crop={crop} onChange={(_, percentCrop) => setCrop(percentCrop)} onComplete={(c) => setCompletedCrop(c)} aspect={cropAspect} style={{ maxHeight: '65vh' }}>
@@ -670,149 +758,113 @@ export default function ImageStudio() {
                             </div>
                         ) : (
                             /* SPLIT VIEW COMPARATOR */
-                            <div ref={splitRef} onMouseMove={handleSplitMove} className="relative w-full h-full max-h-[80vh] flex items-center justify-center cursor-col-resize group">
+                            <div ref={splitRef} onMouseMove={handleSplitMove} onTouchMove={(e) => handleSplitMove(e.touches[0])} className="relative w-full h-full max-h-[70vh] flex items-center justify-center cursor-col-resize group touch-none">
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <img src={currentUrl} className="max-w-full max-h-full object-contain" />
                                     <div className="absolute top-4 left-4 bg-black/50 px-2 py-1 rounded text-[10px] font-bold text-white pointer-events-none">ORIGINAL</div>
                                 </div>
                                 <div className="absolute inset-0 bg-zinc-950 flex items-center justify-center overflow-hidden" style={{ clipPath: `inset(0 ${100 - splitPos}% 0 0)` }}>
                                     <div className="w-full h-full flex items-center justify-center p-4 bg-[url('/transparent-grid.png')]"><img src={previewUrl} className="max-w-full max-h-full object-contain" /></div>
-                                    <div className="absolute top-4 right-4 bg-blue-600 px-2 py-1 rounded text-[10px] font-bold text-white pointer-events-none">PROCESSED</div>
+                                    <div className="absolute top-4 right-4 bg-green-600 px-2 py-1 rounded text-[10px] font-bold text-white pointer-events-none">PROCESSED</div>
                                 </div>
-                                <div className="absolute top-0 bottom-0 w-1 bg-blue-500 z-20 shadow-[0_0_20px_rgba(37,99,235,0.5)]" style={{ left: `${splitPos}%` }}><div className="absolute top-1/2 -translate-y-1/2 -left-3 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-lg text-blue-600 pointer-events-none"><Code2 size={14} className="rotate-90" /></div></div>
+                                <div className="absolute top-0 bottom-0 w-1 bg-green-500 z-20 shadow-[0_0_20px_rgba(34,197,94,0.5)]" style={{ left: `${splitPos}%` }}><div className="absolute top-1/2 -translate-y-1/2 -left-3 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-lg text-green-600 pointer-events-none"><Code2 size={14} className="rotate-90" /></div></div>
                             </div>
                         )}
                     </div>
 
-                    <div className="h-20 mt-6 flex items-center justify-between gap-4">
-                        <div className="flex gap-2">
-                            <button onClick={resetEdits} className="px-4 py-3 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 font-bold text-xs uppercase transition-all flex items-center gap-2"><RefreshCcw size={16} /> {t.actions.resetEdits}</button>
-                            <button onClick={closeActiveImage} className="px-4 py-3 rounded-xl border border-red-900/30 text-red-500 hover:bg-red-900/20 font-bold text-xs uppercase transition-all flex items-center gap-2"><Trash2 size={16} /> {t.actions.closeImage}</button>
+                    {/* ACTION BUTTONS */}
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="flex gap-2 w-full md:w-auto">
+                            <button onClick={resetEdits} className="flex-1 md:flex-none px-4 py-3 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 font-bold text-xs uppercase transition-all flex items-center justify-center gap-2"><RefreshCcw size={16} /> {t.actions.resetEdits}</button>
+                            <button onClick={closeActiveImage} className="flex-1 md:flex-none px-4 py-3 rounded-xl border border-red-900/30 text-red-500 hover:bg-red-900/20 font-bold text-xs uppercase transition-all flex items-center justify-center gap-2"><Trash2 size={16} /> {t.actions.closeImage}</button>
                         </div>
                         {activeTab === 'crop' ? (
-                            <button onClick={() => { applyCrop(); }} className="px-8 py-4 bg-green-600 hover:bg-green-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-900/20 flex items-center gap-2 transition-all"><Check size={18} /> {t.actions.applyCrop}</button>
+                            <button onClick={() => { applyCrop(); }} className="w-full md:w-auto px-8 py-4 bg-green-600 hover:bg-green-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-900/20 flex items-center justify-center gap-2 transition-all"><Check size={18} /> {t.actions.applyCrop}</button>
                         ) : (
-                            <button onClick={handleDownloadClick} className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-900/20 flex items-center gap-2 transition-all"><Download size={18} /> {t.actions.download}</button>
+                            <button onClick={handleDownloadClick} className="w-full md:w-auto px-8 py-4 bg-green-600 hover:bg-green-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-900/20 flex items-center justify-center gap-2 transition-all"><Download size={18} /> {t.actions.download}</button>
                         )}
+                    </div>
+                    
+                    {/* MOBILE CONTROLS (Only visible on Mobile/Tablet) */}
+                    <div className="lg:hidden w-full bg-zinc-950 border border-white/5 p-6 rounded-3xl shadow-sm">
+                        <ToolControls />
+                    </div>
+
+                    {/* SEO CONTENT SECTION */}
+                    <div className="mt-12 pt-12 border-t border-white/5 text-zinc-400">
+                        <div className="flex items-center gap-2 mb-6">
+                            <BookOpen size={20} className="text-green-500"/>
+                            <h2 className="text-2xl font-black text-white tracking-tight">{t.seo.title}</h2>
+                        </div>
+                        
+                        <div className="prose prose-invert prose-sm max-w-none">
+                            <p className="leading-relaxed mb-8 text-zinc-300">{t.seo.intro}</p>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                                <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5">
+                                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                        <HelpCircle size={18} className="text-green-500"/> {t.seo.h1}
+                                    </h3>
+                                    <p className="mb-4 text-xs leading-relaxed">{t.seo.p1}</p>
+                                    <ul className="space-y-3">
+                                        {t.seo.ul1.map((item, idx) => (
+                                            <li key={idx} className="flex items-start gap-2 text-xs leading-relaxed">
+                                                <div className="min-w-[4px] h-[4px] mt-1.5 rounded-full bg-green-500/50"></div>
+                                                <span>{item.includes('**') ? <><strong className="text-zinc-200">{item.split('**')[1]}</strong>{item.split('**')[2]}</> : item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5">
+                                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                            <Layers size={18} className="text-green-500"/> {t.seo.h2}
+                                        </h3>
+                                        <p className="text-xs leading-relaxed">{t.seo.p2}</p>
+                                    </div>
+                                    <div className="bg-green-900/10 p-6 rounded-2xl border border-green-500/10">
+                                        <h3 className="text-lg font-bold text-green-400 mb-2 flex items-center gap-2"><Fingerprint size={16}/> {t.seo.h3}</h3>
+                                        <p className="text-xs leading-relaxed text-green-100/70">{t.seo.p3}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
         </div>
       </main>
 
-      {/* RIGHT SIDEBAR */}
-      <aside className="w-80 border-l border-white/5 bg-zinc-950 p-6 flex flex-col overflow-y-auto">
+      {/* RIGHT SIDEBAR (CONTROLS - Desktop Only) */}
+      <aside className="hidden lg:flex w-80 border-l border-white/5 bg-zinc-950 p-6 flex-col overflow-y-auto shrink-0">
         {activeFileObj ? (
-            <div className="animate-in slide-in-from-right-4 fade-in">
-                <SectionTitle icon={Sliders} title={t.nav[activeTab]} />
-                
-                {activeTab === 'crop' && (
-                    <div className="space-y-6">
-                        <div className="p-4 bg-zinc-900 rounded-xl border border-zinc-800 text-center space-y-3">
-                            <CropIcon size={32} className="mx-auto text-green-500" />
-                            <p className="text-xs text-zinc-400 leading-relaxed">{t.controls.cropInfo}</p>
-                        </div>
-                        
-                        <div>
-                            <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.transform}</label>
-                            <div className="grid grid-cols-3 gap-2">
-                                <button onClick={() => applyTransform('rotate90')} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all flex items-center justify-center"><RotateCw size={18}/></button>
-                                <button onClick={() => applyTransform('flipH')} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all flex items-center justify-center"><FlipHorizontal size={18}/></button>
-                                <button onClick={() => applyTransform('flipV')} className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all flex items-center justify-center"><FlipVertical size={18}/></button>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.ratios}</label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {ASPECT_RATIOS.map((r, i) => (
-                                    <button 
-                                        key={i} 
-                                        onClick={() => setCropAspect(r.value)} 
-                                        className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg border transition-all ${cropAspect === r.value ? 'bg-blue-600 border-blue-600 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'}`}
-                                    >
-                                        <r.icon size={14} className="mb-1" />
-                                        <span className="text-[9px] font-bold uppercase">{r.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {activeTab !== 'crop' && (
-                    <div className="mb-6">
-                        <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">{t.controls.format}</label>
-                        <div className="grid grid-cols-3 gap-2">{['jpeg', 'png', 'webp'].map(fmt => (<button key={fmt} onClick={() => setSettings({...settings, format: `image/${fmt}`})} className={`py-2 rounded-lg text-[10px] font-bold uppercase border transition-all ${settings.format.includes(fmt) ? 'bg-blue-600 border-blue-600 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'}`}>{fmt}</button>))}</div>
-                    </div>
-                )}
-
-                {activeTab === 'compress' && (
-                    <div className="space-y-6">
-                        <Slider label={t.controls.quality} value={Math.round(settings.quality * 100)} min={1} max={100} onChange={(v) => setSettings({...settings, quality: v/100})} unit="%" />
-                        <div className="p-4 bg-blue-900/10 border border-blue-500/20 rounded-xl"><div className="flex items-center gap-2 text-blue-400 font-bold text-xs mb-1"><Zap size={14} /> Smart Compression</div><p className="text-[10px] text-blue-200/60 leading-relaxed">Metadata removed automatically.</p></div>
-                    </div>
-                )}
-
-                {activeTab === 'resize' && (
-                    <div className="space-y-4">
-                        <div><label className="text-[10px] font-bold text-zinc-500 uppercase mb-1 block">{t.controls.width}</label><input type="number" value={Math.round(settings.width)} onChange={(e) => handleResize('w', parseInt(e.target.value))} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-xs text-white" /></div>
-                        <div><label className="text-[10px] font-bold text-zinc-500 uppercase mb-1 block">{t.controls.height}</label><input type="number" value={Math.round(settings.height)} onChange={(e) => handleResize('h', parseInt(e.target.value))} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-xs text-white" /></div>
-                        <div className="flex items-center gap-2"><input type="checkbox" checked={settings.maintainRatio} onChange={(e) => setSettings({...settings, maintainRatio: e.target.checked})} className="accent-blue-500"/><span className="text-xs text-zinc-400">{t.controls.maintainRatio}</span></div>
-                    </div>
-                )}
-
-                {activeTab === 'watermark' && (
-                    <div className="space-y-6">
-                        <div className="flex bg-zinc-900 p-1 rounded-lg border border-zinc-800">
-                            <button onClick={() => setSettings({...settings, wmType: 'text'})} className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded ${settings.wmType === 'text' ? 'bg-zinc-700 text-white' : 'text-zinc-500'}`}>{t.controls.wmText}</button>
-                            <button onClick={() => setSettings({...settings, wmType: 'image'})} className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded ${settings.wmType === 'image' ? 'bg-zinc-700 text-white' : 'text-zinc-500'}`}>{t.controls.wmImage}</button>
-                        </div>
-                        {settings.wmType === 'text' ? (
-                            <div className="space-y-4 animate-in fade-in">
-                                <input type="text" placeholder={t.controls.text} value={settings.wmText} onChange={(e) => setSettings({...settings, wmText: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-xs text-white"/>
-                                <div className="flex items-center gap-2"><input type="color" value={settings.wmColor} onChange={(e) => setSettings({...settings, wmColor: e.target.value})} className="h-8 w-8 bg-transparent border-0 rounded cursor-pointer"/><span className="text-xs text-zinc-400">{t.controls.color}</span></div>
-                            </div>
-                        ) : (
-                            <div className="space-y-4 animate-in fade-in">
-                                <div {...getLogoProps()} className="border border-dashed border-zinc-700 rounded-xl p-6 text-center hover:bg-zinc-900/50 cursor-pointer">
-                                    <input {...getLogoInput()} />
-                                    {settings.wmLogoUrl ? (<div className="flex flex-col items-center"><img src={settings.wmLogoUrl} className="h-10 object-contain mb-2" /><span className="text-[10px] text-green-500">Logo Caricato</span></div>) : (<div className="flex flex-col items-center text-zinc-500"><FileImage size={24} className="mb-2" /><span className="text-[10px] font-bold uppercase">{t.controls.dragLogo}</span></div>)}
-                                </div>
-                            </div>
-                        )}
-                        <hr className="border-white/5" />
-                        <Slider label={t.controls.size} value={settings.wmSize} min={5} max={200} onChange={(v) => setSettings({...settings, wmSize: v})} unit={settings.wmType === 'text' ? 'px' : '%'} />
-                        <Slider label={t.controls.opacity} value={Math.round(settings.wmOpacity * 100)} min={0} max={100} onChange={(v) => setSettings({...settings, wmOpacity: v/100})} unit="%" />
-                        <div className="flex items-center gap-2 p-3 bg-zinc-900 rounded-xl border border-zinc-800"><input type="checkbox" checked={settings.wmTiled} onChange={(e) => setSettings({...settings, wmTiled: e.target.checked})} className="accent-blue-500 w-4 h-4"/><span className="text-xs font-bold text-zinc-400">{t.controls.tiled}</span></div>
-                    </div>
-                )}
-            </div>
+            <ToolControls />
         ) : (
             <div className="h-full flex items-center justify-center text-center p-6 opacity-30"><div><ImageIcon size={48} className="mx-auto mb-4 text-zinc-500" /><p className="text-xs text-zinc-400">Select an image to activate controls</p></div></div>
         )}
       </aside>
 
-      {/* RENAME / DOWNLOAD MODAL */}
+      {/* MODALS */}
       {showDownloadModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity duration-300">
-          <div className="bg-[#0a0a0a] border border-blue-600/30 rounded-[2rem] w-[90%] max-w-lg p-8 shadow-[0_0_50px_rgba(37,99,235,0.1)] relative">
+          <div className="bg-[#0a0a0a] border border-green-600/30 rounded-[2rem] w-[90%] max-w-lg p-8 shadow-[0_0_50px_rgba(34,197,94,0.1)] relative">
             <div className="flex items-center gap-3 mb-6">
-              <div className="bg-blue-600/10 p-3 rounded-full text-blue-500"><Wand2 size={24} /></div>
+              <div className="bg-green-600/10 p-3 rounded-full text-green-500"><Wand2 size={24} /></div>
               <div><h3 className="text-xl font-black italic text-white uppercase tracking-wider">{t.modals.ready}</h3><p className="text-[11px] text-gray-500 font-bold uppercase">{t.modals.chooseName}</p></div>
               <button onClick={() => setShowDownloadModal(false)} className="absolute top-6 right-6 text-gray-600 hover:text-white transition-colors"><X size={20} /></button>
             </div>
             <div className="space-y-2 mb-8">
               <label className="text-xs font-bold text-gray-400 uppercase ml-2">{t.modals.fileName}</label>
               <div className="relative">
-                <input type="text" value={exportFilename} onChange={(e) => setExportFilename(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && confirmDownload()} autoFocus className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white font-medium outline-none focus:border-blue-600 transition-all shadow-inner" />
+                <input type="text" value={exportFilename} onChange={(e) => setExportFilename(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && confirmDownload()} autoFocus className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white font-medium outline-none focus:border-green-600 transition-all shadow-inner" />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 text-xs font-bold pointer-events-none">.{settings.format.split('/')[1].toUpperCase()}</span>
               </div>
             </div>
-            <div className="bg-blue-900/10 border border-blue-600/10 rounded-2xl p-5 mb-6 flex gap-4">
-              <Sparkles className="text-blue-500 shrink-0 mt-0.5" size={18} />
+            <div className="bg-green-900/10 border border-green-600/10 rounded-2xl p-5 mb-6 flex gap-4">
+              <Sparkles className="text-green-500 shrink-0 mt-0.5" size={18} />
               <div className="space-y-1">
-                <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block">{t.modals.didYouKnow} ({trickCuriosity.key})</span>
+                <span className="text-[10px] font-black text-green-400 uppercase tracking-widest block">{t.modals.didYouKnow} ({trickCuriosity.key})</span>
                 <p className="text-xs text-gray-300 italic leading-relaxed">{trickCuriosity.text}</p>
               </div>
             </div>
@@ -821,7 +873,7 @@ export default function ImageStudio() {
             </div>
             <div className="flex gap-3">
               <button onClick={() => setShowDownloadModal(false)} className="flex-1 py-4 rounded-xl border border-white/5 hover:bg-white/5 text-gray-400 font-bold text-xs uppercase tracking-widest transition-all">{t.modals.cancel}</button>
-              <button onClick={confirmDownload} className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-2"><Check size={16} /> {t.actions.downloadNow}</button>
+              <button onClick={confirmDownload} className="flex-1 py-4 bg-green-600 hover:bg-green-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-green-900/20 transition-all flex items-center justify-center gap-2"><Check size={16} /> {t.actions.downloadNow}</button>
             </div>
           </div>
         </div>
@@ -833,8 +885,8 @@ export default function ImageStudio() {
           <div className="bg-[#0a0a0a] border border-zinc-800 rounded-[2rem] w-[90%] max-w-lg overflow-hidden relative shadow-2xl">
             <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-zinc-800 p-3 rounded-full text-white"><Info size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">Info & Support</h3></div><button onClick={() => setShowInfoModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white transition-colors"><X size={20} /></button></div>
             <div className="p-8 space-y-6">
-                <div><div className="flex items-center gap-2 mb-2 text-blue-500 font-bold uppercase text-xs tracking-wider"><Heart size={14} /> {t.modals.aboutTitle}</div><p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-blue-500/20 pl-4">{t.modals.aboutText}</p></div>
-                <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800 hover:border-blue-500/30 transition-colors"><div className="flex items-center gap-2 mb-2 text-zinc-300 font-bold uppercase text-xs tracking-wider"><Mail size={14} /> {t.modals.contactTitle}</div><a href="mailto:trichesir@gmail.com" className="text-blue-400 hover:text-blue-300 font-mono text-sm block">trichesir@gmail.com</a></div>
+                <div><div className="flex items-center gap-2 mb-2 text-green-500 font-bold uppercase text-xs tracking-wider"><Heart size={14} /> {t.modals.aboutTitle}</div><p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-green-500/20 pl-4">{t.modals.aboutText}</p></div>
+                <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800 hover:border-green-500/30 transition-colors"><div className="flex items-center gap-2 mb-2 text-zinc-300 font-bold uppercase text-xs tracking-wider"><Mail size={14} /> {t.modals.contactTitle}</div><a href="mailto:trichesir@gmail.com" className="text-green-400 hover:text-green-300 font-mono text-sm block">trichesir@gmail.com</a></div>
                 <div className="bg-green-900/10 rounded-xl p-4 border border-green-500/20 flex items-start gap-4"><ShieldCheck size={24} className="text-green-500 shrink-0 mt-1" /><div><h4 className="text-green-500 font-bold uppercase text-xs tracking-wider mb-1">{t.modals.privacyTitle}</h4><p className="text-[11px] text-green-200/70 leading-relaxed">{t.modals.privacyText}</p></div></div>
             </div>
             <div className="p-4 bg-zinc-950 text-center border-t border-white/5"><p className="text-[10px] text-zinc-600 uppercase tracking-widest">© 2024 DigitrikPro Team. {t.modals.rights}</p></div>
@@ -852,7 +904,7 @@ export default function ImageStudio() {
                     <div className="grid grid-cols-3 gap-2">{['1', '2', '5'].map(a => <a key={a} href={`https://www.paypal.me/triches89/${a}`} target="_blank" className="py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-center font-bold hover:border-green-500 hover:text-green-400 transition-all">{a}€</a>)}</div>
                 </div>
                 <div className="p-8 space-y-4 bg-zinc-950/30">
-                    <h4 className="text-blue-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> {t.modals.adTitle}</h4>
+                    <h4 className="text-green-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> {t.modals.adTitle}</h4>
                     <button disabled className="w-full py-3 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-bold uppercase cursor-not-allowed">{t.modals.adButton}</button>
                 </div>
             </div>
