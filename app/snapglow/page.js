@@ -32,24 +32,7 @@ const TRANSLATIONS = {
     deviceColor: "Finitura Device",
     estSize: "Peso Stimato",
     calculating: "Calcolo...",
-    seo: {
-      title: "Generatore Mockup Istantaneo",
-      intro: "SnapGlow trasforma i tuoi screenshot grezzi in presentazioni professionali. Ideale per Social Media, Portfolio e Pitch Deck, tutto direttamente nel browser.",
-      h1: "Perché usare SnapGlow?",
-      p1: "Presentare il tuo lavoro con cura aumenta il valore percepito. Un'app mostrata dentro un iPhone 15 o un sito web dentro un MacBook attirano il 40% di clic in più.",
-      ul1: [
-        "**Multi-Device:** iPhone 15, Pixel 8, MacBook, iMac e Browser.",
-        "**Smart Fit:** Adattamento automatico di qualsiasi immagine (anche 16:9 su schermi verticali).",
-        "**Privacy First:** Le immagini vengono elaborate in locale (WASM), nulla sale sui server."
-      ],
-      h2: "Performance & Export",
-      p2: "Scegli tra PNG (massima qualità), JPEG (social media) o WEBP (siti web). Vedi il peso del file in tempo reale prima di scaricare.",
-      h3: "Personalizzazione Avanzata",
-      p3: "Cambia il colore della scocca del dispositivo (Titanio, Midnight, Silver) per adattarlo al tuo branding."
-    },
-    enc: {
-      SNAP: { curiosity: "Il primo screenshot della storia è stato fatto nel 1960 su un computer PDP-1. Oggi ne facciamo milioni al giorno.", type: "Storia" }
-    }
+    seo: { title: "Generatore Mockup", intro: "Crea mockup realistici di iPhone, Mac e Browser istantaneamente." }
   },
   en: {
     appName: "SNAPGLOW",
@@ -69,24 +52,7 @@ const TRANSLATIONS = {
     deviceColor: "Device Finish",
     estSize: "Est. Size",
     calculating: "Calculating...",
-    seo: {
-      title: "Instant Mockup Generator",
-      intro: "SnapGlow turns raw screenshots into professional presentations. Ideal for Social Media, Portfolios, and Pitch Decks, all directly in the browser.",
-      h1: "Why use SnapGlow?",
-      p1: "Presenting your work with care increases perceived value. An app shown inside an iPhone 15 or a website inside a MacBook attracts 40% more clicks.",
-      ul1: [
-        "**Multi-Device:** iPhone 15, Pixel 8, MacBook, iMac, and Browser.",
-        "**Smart Fit:** Automatic adaptation of any image (even 16:9 on vertical screens).",
-        "**Privacy First:** Images are processed locally (WASM), nothing goes to servers."
-      ],
-      h2: "Performance & Export",
-      p2: "Choose between PNG (max quality), JPEG (social media), or WEBP (websites). See real-time file size before downloading.",
-      h3: "Advanced Customization",
-      p3: "Change the device body color (Titanium, Midnight, Silver) to match your branding."
-    },
-    enc: {
-      SNAP: { curiosity: "The first screenshot in history was taken in 1960 on a PDP-1 computer. Today we take millions daily.", type: "History" }
-    }
+    seo: { title: "Mockup Generator", intro: "Create realistic iPhone, Mac, and Browser mockups instantly." }
   }
 };
 
@@ -191,72 +157,104 @@ const SmartScreen = ({ image, className }) => {
     );
 };
 
-// --- DEVICE RENDERER ---
+// --- DEVICE RENDERER (FIXED LAYERING) ---
 const DeviceRenderer = ({ device, image, color, shadow }) => {
     
+    // 1. IPHONE 15 PRO (Fixed Z-Index & Border)
     if (device === 'iphone15') {
         return (
-            <div className={`relative rounded-[50px] p-[12px] ring-1 ring-white/10 shadow-2xl ${shadow}`} style={{ width: '300px', backgroundColor: color.hex }}>
-                <div className="absolute inset-0 rounded-[50px] border-[6px] pointer-events-none opacity-40" style={{ borderColor: color.border }}></div>
-                <div className="relative bg-black rounded-[38px] overflow-hidden aspect-[9/19.5] w-full border border-zinc-800">
-                    <div className="absolute top-3 left-1/2 -translate-x-1/2 w-[90px] h-[26px] bg-black rounded-full z-20 flex justify-center items-center"><div className="w-2 h-2 rounded-full bg-[#1a1a1a] mr-6"></div></div>
-                    <SmartScreen image={image} />
-                </div>
-                <div className="absolute top-24 -left-[2px] w-[2px] h-8 rounded-l-md brightness-75" style={{ backgroundColor: color.hex }}></div>
-                <div className="absolute top-40 -left-[2px] w-[2px] h-14 rounded-l-md brightness-75" style={{ backgroundColor: color.hex }}></div>
-                <div className="absolute top-32 -right-[2px] w-[2px] h-20 rounded-r-md brightness-75" style={{ backgroundColor: color.hex }}></div>
-            </div>
-        );
-    }
-
-    if (device === 'pixel') {
-        return (
-            <div className={`relative rounded-[24px] p-[3px] shadow-2xl ${shadow}`} style={{ width: '290px', backgroundColor: color.hex }}>
-                <div className="bg-black rounded-[21px] p-[8px] h-full">
-                    <div className="relative bg-black rounded-[14px] overflow-hidden aspect-[9/20] w-full ring-1 ring-white/10">
-                        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-4 h-4 bg-black rounded-full z-20 border border-zinc-800"></div>
+            <div className={`relative ${shadow}`} style={{ width: '300px' }}>
+                {/* CONTAINER SCOCCA */}
+                <div className="rounded-[50px] p-[10px] ring-1 ring-black/10" style={{ backgroundColor: color.hex }}>
+                    
+                    {/* BORDER ESTERNO (BEZEL) - Layer Sopra */}
+                    <div className="absolute inset-0 rounded-[50px] border-[10px] pointer-events-none z-30" style={{ borderColor: color.border }}></div>
+                    
+                    {/* SCREEN CONTAINER - Layer Sotto */}
+                    <div className="relative bg-black rounded-[40px] overflow-hidden aspect-[9/19.5] w-full z-10">
+                        {/* Dynamic Island (Sopra l'immagine) */}
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-[90px] h-[26px] bg-black rounded-full z-40 flex justify-center items-center pointer-events-none">
+                            <div className="w-2 h-2 rounded-full bg-[#1a1a1a] mr-6"></div>
+                        </div>
+                        {/* Immagine */}
                         <SmartScreen image={image} />
                     </div>
                 </div>
-                <div className="absolute top-24 -right-[2px] w-[3px] h-10 rounded-r-md brightness-75" style={{ backgroundColor: color.hex }}></div>
-                <div className="absolute top-40 -right-[2px] w-[3px] h-16 rounded-r-md brightness-75" style={{ backgroundColor: color.hex }}></div>
+
+                {/* Buttons (Decorative) */}
+                <div className="absolute top-28 -left-[3px] w-[3px] h-8 rounded-l-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
+                <div className="absolute top-44 -left-[3px] w-[3px] h-14 rounded-l-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
+                <div className="absolute top-36 -right-[3px] w-[3px] h-20 rounded-r-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
             </div>
         );
     }
 
+    // 2. PIXEL 8 (Fixed Z-Index)
+    if (device === 'pixel') {
+        return (
+            <div className={`relative ${shadow}`} style={{ width: '290px' }}>
+                <div className="rounded-[30px] p-[8px]" style={{ backgroundColor: color.hex }}>
+                    
+                    {/* Bezel Overlay */}
+                    <div className="absolute inset-0 rounded-[30px] border-[8px] pointer-events-none z-30" style={{ borderColor: color.hex }}></div>
+
+                    {/* Screen */}
+                    <div className="relative bg-black rounded-[22px] overflow-hidden aspect-[9/20] w-full z-10 border border-black">
+                        {/* Camera Hole */}
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-4 h-4 bg-black rounded-full z-40 border border-zinc-800"></div>
+                        <SmartScreen image={image} />
+                    </div>
+                </div>
+                {/* Buttons */}
+                <div className="absolute top-24 -right-[3px] w-[3px] h-10 rounded-r-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
+                <div className="absolute top-40 -right-[3px] w-[3px] h-16 rounded-r-md brightness-75 z-0" style={{ backgroundColor: color.hex }}></div>
+            </div>
+        );
+    }
+
+    // 3. MACBOOK (Fixed)
     if (device === 'macbook') {
         return (
             <div className={`relative ${shadow}`} style={{ width: '600px' }}>
-                <div className="rounded-t-2xl p-3 pb-0 relative ring-1 ring-white/10 transition-colors" style={{ backgroundColor: color.id === 'midnight' ? '#0d0d0d' : color.hex }}>
-                    <div className="relative bg-black rounded-t-lg overflow-hidden aspect-[16/10]">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 rounded-b-lg z-20" style={{ backgroundColor: color.id === 'midnight' ? '#0d0d0d' : color.hex }}></div>
+                {/* LID */}
+                <div className="rounded-t-2xl p-[12px] pb-0 relative transition-colors z-10" style={{ backgroundColor: color.id === 'midnight' ? '#0d0d0d' : color.hex }}>
+                    <div className="relative bg-black rounded-t-lg overflow-hidden aspect-[16/10] ring-1 ring-black/20">
+                        {/* Notch Area */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 rounded-b-lg z-40" style={{ backgroundColor: color.id === 'midnight' ? '#0d0d0d' : color.hex }}></div>
                         <InternalBrowser><SmartScreen image={image} /></InternalBrowser>
                     </div>
                 </div>
-                <div className="h-4 rounded-b-xl relative flex items-center justify-center border-t border-black/20" style={{ backgroundColor: color.hex }}>
-                    <div className="w-16 h-2 rounded-b-md absolute -top-[1px] brightness-75" style={{ backgroundColor: color.hex }}></div>
+                {/* BOTTOM DECK */}
+                <div className="h-4 rounded-b-xl relative flex items-center justify-center border-t border-black/10 z-20" style={{ backgroundColor: color.hex }}>
+                    <div className="w-20 h-2 rounded-b-md absolute -top-[1px] brightness-75" style={{ backgroundColor: color.hex }}></div>
                 </div>
             </div>
         );
     }
 
+    // 4. iMAC (Fixed)
     if (device === 'imac') {
         return (
             <div className={`relative flex flex-col items-center ${shadow}`} style={{ width: '580px' }}>
-                <div className="bg-white rounded-2xl p-3 pb-12 relative w-full shadow-lg ring-1 ring-black/5">
-                    <div className="relative bg-black overflow-hidden aspect-[16/9] ring-1 ring-black/5">
+                <div className="rounded-2xl p-[12px] pb-14 relative w-full shadow-lg z-10 transition-colors" style={{ backgroundColor: '#f0f0f0' }}>
+                    
+                    {/* Screen */}
+                    <div className="relative bg-black overflow-hidden aspect-[16/9] rounded-sm ring-1 ring-black/10">
                         <InternalBrowser><SmartScreen image={image} /></InternalBrowser>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 top-[calc(100%-48px)] rounded-b-xl" style={{ backgroundColor: color.hex }}>
-                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-6 h-6 bg-black/10 rounded-full"></div>
+                    
+                    {/* Chin */}
+                    <div className="absolute bottom-0 left-0 right-0 h-12 rounded-b-xl z-20" style={{ backgroundColor: color.hex }}>
                     </div>
                 </div>
-                <div className="w-24 h-16 -mt-2 z-[-1] relative brightness-90" style={{ backgroundColor: color.hex }}></div>
-                <div className="w-32 h-2 rounded-full shadow-md brightness-90" style={{ backgroundColor: color.hex }}></div>
+                {/* Stand */}
+                <div className="w-24 h-20 -mt-6 z-0 relative brightness-90" style={{ backgroundColor: color.hex }}></div>
+                <div className="w-36 h-2 rounded-full shadow-md brightness-90" style={{ backgroundColor: color.hex }}></div>
             </div>
         );
     }
 
+    // 5. BROWSER (Fixed)
     if (device.startsWith('browser')) {
         const isDark = device.includes('dark');
         const bg = isDark ? 'bg-[#1e1e1e] border-zinc-700' : 'bg-white border-zinc-200';
@@ -272,6 +270,7 @@ const DeviceRenderer = ({ device, image, color, shadow }) => {
         );
     }
 
+    // 6. NONE
     return <div className={`overflow-hidden rounded-xl ${shadow}`}><img src={image} className="max-w-full h-auto block rounded-lg" alt="screen" /></div>;
 };
 
