@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Script from 'next/script';
 import Link from 'next/link';
 
-/* STILI CSS INLINE (Tailwind + Custom) */
+/* STILI CSS INLINE */
 const styles = `
   :root { --primary: #0b2d51; --accent: #fdb913; --bg: #f0f2f5; --success: #28a745; --error: #dc3545; --white: #fff; }
   
@@ -21,24 +21,25 @@ const styles = `
   .drop-zone { border: 2px dashed #cbd5e0; background: #f8f9fa; border-radius: 8px; padding: 10px; text-align: center; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; }
   .drop-zone:hover { background: #e8f0fe; border-color: var(--primary); }
 
-  .barcode-list { display: flex; flex-direction: column; align-items: center; padding: 50vh 0; }
-  .list-container { flex-grow: 1; overflow-y: auto; background: #e2e6ea; scroll-behavior: smooth; }
+  /* Lista con padding extra per centrare comodamente */
+  .barcode-list { display: flex; flex-direction: column; align-items: center; padding-top: 20px; padding-bottom: 50vh; }
+  .list-container { flex-grow: 1; overflow-y: auto; background: #e2e6ea; scroll-behavior: smooth; position: relative; }
 
-  /* CARD STYLES */
-  .barcode-card { background: white; border-radius: 8px; display: grid; grid-template-columns: 80px 1fr; width: 90%; max-width: 700px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; cursor: pointer; border-left: 6px solid #ccc; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0.3; transform: scale(0.9); filter: blur(2px) grayscale(100%); }
+  /* CARD STYLES - Default sfocato */
+  .barcode-card { background: white; border-radius: 8px; display: grid; grid-template-columns: 80px 1fr; width: 90%; max-width: 700px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; cursor: pointer; border-left: 6px solid #ccc; transition: all 0.3s ease-out; opacity: 0.4; transform: scale(0.95); filter: blur(1px) grayscale(100%); }
   
-  /* CARD ATTIVA */
-  .barcode-card.active-focus { opacity: 1; transform: scale(1.1); filter: none; border: 4px solid var(--accent); box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 100vmax rgba(0,0,0,0.1); margin: 80px 0; z-index: 100; }
+  /* CARD ATTIVA - CENTRATA E GRANDE */
+  .barcode-card.active-focus { opacity: 1; transform: scale(1.05); filter: none; border: 4px solid var(--accent); box-shadow: 0 20px 50px rgba(0,0,0,0.2); margin: 40px 0; z-index: 10; }
   .barcode-card.active-focus svg { height: 150px !important; width: 100% !important; }
-  .barcode-card.active-focus .human-readable { font-size: 2rem; color: var(--primary); }
+  .barcode-card.active-focus .human-readable { font-size: 1.8rem; color: var(--primary); font-weight: 900; }
   .barcode-card.active-focus .zone-box { background: var(--primary); }
 
-  /* CARD SCANSIONATA */
+  /* Stati */
   .barcode-card.scanned { display: none; }
   .barcode-card.hidden { display: none; }
 
-  .zone-box { background: var(--primary); color: var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
-  .human-readable { font-family: 'Courier New', monospace; font-size: 1.4rem; font-weight: 800; letter-spacing: 2px; color: var(--primary); margin-top: 10px; }
+  .zone-box { background: var(--primary); color: var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; transition: background 0.3s; }
+  .human-readable { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 2px; color: var(--primary); margin-top: 10px; transition: font-size 0.3s; }
   
   /* COLORI ZONE */
   .border-A { border-left-color: #dc3545; } 
@@ -51,12 +52,16 @@ const styles = `
 
   .status-led { width: 10px; height: 10px; border-radius: 50%; background: #ddd; border: 2px solid white; box-shadow: 0 0 2px rgba(0,0,0,0.1); transition: 0.1s; }
   .status-led.flash { background: #28a745; box-shadow: 0 0 10px #28a745; transform: scale(1.5); }
+
+  /* Select personalizzata */
+  .styled-select { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; background-color: #fff; font-size: 0.9rem; font-weight: bold; color: #333; }
 `;
 
 export default function GLSReader() {
   const [dataList, setDataList] = useState<any[]>([]);
   const [scannedCount, setScannedCount] = useState(0);
   const [filterQuery, setFilterQuery] = useState('');
+  const [filterLogic, setFilterLogic] = useState('ALL'); // NS, SN, NN, SS, ALL
   const [activeId, setActiveId] = useState<number | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   
@@ -77,37 +82,70 @@ export default function GLSReader() {
   const animationRef = useRef<number | null>(null);
   const cooldownRef = useRef(false);
 
-  // --- EFFETTO FOCUS (Auto-Scroll) ---
+  // --- FILTRO LISTA (Memoized) ---
+  const filteredList = useMemo(() => {
+    return dataList.filter(item => {
+      // 1. Filtro Ricerca
+      const searchMatch = item.human.toLowerCase().includes(filterQuery) || item.zona.toLowerCase().includes(filterQuery);
+      if (!searchMatch) return false;
+
+      // 2. Filtro Logico (NS, SN, ecc.) basato sul raw text
+      if (filterLogic === 'ALL') return true;
+      
+      const regexMap: Record<string, RegExp> = {
+        'NS': /\*\s+N\s+S/,
+        'SN': /\*\s+S\s+N/,
+        'NN': /\*\s+N\s+N/,
+        'SS': /\*\s+S\s+S/
+      };
+      
+      return regexMap[filterLogic] ? regexMap[filterLogic].test(item.raw || '') : true;
+    });
+  }, [dataList, filterQuery, filterLogic]);
+
+  // --- GESTIONE FOCUS & SCROLL ---
+  const updateFocus = useCallback(() => {
+    // Cerca il primo elemento visibile e non scansionato NELLA LISTA FILTRATA
+    const firstPending = filteredList.find(item => item.status !== 'scanned');
+
+    if (firstPending) {
+        setActiveId(firstPending.id);
+        
+        // Scroll preciso al centro
+        setTimeout(() => {
+            const el = document.querySelector(`[data-id="${firstPending.id}"]`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 50); // Piccolo delay per permettere il rendering
+    } else {
+        setActiveId(null);
+    }
+  }, [filteredList]);
+
+  // Trigger focus quando cambia la lista filtrata
   useEffect(() => {
-    const timer = setTimeout(() => {
-        updateFocus();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [dataList, filterQuery]); 
+    const t = setTimeout(updateFocus, 150);
+    return () => clearTimeout(t);
+  }, [updateFocus]);
 
-  const updateFocus = () => {
-      const allCards = Array.from(document.querySelectorAll('.barcode-card'));
-      const firstVisible = allCards.find(card => 
-          !card.classList.contains('scanned') && 
-          !card.classList.contains('hidden')
-      );
+  // --- SHORTCUTS TASTIERA (Freccia Giù, Invio, Spazio) ---
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+        // Se c'è una modale aperta, ignora
+        if (showModal) return;
 
-      if (firstVisible) {
-          const id = Number(firstVisible.getAttribute('data-id'));
-          setActiveId(id);
-          
-          const container = document.getElementById('scrollContainer');
-          if (container && firstVisible instanceof HTMLElement) {
-              const elTop = firstVisible.offsetTop;
-              const elHeight = firstVisible.offsetHeight;
-              const contHeight = container.clientHeight;
-              const target = elTop - (contHeight / 2) + (elHeight / 2) + 130;
-              container.scrollTo({ top: target, behavior: 'smooth' });
-          }
-      } else {
-          setActiveId(null);
-      }
-  };
+        if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
+            e.preventDefault(); // Evita scroll pagina con spazio
+            if (activeId !== null) {
+                markAsDone(activeId);
+            }
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeId, showModal]); 
 
   // --- AUDIO ---
   const toggleAudio = async () => {
@@ -126,7 +164,7 @@ export default function GLSReader() {
       const analyser = ctx.createAnalyser();
       const source = ctx.createMediaStreamSource(stream);
 
-      // Filtri Audio
+      // Filtri
       const filter1 = ctx.createBiquadFilter(); filter1.type = "highpass"; filter1.frequency.value = 3500;
       const filter2 = ctx.createBiquadFilter(); filter2.type = "highpass"; filter2.frequency.value = 3500;
       const bpFilter = ctx.createBiquadFilter(); bpFilter.type = "bandpass"; bpFilter.frequency.value = targetFreq; bpFilter.Q.value = 5;
@@ -174,7 +212,7 @@ export default function GLSReader() {
       }
   };
 
-  // --- FILE HANDLING ---
+  // --- DATI ---
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
@@ -210,6 +248,7 @@ export default function GLSReader() {
               
               newData.push({
                   id: Date.now() + idx,
+                  raw: clean,
                   zona, sigla, sped, collo, tipo, details,
                   barcode: `${sigla}${sped}${collo}${tipo}${zona}`,
                   human: `${sigla} ${sped} ${collo} ${tipo} ${zona}`,
@@ -236,18 +275,20 @@ export default function GLSReader() {
       const { sede, sped, collo, tipo, dest } = manualData;
       if (!sede || !sped) return alert("Sede e Spedizione obbligatori");
 
+      // Applica la regola WW anche al salvataggio
       const finalSped = (sede.toUpperCase() === 'WW' && sped.length < 9) ? sped.padStart(9, '0') : sped;
       const finalCollo = collo.padStart(2, '0');
       const finalDest = dest.toUpperCase() || '???';
       
       const newItem = {
           id: Date.now(),
+          raw: "GENERATO MANUALMENTE",
           zona: finalDest,
           sigla: sede.toUpperCase(),
           sped: finalSped,
           collo: finalCollo,
           tipo,
-          details: "GENERATO MANUALMENTE",
+          details: "MANUALE",
           barcode: `${sede.toUpperCase()}${finalSped}${finalCollo}${tipo}${finalDest}`,
           human: `${sede.toUpperCase()} ${finalSped} ${finalCollo} ${tipo} ${finalDest}`,
           colorClass: `border-${finalDest.charAt(0)}`,
@@ -259,7 +300,6 @@ export default function GLSReader() {
       setManualData({ sede: '', sped: '', collo: '1', tipo: '0', dest: '' });
   };
 
-  // --- RENDER ---
   return (
     <>
       <Script 
@@ -304,14 +344,17 @@ export default function GLSReader() {
                 </div>
              </div>
 
+             {/* FILTRI E STATISTICHE */}
              <div className="border-t border-dashed border-gray-200 pt-3 grid grid-cols-2 gap-4 items-center">
                 <div>
-                   <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase">
-                      <span>Freq: {targetFreq}Hz</span>
-                      <span className="text-blue-600">Soglia: {threshold}%</span>
-                   </div>
-                   <input type="range" min="2000" max="4000" value={targetFreq} onChange={e => setTargetFreq(Number(e.target.value))} className="w-full h-1 bg-gray-200 rounded appearance-none cursor-pointer accent-[#0b2d51] mt-1" />
-                   <input type="range" min="10" max="98" value={threshold} onChange={e => setThreshold(Number(e.target.value))} className="w-full h-1 bg-gray-200 rounded appearance-none cursor-pointer accent-red-500 mt-2" />
+                   <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Filtro Sequenza</label>
+                   <select className="styled-select" value={filterLogic} onChange={e => setFilterLogic(e.target.value)}>
+                      <option value="ALL">Mostra Tutto</option>
+                      <option value="NS">✱ N S (Richiesto)</option>
+                      <option value="SN">✱ S N (Standard)</option>
+                      <option value="NN">✱ N N</option>
+                      <option value="SS">✱ S S</option>
+                   </select>
                 </div>
                 <div className="text-right text-xs text-gray-500">
                    <div>Totale: <b>{dataList.length}</b></div>
@@ -324,7 +367,7 @@ export default function GLSReader() {
             type="text" 
             placeholder="🔍 Cerca spedizione o zona..." 
             value={filterQuery}
-            onChange={e => { setFilterQuery(e.target.value.toLowerCase()); setTimeout(updateFocus, 100); }}
+            onChange={e => { setFilterQuery(e.target.value.toLowerCase()); }}
             className="w-full p-3 rounded-lg border border-gray-300 text-lg font-bold outline-none focus:border-[#0b2d51] shadow-sm"
           />
         </div>
@@ -332,14 +375,13 @@ export default function GLSReader() {
         {/* LISTA SCORREVOLE */}
         <div className="list-container" id="scrollContainer">
            <div className="barcode-list">
-              {dataList.length === 0 && (
-                 <div className="text-center text-gray-400 mt-20 italic">Nessun dato caricato.</div>
+              {filteredList.length === 0 && (
+                 <div className="text-center text-gray-400 mt-20 italic">Nessun dato (o filtro attivo).</div>
               )}
               
-              {dataList.map(item => {
-                 const isVisible = item.human.toLowerCase().includes(filterQuery) || item.zona.toLowerCase().includes(filterQuery);
+              {filteredList.map(item => {
                  const isActive = activeId === item.id;
-                 const classes = `barcode-card ${item.colorClass} ${item.status === 'scanned' ? 'scanned' : ''} ${!isVisible ? 'hidden' : ''} ${isActive ? 'active-focus' : ''}`;
+                 const classes = `barcode-card ${item.colorClass} ${item.status === 'scanned' ? 'scanned' : ''} ${isActive ? 'active-focus' : ''}`;
 
                  return (
                     <div key={item.id} data-id={item.id} className={classes} onClick={() => markAsDone(item.id)}>
@@ -348,7 +390,6 @@ export default function GLSReader() {
                           <span className="text-[10px] font-bold opacity-80 mt-1">ZONA</span>
                        </div>
                        <div className="p-4 text-center flex flex-col items-center justify-center">
-                          {/* Usa il componente sicuro per renderizzare il barcode */}
                           <BarcodeCanvas text={item.barcode} ready={isScriptLoaded} />
                           <div className="human-readable">{item.human}</div>
                           <div className="text-xs text-gray-500 mt-1 truncate max-w-full">{item.details}</div>
@@ -382,8 +423,21 @@ export default function GLSReader() {
                     <div><label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Dest</label><input maxLength={4} className="w-full border p-2 rounded font-bold uppercase" placeholder="V3" value={manualData.dest} onChange={e => setManualData({...manualData, dest: e.target.value.toUpperCase()})} /></div>
                  </div>
 
+                 {/* ANTEPRIMA CON REGOLA WW */}
                  <div className="bg-gray-50 p-4 rounded-lg flex items-center justify-center mb-4 border border-dashed border-gray-300 h-24">
-                    <BarcodeCanvas text={`${manualData.sede}${manualData.sped.padEnd(9,'0')}${manualData.collo.padStart(2,'0')}${manualData.tipo}${manualData.dest}`} ready={isScriptLoaded} />
+                    <BarcodeCanvas 
+                        text={`
+                            ${manualData.sede.toUpperCase()}
+                            ${(manualData.sede.toUpperCase() === 'WW' && manualData.sped.length < 9) 
+                                ? manualData.sped.padStart(9, '0') 
+                                : manualData.sped.padEnd(9, '0')
+                            }
+                            ${manualData.collo.padStart(2,'0')}
+                            ${manualData.tipo}
+                            ${manualData.dest.toUpperCase()}
+                        `.replace(/\s/g, '')} 
+                        ready={isScriptLoaded} 
+                    />
                  </div>
 
                  <div className="flex gap-3">
