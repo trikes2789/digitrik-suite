@@ -82,7 +82,7 @@ export default function PrivacyPolicy() {
             <h2 className="text-lg font-bold text-white mb-4">Contatti</h2>
             <p className="text-sm text-zinc-400">
               Per qualsiasi domanda riguardante questa privacy policy, puoi contattarci a:<br/>
-              <a href="mailto:trichesir@gmail.com" className="text-blue-500 font-mono mt-2 block">trichesir@gmail.com</a>
+              <a href="mailto:info@digitrikpro.com" className="text-blue-500 font-mono mt-2 block">info@digitrikpro.com</a>
             </p>
           </section>
 

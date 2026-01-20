@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script"; // Importa il componente Script
+import Script from "next/script";
+import Navbar from "./components/Navbar"; // <--- Import della Navbar
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// INSERISCI QUI IL TUO ID ANALYTICS (quello che inizia con G-)
+// ID di Google Analytics
 const GA_MEASUREMENT_ID = 'G-8PCSJNMV8E'; 
 
 export const metadata = {
@@ -23,7 +24,7 @@ export const metadata = {
   openGraph: {
     title: 'Digitrik Pro - Il tuo ufficio digitale privacy-first',
     description: 'Nessun upload, nessun costo. Gestisci PDF, Immagini e Preventivi direttamente dal tuo browser.',
-    url: 'https://digitrik-suite.vercel.app', 
+    url: 'https://digitrikpro.com', // <--- URL aggiornato al dominio ufficiale
     siteName: 'Digitrik Pro',
     locale: 'it_IT',
     type: 'website',
@@ -62,8 +63,16 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={`${inter.className} bg-grid min-h-screen`}>
-        {children}
+      
+      {/* Corpo della pagina con Navbar fissa in alto */}
+      <body className={`${inter.className} bg-grid min-h-screen text-white`}>
+        
+        <Navbar />
+
+        <main>
+          {children}
+        </main>
+        
       </body>
     </html>
   );

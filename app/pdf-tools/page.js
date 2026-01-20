@@ -905,7 +905,7 @@ export default function DigitrikPro() {
             <div className="p-8 border-b border-white/5 bg-zinc-950/50 flex items-center gap-3"><div className="bg-zinc-800 p-3 rounded-full text-white"><Info size={24} /></div><div><h3 className="text-xl font-black italic text-white uppercase">Info & Support</h3></div><button onClick={() => setShowInfoModal(false)} className="absolute top-8 right-8 text-gray-600 hover:text-white transition-colors"><X size={20} /></button></div>
             <div className="p-8 space-y-6">
                 <div><div className="flex items-center gap-2 mb-2 text-red-500 font-bold uppercase text-xs tracking-wider"><Heart size={14} /> {t.aboutTitle}</div><p className="text-sm text-zinc-400 leading-relaxed italic border-l-2 border-red-500/20 pl-4">{t.aboutText}</p></div>
-                <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800 hover:border-red-500/30 transition-colors"><div className="flex items-center gap-2 mb-2 text-zinc-300 font-bold uppercase text-xs tracking-wider"><Mail size={14} /> {t.contactTitle}</div><a href="mailto:trichesir@gmail.com" className="text-red-400 hover:text-red-300 font-mono text-sm block">trichesir@gmail.com</a></div>
+                <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800 hover:border-red-500/30 transition-colors"><div className="flex items-center gap-2 mb-2 text-zinc-300 font-bold uppercase text-xs tracking-wider"><Mail size={14} /> {t.contactTitle}</div><a href="mailto:info@digitrikpro.com" className="text-red-400 hover:text-red-300 font-mono text-sm block">info@digitrikpro.com</a></div>
             </div>
           </div>
         </div>
