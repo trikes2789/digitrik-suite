@@ -8,24 +8,29 @@ import {
   ArrowLeft, Terminal, Activity, FileText 
 } from 'lucide-react';
 
-/* STILI CSS INLINE - DARK MODE DIGITRIK */
+/* STILI CSS INLINE - THEME ORANGE / WHITE CARDS */
 const styles = `
   :root { 
     --bg: #09090b; /* zinc-950 */
-    --card: #18181b; /* zinc-900 */
+    --card-dark: #18181b; /* zinc-900 */
+    --card-light: #ffffff; /* white */
     --border: #27272a; /* zinc-800 */
-    --text: #e4e4e7; /* zinc-200 */
-    --primary: #3b82f6; /* blue-500 */
-    --accent: #06b6d4; /* cyan-500 */
+    --text-main: #e4e4e7; /* zinc-200 */
+    --text-card: #18181b; /* zinc-900 */
+    
+    /* TEMA ARANCIO VIVO */
+    --primary: #f97316; /* orange-500 */
+    --primary-glow: rgba(249, 115, 22, 0.5);
+    --primary-dim: rgba(249, 115, 22, 0.1);
+    
     --success: #10b981; /* emerald-500 */
     --error: #ef4444; /* red-500 */
   }
   
-  body { background-color: var(--bg); color: var(--text); }
+  body { background-color: var(--bg); color: var(--text-main); }
 
   .top-section { 
-    background: rgba(9, 9, 11, 0.8); 
-    backdrop-filter: blur(12px);
+    background: rgba(9, 9, 11, 0.95); 
     border-bottom: 1px solid var(--border);
     padding: 15px; 
     z-index: 50; 
@@ -33,7 +38,7 @@ const styles = `
   }
 
   .control-card { 
-    background: var(--card); 
+    background: var(--card-dark); 
     border: 1px solid var(--border); 
     border-radius: 16px; 
     padding: 16px; 
@@ -41,10 +46,10 @@ const styles = `
     box-shadow: 0 4px 20px -10px rgba(0,0,0,0.5);
   }
   
-  /* BOTTONE MICROFONO NEON */
+  /* BOTTONE MICROFONO */
   .btn-mic { 
-    background: rgba(59, 130, 246, 0.1); 
-    border: 1px solid rgba(59, 130, 246, 0.2); 
+    background: var(--primary-dim); 
+    border: 1px solid rgba(249, 115, 22, 0.2); 
     color: var(--primary); 
     border-radius: 12px; 
     width: 100%; 
@@ -56,7 +61,7 @@ const styles = `
     align-items: center; 
     justify-content: center; 
   }
-  .btn-mic:hover { background: rgba(59, 130, 246, 0.2); border-color: var(--primary); }
+  .btn-mic:hover { background: rgba(249, 115, 22, 0.2); border-color: var(--primary); }
   .btn-mic.active { 
     background: rgba(16, 185, 129, 0.1); 
     border-color: var(--success); 
@@ -83,75 +88,77 @@ const styles = `
     cursor: pointer; 
     transition: 0.2s; 
   }
-  .drop-zone.drag-active { background: rgba(59, 130, 246, 0.1); border-color: var(--primary); }
-  .drop-zone:hover { border-color: var(--text); }
+  .drop-zone.drag-active { background: var(--primary-dim); border-color: var(--primary); }
+  .drop-zone:hover { border-color: var(--primary); }
 
   .barcode-list { display: flex; flex-direction: column; align-items: center; padding-top: 20vh; padding-bottom: 50vh; }
-  .list-container { flex-grow: 1; overflow-y: auto; background: var(--bg); scroll-behavior: smooth; position: relative; }
+  .list-container { flex-grow: 1; overflow-y: auto; background: #000; scroll-behavior: smooth; position: relative; }
 
-  /* CARD STYLES */
+  /* CARD STYLES - BIANCHE PER BARCODE */
   .barcode-card { 
-      background: var(--card); 
-      border: 1px solid var(--border);
-      border-radius: 16px; 
+      background: var(--card-light); /* SFONDO BIANCO */
+      color: var(--text-card);       /* TESTO SCURO */
+      border-radius: 12px; 
       display: grid; 
       grid-template-columns: 80px 1fr; 
       width: 90%; max-width: 600px; margin-bottom: 40px; 
       overflow: hidden; cursor: pointer; 
       transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
-      opacity: 0.2; transform: scale(0.9); filter: blur(4px) grayscale(100%); 
+      opacity: 0.3; transform: scale(0.9); filter: blur(4px) grayscale(100%); 
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
   }
   
-  /* CARD ATTIVA */
+  /* CARD ATTIVA - ORANGE GLOW */
   .barcode-card.active-focus { 
-      opacity: 1; transform: scale(1.1); filter: none; 
-      border: 1px solid var(--primary); 
-      box-shadow: 0 0 40px -10px rgba(59, 130, 246, 0.3); 
-      margin: 60px 0; z-index: 10; 
+      opacity: 1; transform: scale(1.15); filter: none; 
+      border: 4px solid var(--primary); 
+      box-shadow: 0 0 50px -10px var(--primary-glow); 
+      margin: 80px 0; z-index: 10; 
   }
   
-  .barcode-card.active-focus svg { height: 140px !important; width: 100% !important; filter: invert(1); opacity: 0.9; }
-  .barcode-card.active-focus .human-readable { font-size: 1.8rem; color: var(--primary); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 20px rgba(59,130,246,0.5); }
-  .barcode-card.active-focus .zone-box { background: var(--primary); color: black; }
+  .barcode-card.active-focus svg { height: 160px !important; width: 100% !important; filter: none; opacity: 1; }
+  .barcode-card.active-focus .human-readable { font-size: 2rem; color: #000; font-weight: 900; letter-spacing: 3px; }
+  .barcode-card.active-focus .zone-box { background: var(--primary); color: white; }
   
   /* Stati */
   .barcode-card.scanned { display: none; }
   .barcode-card.hidden { display: none; }
 
-  .zone-box { background: var(--border); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; transition: background 0.3s; font-family: monospace; }
-  .human-readable { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 2px; color: var(--text); margin-top: 10px; transition: font-size 0.3s; }
-  .details { font-size: 0.8rem; color: #71717a; margin-top: 5px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; }
+  /* ZONA BOX */
+  .zone-box { background: #e4e4e7; color: #18181b; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; transition: background 0.3s; font-family: monospace; border-right: 1px solid #d4d4d8; }
+  
+  .human-readable { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #3f3f46; margin-top: 10px; transition: font-size 0.3s; }
+  .details { font-size: 0.8rem; color: #71717a; margin-top: 5px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; font-weight: bold; }
 
-  /* ZONE COLORS (Adattati al Dark) */
-  .border-A { border-left: 4px solid #ef4444; } 
-  .border-B { border-left: 4px solid #3b82f6; }
-  .border-C { border-left: 4px solid #eab308; } 
-  .border-D { border-left: 4px solid #a855f7; }
-  .border-E { border-left: 4px solid #22c55e; } 
-  .border-F { border-left: 4px solid #f97316; }
-  .border-G { border-left: 4px solid #06b6d4; }
+  /* ZONE COLORS */
+  .border-A { border-left: 6px solid #ef4444; } 
+  .border-B { border-left: 6px solid #3b82f6; }
+  .border-C { border-left: 6px solid #eab308; } 
+  .border-D { border-left: 6px solid #a855f7; }
+  .border-E { border-left: 6px solid #22c55e; } 
+  .border-F { border-left: 6px solid #f97316; }
+  .border-G { border-left: 6px solid #06b6d4; }
 
-  .status-led { width: 8px; height: 8px; border-radius: 50%; background: #52525b; box-shadow: 0 0 5px rgba(0,0,0,0.5); transition: 0.1s; }
+  .status-led { width: 10px; height: 10px; border-radius: 50%; background: #52525b; box-shadow: 0 0 5px rgba(0,0,0,0.5); transition: 0.1s; }
   .status-led.flash { background: #10b981; box-shadow: 0 0 15px #10b981; transform: scale(1.5); }
 
   .styled-select { 
     width: 100%; padding: 10px; 
     background-color: var(--bg); 
     border: 1px solid var(--border); 
-    color: var(--text); 
+    color: var(--text-main); 
     border-radius: 8px; font-size: 0.85rem; font-weight: bold; 
     outline: none;
   }
   
-  /* Input Search Dark */
   .search-input {
-    background: var(--card);
+    background: var(--card-dark);
     border: 1px solid var(--border);
     color: white;
   }
   .search-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 0 2px var(--primary-dim);
   }
 `;
 
@@ -160,7 +167,7 @@ export default function GLSReader() {
   const [scannedCount, setScannedCount] = useState(0);
   const [filterQuery, setFilterQuery] = useState('');
   
-  // MODIFICA: Default filter impostato su 'NS'
+  // Default Filtro NS
   const [filterLogic, setFilterLogic] = useState('NS'); 
   
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -187,13 +194,10 @@ export default function GLSReader() {
   // --- FILTRO LISTA ---
   const filteredList = useMemo(() => {
     return dataList.filter(item => {
-      // 1. Filtro Ricerca
       const searchMatch = item.human.toLowerCase().includes(filterQuery) || item.zona.toLowerCase().includes(filterQuery);
       if (!searchMatch) return false;
 
-      // 2. Filtro Logico (NS default)
       if (filterLogic === 'ALL') return true;
-      
       const regexMap: Record<string, RegExp> = {
         'NS': /\*\s+N\s+S/,
         'SN': /\*\s+S\s+N/,
@@ -201,9 +205,7 @@ export default function GLSReader() {
         'SS': /\*\s+S\s+S/
       };
       
-      // Se è un item manuale (che non ha raw text complesso), lo mostriamo sempre se il filtro non è esclusivo
       if (item.details === 'MANUALE') return true;
-
       return regexMap[filterLogic] ? regexMap[filterLogic].test(item.raw || '') : true;
     });
   }, [dataList, filterQuery, filterLogic]);
@@ -261,7 +263,7 @@ export default function GLSReader() {
       reader.readAsText(file);
   };
 
-  // --- AUDIO DETECTION ---
+  // --- AUDIO ---
   const toggleAudio = async () => {
     if (isListening) {
       if (audioCtxRef.current) audioCtxRef.current.close();
@@ -410,20 +412,19 @@ export default function GLSReader() {
 
       <style jsx global>{styles}</style>
 
-      <div className="flex flex-col h-screen overflow-hidden bg-black text-white font-sans selection:bg-blue-500/30">
+      <div className="flex flex-col h-screen overflow-hidden bg-black text-white font-sans selection:bg-orange-500/30">
         
         {/* HEADER */}
         <div className="top-section">
           <header className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-3">
                <Link href="/" className="text-zinc-400 hover:text-white transition-colors"><ArrowLeft size={20}/></Link>
-               {/* TITOLO AGGIORNATO */}
                <h1 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
-                 <Terminal size={18} className="text-blue-500"/> Lettore Incongruenze
+                 <Terminal size={18} className="text-orange-500"/> Lettore Incongruenze
                </h1>
             </div>
             <div className="flex items-center gap-3">
-               <button onClick={() => setShowModal(true)} className="bg-zinc-800 border border-zinc-700 hover:border-blue-500 text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all">
+               <button onClick={() => setShowModal(true)} className="bg-zinc-800 border border-zinc-700 hover:border-orange-500 text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all">
                  <Plus size={14} /> Manuale
                </button>
                <div className={`status-led ${ledActive ? 'flash' : ''}`}></div>
@@ -441,14 +442,14 @@ export default function GLSReader() {
                    </div>
                 </button>
 
-                {/* DROP ZONE & BUTTONS */}
+                {/* DROP ZONE */}
                 <div 
                     className={`drop-zone ${isDragActive ? 'drag-active' : ''}`} 
                     onDragOver={onDragOver}
                     onDragLeave={onDragLeave}
                     onDrop={onDrop}
                 >
-                   <p className="font-bold text-blue-500 text-xs uppercase mb-2 flex items-center gap-2"><Upload size={14}/> Carica Dati</p>
+                   <p className="font-bold text-orange-500 text-xs uppercase mb-2 flex items-center gap-2"><Upload size={14}/> Carica Dati</p>
                    
                    <div className="flex gap-2 w-full px-2">
                        <input type="file" id="fileUpload" className="hidden" accept=".txt,.csv" onChange={handleFileChange} />
@@ -457,7 +458,7 @@ export default function GLSReader() {
                            Sfoglia PC
                        </button>
 
-                       <a href="search-ms:displayname=Risultati%20ricerca%20in%20%5C%5C10.58.125.2%5Cpc&crumb=System.Generic.String%3Anatana&crumb=location:%5C%5C10.58.125.2%5Cpc" target="_blank" className="flex-1 bg-blue-900/30 border border-blue-500/30 px-2 py-1 rounded text-[10px] font-bold text-blue-400 text-center hover:bg-blue-500/20 hover:border-blue-500 transition-all flex items-center justify-center">
+                       <a href="search-ms:displayname=Risultati%20ricerca%20in%20%5C%5C10.58.125.2%5Cpc&crumb=System.Generic.String%3Anatana&crumb=location:%5C%5C10.58.125.2%5Cpc" target="_blank" className="flex-1 bg-orange-900/30 border border-orange-500/30 px-2 py-1 rounded text-[10px] font-bold text-orange-400 text-center hover:bg-orange-500/20 hover:border-orange-500 transition-all flex items-center justify-center">
                            Apri Server
                        </a>
                    </div>
@@ -466,7 +467,7 @@ export default function GLSReader() {
                 </div>
              </div>
 
-             {/* FILTRI E STATISTICHE */}
+             {/* FILTRI */}
              <div className="border-t border-zinc-800 pt-3 grid grid-cols-2 gap-4 items-center">
                 <div>
                    <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Filtro Sequenza</label>
@@ -518,7 +519,8 @@ export default function GLSReader() {
                           <h2 className="text-4xl font-black m-0 leading-none text-white">{item.zona}</h2>
                           <span className="text-[10px] font-bold opacity-50 mt-1">ZONA</span>
                        </div>
-                       <div className="p-4 text-center flex flex-col items-center justify-center bg-zinc-950">
+                       <div className="p-4 text-center flex flex-col items-center justify-center">
+                          {/* CARD BIANCA -> Barcode NERO */}
                           <BarcodeCanvas text={item.barcode} ready={isScriptLoaded} />
                           <div className="human-readable">{item.human}</div>
                           <div className="details">{item.details}</div>
@@ -534,17 +536,17 @@ export default function GLSReader() {
            <div className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-md flex justify-center items-center p-6">
               <div className="bg-zinc-900 w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-zinc-800 animate-in zoom-in-95 duration-200">
                  <h3 className="text-white font-black uppercase text-lg border-b border-zinc-800 pb-4 mb-4 flex items-center gap-2">
-                    <Plus size={18} className="text-blue-500"/> Nuovo Pacco
+                    <Plus size={18} className="text-orange-500"/> Nuovo Pacco
                  </h3>
                  
                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                        <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Sede</label>
-                       <input className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white uppercase focus:border-blue-500 outline-none" maxLength={4} placeholder="AB" value={manualData.sede} onChange={e => setManualData({...manualData, sede: e.target.value.toUpperCase()})} />
+                       <input className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white uppercase focus:border-orange-500 outline-none" maxLength={4} placeholder="AB" value={manualData.sede} onChange={e => setManualData({...manualData, sede: e.target.value.toUpperCase()})} />
                     </div>
                     <div>
                        <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Spedizione</label>
-                       <input className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white focus:border-blue-500 outline-none" maxLength={9} placeholder="123456789" value={manualData.sped} onChange={e => setManualData({...manualData, sped: e.target.value.replace(/\D/g,'')})} />
+                       <input className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white focus:border-orange-500 outline-none" maxLength={9} placeholder="123456789" value={manualData.sped} onChange={e => setManualData({...manualData, sped: e.target.value.replace(/\D/g,'')})} />
                     </div>
                  </div>
 
@@ -554,7 +556,7 @@ export default function GLSReader() {
                     <div><label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Dest</label><input maxLength={4} className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white uppercase text-center" placeholder="V3" value={manualData.dest} onChange={e => setManualData({...manualData, dest: e.target.value.toUpperCase()})} /></div>
                  </div>
 
-                 <div className="bg-white p-4 rounded-xl flex items-center justify-center mb-6 h-24 overflow-hidden">
+                 <div className="bg-white p-4 rounded-xl flex items-center justify-center mb-6 h-24 overflow-hidden border border-zinc-700">
                     <BarcodeCanvas 
                         text={`
                             ${manualData.sede.toUpperCase()}
@@ -572,7 +574,7 @@ export default function GLSReader() {
 
                  <div className="flex gap-3">
                     <button onClick={() => setShowModal(false)} className="flex-1 py-3 bg-zinc-800 font-bold text-zinc-400 rounded-xl text-xs uppercase hover:bg-zinc-700 transition-colors">Annulla</button>
-                    <button onClick={addManual} className="flex-1 py-3 bg-blue-600 font-bold text-white rounded-xl text-xs uppercase shadow-lg shadow-blue-900/20 hover:bg-blue-500 transition-colors">Aggiungi</button>
+                    <button onClick={addManual} className="flex-1 py-3 bg-orange-600 font-bold text-white rounded-xl text-xs uppercase shadow-lg shadow-orange-900/20 hover:bg-orange-500 transition-colors">Aggiungi</button>
                  </div>
               </div>
            </div>
@@ -583,7 +585,7 @@ export default function GLSReader() {
   );
 }
 
-// Componente Barcode Sicuro (Invertito per Dark Mode)
+// Componente Barcode Sicuro (NERO su BIANCO)
 const BarcodeCanvas = ({ text, ready }: { text: string, ready: boolean }) => {
     const svgRef = useRef<SVGSVGElement>(null);
     
@@ -597,7 +599,8 @@ const BarcodeCanvas = ({ text, ready }: { text: string, ready: boolean }) => {
                         height: 100, 
                         displayValue: false, 
                         margin: 0,
-                        lineColor: "#000" // Il barcode resta nero perché sta su sfondo bianco (nella card e nel modale)
+                        lineColor: "#000000", // Nero puro
+                        background: "#ffffff" // Sfondo bianco
                     });
                 } catch(e) {}
             }
