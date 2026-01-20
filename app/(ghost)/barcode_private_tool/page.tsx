@@ -8,7 +8,7 @@ import {
   ArrowLeft, Terminal, Activity, FileText 
 } from 'lucide-react';
 
-/* STILI CSS INLINE */
+/* STILI CSS INLINE - FAST TRANSITIONS */
 const styles = `
   :root { 
     --bg: #09090b; 
@@ -43,7 +43,6 @@ const styles = `
     box-shadow: 0 4px 20px -10px rgba(0,0,0,0.5);
   }
   
-  /* BOTTONE MICROFONO */
   .btn-mic { 
     background: var(--primary-dim); 
     border: 1px solid rgba(249, 115, 22, 0.2); 
@@ -52,7 +51,7 @@ const styles = `
     width: 100%; 
     min-height: 80px; 
     cursor: pointer; 
-    transition: all 0.3s ease; 
+    transition: all 0.2s ease; /* Veloce */
     display: flex; 
     flex-direction: column; 
     align-items: center; 
@@ -70,7 +69,6 @@ const styles = `
   .visualizer-bar { height: 100%; background: var(--success); transition: width 0.05s linear; box-shadow: 0 0 10px var(--success); }
   .visualizer-threshold { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--error); z-index: 5; }
 
-  /* DROP ZONE DARK */
   .drop-zone { 
     border: 2px dashed var(--border); 
     background: rgba(255,255,255,0.02); 
@@ -83,7 +81,7 @@ const styles = `
     justify-content: center; 
     align-items: center; 
     cursor: pointer; 
-    transition: 0.2s; 
+    transition: 0.1s; 
   }
   .drop-zone.drag-active { background: var(--primary-dim); border-color: var(--primary); }
   .drop-zone:hover { border-color: var(--primary); }
@@ -100,12 +98,13 @@ const styles = `
       grid-template-columns: 80px 1fr; 
       width: 90%; max-width: 600px; margin-bottom: 40px; 
       overflow: hidden; cursor: pointer; 
-      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
+      /* TRANSITION VELOCISSIMA (0.1s) */
+      transition: all 0.1s cubic-bezier(0.25, 0.8, 0.25, 1); 
       opacity: 0.15; transform: scale(0.9); filter: blur(6px) grayscale(100%); 
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
   }
   
-  /* CARD ATTIVA - ZONA BARCODE INGRANDITA */
+  /* CARD ATTIVA */
   .barcode-card.active-focus { 
       opacity: 1; transform: scale(1.15); filter: none; 
       border: 4px solid var(--primary); 
@@ -113,21 +112,25 @@ const styles = `
       margin: 80px 0; z-index: 10; 
   }
   
-  /* Barcode SVG in Focus: Alto 180px e stretto */
   .barcode-card.active-focus svg { height: 180px !important; width: auto !important; max-width: 95%; filter: none; opacity: 1; }
   .barcode-card.active-focus .human-readable { font-size: 2rem; color: #000; font-weight: 900; letter-spacing: 2px; }
   .barcode-card.active-focus .zone-box { background: var(--primary); color: white; }
   
-  /* Stati */
   .barcode-card.scanned { display: none; }
   .barcode-card.hidden { display: none; }
 
-  .zone-box { background: #e4e4e7; color: #18181b; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; transition: background 0.3s; font-family: monospace; border-right: 1px solid #d4d4d8; }
+  .zone-box { 
+      background: #e4e4e7; color: #18181b; 
+      display: flex; flex-direction: column; align-items: center; justify-content: center; 
+      height: 100%; transition: background 0.1s; font-family: monospace; border-right: 1px solid #d4d4d8; 
+  }
   
-  .human-readable { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #3f3f46; margin-top: 5px; transition: font-size 0.3s; }
+  .human-readable { 
+      font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #3f3f46; 
+      margin-top: 5px; transition: font-size 0.1s; 
+  }
   .details { font-size: 0.8rem; color: #71717a; margin-top: 5px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; font-weight: bold; }
 
-  /* ZONE COLORS */
   .border-A { border-left: 6px solid #ef4444; } 
   .border-B { border-left: 6px solid #3b82f6; }
   .border-C { border-left: 6px solid #eab308; } 
@@ -139,24 +142,10 @@ const styles = `
   .status-led { width: 10px; height: 10px; border-radius: 50%; background: #52525b; box-shadow: 0 0 5px rgba(0,0,0,0.5); transition: 0.1s; }
   .status-led.flash { background: #10b981; box-shadow: 0 0 15px #10b981; transform: scale(1.5); }
 
-  .styled-select { 
-    width: 100%; padding: 10px; 
-    background-color: var(--bg); 
-    border: 1px solid var(--border); 
-    color: var(--text-main); 
-    border-radius: 8px; font-size: 0.85rem; font-weight: bold; 
-    outline: none;
-  }
+  .styled-select { width: 100%; padding: 10px; background-color: var(--bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; font-size: 0.85rem; font-weight: bold; outline: none; }
   
-  .search-input {
-    background: var(--card-dark);
-    border: 1px solid var(--border);
-    color: white;
-  }
-  .search-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--primary-dim);
-  }
+  .search-input { background: var(--card-dark); border: 1px solid var(--border); color: white; }
+  .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-dim); }
 `;
 
 export default function GLSReader() {
@@ -168,24 +157,20 @@ export default function GLSReader() {
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
   
-  // Audio Config
   const [isListening, setIsListening] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
   const [threshold, setThreshold] = useState(85);
   const [targetFreq, setTargetFreq] = useState(3000);
   const [ledActive, setLedActive] = useState(false);
 
-  // Manual Modal
   const [showModal, setShowModal] = useState(false);
   const [manualData, setManualData] = useState({ sede: '', sped: '', collo: '1', tipo: '0', dest: '' });
 
-  // Refs
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationRef = useRef<number | null>(null);
   const cooldownRef = useRef(false);
 
-  // --- FILTRO LISTA ---
   const filteredList = useMemo(() => {
     return dataList.filter(item => {
       const searchMatch = item.human.toLowerCase().includes(filterQuery) || item.zona.toLowerCase().includes(filterQuery);
@@ -204,7 +189,6 @@ export default function GLSReader() {
     });
   }, [dataList, filterQuery, filterLogic]);
 
-  // --- FOCUS & SCROLL ---
   const updateFocus = useCallback(() => {
     const firstPending = filteredList.find(item => item.status !== 'scanned');
 
@@ -222,11 +206,10 @@ export default function GLSReader() {
   }, [filteredList]);
 
   useEffect(() => {
-    const t = setTimeout(updateFocus, 150);
+    const t = setTimeout(updateFocus, 100); // Ridotto delay iniziale
     return () => clearTimeout(t);
   }, [updateFocus]);
 
-  // --- SHORTCUTS TASTIERA ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (showModal) return;
@@ -239,7 +222,6 @@ export default function GLSReader() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeId, showModal]); 
 
-  // --- DRAG & DROP HANDLERS ---
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragActive(true); };
   const onDragLeave = () => setIsDragActive(false);
   const onDrop = (e: React.DragEvent) => {
@@ -257,7 +239,6 @@ export default function GLSReader() {
       reader.readAsText(file);
   };
 
-  // --- AUDIO ---
   const toggleAudio = async () => {
     if (isListening) {
       if (audioCtxRef.current) audioCtxRef.current.close();
@@ -306,18 +287,17 @@ export default function GLSReader() {
     if (visualVal > threshold && !cooldownRef.current) {
         triggerAction();
         cooldownRef.current = true;
-        setTimeout(() => { cooldownRef.current = false; }, 600);
+        setTimeout(() => { cooldownRef.current = false; }, 400); // Reset più rapido (400ms)
     }
     animationRef.current = requestAnimationFrame(detectSound);
   };
 
   const triggerAction = () => {
       setLedActive(true);
-      setTimeout(() => setLedActive(false), 200);
+      setTimeout(() => setLedActive(false), 150);
       if (activeId !== null) markAsDone(activeId);
   };
 
-  // --- PARSING ---
   const processText = (text: string) => {
       const lines = text.split('\n');
       const newData: any[] = [];
@@ -510,7 +490,7 @@ export default function GLSReader() {
                  return (
                     <div key={item.id} data-id={item.id} className={classes} onClick={() => markAsDone(item.id)}>
                        <div className="zone-box">
-                          <h2 className="text-4xl font-black m-0 leading-none">{item.zona}</h2>
+                          <h2 className="text-4xl font-black m-0 leading-none text-white">{item.zona}</h2>
                           <span className="text-[10px] font-bold opacity-50 mt-1">ZONA</span>
                        </div>
                        <div className="p-4 text-center flex flex-col items-center justify-center">
@@ -551,7 +531,7 @@ export default function GLSReader() {
                  </div>
 
                  <div className="bg-white p-4 rounded-xl flex items-center justify-center mb-6 h-24 overflow-hidden border border-zinc-700">
-                    {/* MODALE: Barcode PICCOLO (h=80, w=2) per stare nel box */}
+                    {/* MODALE: Barcode PICCOLO (h=80, w=2) */}
                     <BarcodeCanvas 
                         text={`
                             ${manualData.sede.toUpperCase()}
@@ -585,7 +565,6 @@ export default function GLSReader() {
 const BarcodeCanvas = ({ text, ready, options }: { text: string, ready: boolean, options?: any }) => {
     const svgRef = useRef<SVGSVGElement>(null);
     
-    // Default options (se non passate)
     const defaults = {
         format: "CODE128", 
         width: 3, 
@@ -613,7 +592,7 @@ const BarcodeCanvas = ({ text, ready, options }: { text: string, ready: boolean,
             const t = setTimeout(draw, 500);
             return () => clearTimeout(t);
         }
-    }, [text, ready, finalOptions]); // Dipendenze aggiornate
+    }, [text, ready, finalOptions]); 
 
     return <svg ref={svgRef} className="w-full h-full"></svg>;
 };
