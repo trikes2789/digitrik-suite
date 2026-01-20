@@ -1,483 +1,335 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Script from 'next/script';
 import Link from 'next/link';
+import { 
+  Mic, MicOff, Upload, FolderOpen, Search, 
+  Plus, Settings, Check, X, Barcode as BarcodeIcon, FileText
+} from 'lucide-react';
+
+// --- TIPI DATI ---
+type Shipment = {
+  id: string;
+  raw: string;
+  sede: string;
+  sped: string;
+  collo: string;
+  dest: string;
+  status: 'pending' | 'scanned';
+};
 
 export default function GLSReader() {
-  // --- STATO E LOGICA ---
-  // Qui dovrai integrare la logica del tuo file 'script.js' originale.
-  // Ho preparato gli stati base per l'interfaccia.
-  const [freq, setFreq] = useState(3000);
+  // --- STATO ---
+  const [items, setItems] = useState<Shipment[]>([]);
+  const [filterQuery, setFilterQuery] = useState('');
+  const [stats, setStats] = useState({ total: 0, done: 0 });
+  
+  // Audio Config
+  const [listening, setListening] = useState(false);
+  const [audioLevel, setAudioLevel] = useState(0);
   const [threshold, setThreshold] = useState(85);
-  const [filter, setFilter] = useState('NS');
-  const [manualInput, setManualInput] = useState({ sede: '', sped: '', collo: '', tipo: '', dest: '' });
+  const [triggerActive, setTriggerActive] = useState(false);
+  
+  // Modale Manuale
   const [showModal, setShowModal] = useState(false);
+  const [manual, setManual] = useState({ sede: '', sped: '', collo: '1', dest: '' });
 
-  // --- FUNZIONI PLACEHOLDER (Sostituisci con la tua logica di script.js) ---
-  const toggleAudio = () => {
-    alert("Qui va integrata la funzione toggleAudio() dal tuo script.js");
+  // Refs
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationRef = useRef<number | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // --- LOGICA AUDIO (MIC) ---
+  const toggleAudio = async () => {
+    if (listening) {
+      if (audioContextRef.current) audioContextRef.current.close();
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      setListening(false);
+      setAudioLevel(0);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const analyser = audioCtx.createAnalyser();
+        const source = audioCtx.createMediaStreamSource(stream);
+        
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        
+        audioContextRef.current = audioCtx;
+        analyserRef.current = analyser;
+        setListening(true);
+        analyzeAudio();
+      } catch (e) {
+        alert("Impossibile accedere al microfono.");
+      }
+    }
   };
 
-  const handleManualPreview = () => {
-    // Logica per aggiornare l'anteprima barcode manuale
-    console.log("Aggiornamento anteprima...", manualInput);
+  const analyzeAudio = () => {
+    if (!analyserRef.current) return;
+    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+    analyserRef.current.getByteFrequencyData(dataArray);
+    
+    // Calcola volume medio
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+    const average = sum / dataArray.length;
+    
+    // Normalizza su 0-100
+    const level = Math.min(100, (average / 128) * 100);
+    setAudioLevel(level);
+
+    // Trigger Soglia
+    if (level > threshold) {
+       setTriggerActive(true);
+       setTimeout(() => setTriggerActive(false), 200);
+       // Qui potresti aggiungere logica extra (es. focus search)
+       searchInputRef.current?.focus();
+       searchInputRef.current?.select();
+    }
+
+    animationRef.current = requestAnimationFrame(analyzeAudio);
   };
 
-  const addManualItem = () => {
-    console.log("Aggiungi item manuale");
-    setShowModal(false);
+  // --- LOGICA FILE ---
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      parseData(text);
+    };
+    reader.readAsText(file);
   };
 
+  const parseData = (text: string) => {
+    // Esempio parsing semplice (adatta al tuo formato reale)
+    const lines = text.split(/\r\n|\n/);
+    const newItems: Shipment[] = [];
+    
+    lines.forEach((line, idx) => {
+      if(line.length < 5) return;
+      // Simulazione parsing posizionale GLS (adatta gli indici)
+      const sede = line.substring(0, 2) || "??";
+      const sped = line.substring(2, 11) || "000000000";
+      const dest = line.substring(line.length - 4) || "XX";
+      
+      newItems.push({
+        id: `row-${idx}`,
+        raw: line,
+        sede, sped, collo: '1', dest,
+        status: 'pending'
+      });
+    });
+
+    setItems(newItems);
+    setStats({ total: newItems.length, done: 0 });
+  };
+
+  // --- LOGICA RICERCA ---
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value.toUpperCase();
+    setFilterQuery(query);
+
+    // Se la query è lunga abbastanza, cerca corrispondenza esatta e segna come fatto
+    if (query.length > 8) {
+      const matchIndex = items.findIndex(i => i.raw.includes(query) || (i.sede + i.sped).includes(query));
+      if (matchIndex >= 0) {
+        const updated = [...items];
+        if (updated[matchIndex].status !== 'scanned') {
+            updated[matchIndex].status = 'scanned';
+            setItems(updated);
+            setStats(prev => ({ ...prev, done: prev.done + 1 }));
+            // Effetto sonoro o visivo di conferma qui
+        }
+      }
+    }
+  };
+
+  // --- RENDER COMPONENT ---
   return (
-    <>
-      {/* Caricamento libreria esterna */}
-      <Script 
-        src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js" 
-        strategy="lazyOnload" 
-      />
+    <div className="flex flex-col h-screen bg-[#f0f2f5] text-gray-800 overflow-hidden">
+      
+      {/* SCRIPT ESTERNI */}
+      <Script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js" strategy="lazyOnload" />
 
-      <div className="gls-app">
-        {/* --- MODALE --- */}
-        {showModal && (
-          <div className="modal-overlay">
-            <div className="modal-card">
-              <h3>Generazione Manuale</h3>
-              <div className="modal-grid-2">
-                <div>
-                  <label>Sede Mitt. (2-4)</label>
-                  <input 
-                    className="manual-input" 
-                    maxLength={4} 
-                    placeholder="AB" 
-                    value={manualInput.sede}
-                    onChange={(e) => { setManualInput({...manualInput, sede: e.target.value.toUpperCase()}); handleManualPreview(); }} 
-                  />
-                </div>
-                <div>
-                  <label>N. Sped (Max 9)</label>
-                  <input 
-                    className="manual-input" 
-                    maxLength={9} 
-                    placeholder="123456789" 
-                    type="tel" 
-                    value={manualInput.sped}
-                    onChange={(e) => { setManualInput({...manualInput, sped: e.target.value.replace(/[^0-9]/g, '')}); handleManualPreview(); }} 
-                  />
-                </div>
-              </div>
-              <div className="modal-grid-3">
-                <div>
-                  <label>Collo</label>
-                  <input 
-                    className="manual-input" 
-                    type="number" 
-                    placeholder="1"
-                    value={manualInput.collo}
-                    onChange={(e) => setManualInput({...manualInput, collo: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label>Tipo (1)</label>
-                  <input 
-                    className="manual-input" 
-                    type="tel" 
-                    maxLength={1} 
-                    placeholder="0"
-                    value={manualInput.tipo}
-                    onChange={(e) => setManualInput({...manualInput, tipo: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label>Dest (2-4)</label>
-                  <input 
-                    className="manual-input" 
-                    maxLength={4} 
-                    placeholder="V3"
-                    value={manualInput.dest}
-                    onChange={(e) => setManualInput({...manualInput, dest: e.target.value})}
-                  />
-                </div>
-              </div>
-              <div className="preview-box">
-                <svg id="manualBarcode"></svg>
-                <div className="preview-text">Anteprima...</div>
-              </div>
-              <div className="modal-actions">
-                <button className="btn-modal-close" onClick={() => setShowModal(false)}>Annulla</button>
-                <button className="btn-modal-add" onClick={addManualItem}>Aggiungi alla Lista</button>
-              </div>
-            </div>
+      {/* HEADER */}
+      <div className="bg-[#f0f2f5] p-3 shadow-sm z-20 shrink-0">
+        <header className="flex justify-between items-center mb-3">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="text-xl hover:scale-110 transition-transform">🏠</Link>
+            <h1 className="text-xl font-black text-[#0b2d51] uppercase tracking-wide">Lettore GLS</h1>
           </div>
-        )}
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowModal(true)} className="bg-[#fdb913] text-[#0b2d51] px-4 py-2 rounded-full text-xs font-bold shadow-sm hover:shadow-md transition-all flex items-center gap-1">
+              <Plus size={14}/> Manuale
+            </button>
+            <div className={`w-3 h-3 rounded-full border-2 border-white shadow-sm transition-all duration-100 ${triggerActive ? 'bg-green-500 scale-125 shadow-[0_0_10px_#22c55e]' : 'bg-gray-300'}`}></div>
+          </div>
+        </header>
 
-        {/* --- HEADER --- */}
-        <div className="top-section">
-          <header>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <Link href="/" className="btn-home" style={{textDecoration: 'none', fontSize: '1.2rem'}}>🏠</Link>
-              <h1>Lettore GLS</h1>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <button className="btn-manual" onClick={() => setShowModal(true)}>+ Manuale</button>
-              <div className="status-led" id="triggerLed"></div>
-            </div>
-          </header>
+        {/* PANNELLO CONTROLLI */}
+        <div className="bg-white rounded-xl shadow-sm border-t-4 border-[#0b2d51] p-4">
+           <div className="grid grid-cols-2 gap-4">
+              
+              {/* BOTTONE MIC */}
+              <button 
+                onClick={toggleAudio}
+                className={`relative overflow-hidden rounded-lg p-3 flex flex-col items-center justify-center gap-2 text-white font-bold transition-all shadow-sm active:scale-95 ${listening ? 'bg-gradient-to-br from-green-600 to-green-700' : 'bg-gradient-to-br from-gray-500 to-gray-600'}`}
+              >
+                {listening ? <Mic size={24}/> : <MicOff size={24}/>}
+                <span className="text-[10px] uppercase tracking-widest">{listening ? 'Ascolto Attivo' : 'Attiva Mic'}</span>
+                
+                {/* Visualizer Bar */}
+                <div className="w-full h-1.5 bg-black/20 rounded-full mt-1 overflow-hidden relative">
+                   <div 
+                     className="h-full bg-yellow-400 transition-all duration-75 ease-linear" 
+                     style={{ width: `${audioLevel}%` }}
+                   />
+                   {/* Threshold Marker */}
+                   <div className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10" style={{ left: `${threshold}%` }} />
+                </div>
+              </button>
 
-          <div className="control-card">
-            <div className="controls-grid">
+              {/* DROP ZONE */}
+              <div className="border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg p-2 flex flex-col items-center justify-center text-center relative group hover:bg-blue-50 hover:border-blue-300 transition-colors">
+                 <input type="file" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" accept=".txt,.csv" />
+                 <p className="text-[10px] font-bold text-[#0b2d51] uppercase mb-2">📂 Area Caricamento</p>
+                 <div className="flex gap-1 w-full">
+                    <span className="flex-1 bg-white border border-gray-300 py-1 rounded text-[10px] font-bold text-gray-600 flex items-center justify-center gap-1">
+                       <FolderOpen size={10}/> Sfoglia
+                    </span>
+                 </div>
+              </div>
+           </div>
+
+           {/* CONTROLLI SLIDERS */}
+           <div className="mt-4 pt-4 border-t border-dashed border-gray-200 grid grid-cols-2 gap-4 items-center">
               <div>
-                <button className="btn-mic" id="btnMic" onClick={toggleAudio}>
-                  <div className="icon">🎙️</div>
-                  <span id="micText">Attiva Ascolto</span>
-                  <div className="visualizer-container">
-                    <div className="visualizer-bar" id="audioBar"></div>
-                    <div className="visualizer-threshold" id="threshLine" style={{ left: `${threshold}%` }}></div>
-                  </div>
-                </button>
+                 <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase mb-1">
+                    <span>Soglia Audio</span>
+                    <span className="text-blue-600">{threshold}%</span>
+                 </div>
+                 <input type="range" min="10" max="95" value={threshold} onChange={(e) => setThreshold(Number(e.target.value))} className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#0b2d51]" />
               </div>
-              
-              <div className="drop-zone" id="dropZone">
-                <p>📂 Area Caricamento</p>
-                <div className="drop-actions">
-                  <input type="file" id="fileInput" accept=".txt,.csv" style={{ display: 'none' }} />
-                  <button className="btn-drop-action" onClick={() => document.getElementById('fileInput')?.click()}>
-                    📁 Sfoglia PC
-                  </button>
-                  <a className="btn-drop-action btn-server" href="search-ms:displayname=Risultati%20ricerca%20in%20%5C%5C10.58.125.2%5Cpc&crumb=System.Generic.String%3Anatana&crumb=location:%5C%5C10.58.125.2%5Cpc" target="_blank">
-                    🔍 Apri Server
-                  </a>
-                </div>
-                <span style={{ fontSize: '0.7em', color: '#999', marginTop: '5px' }}>o trascina il file qui</span>
+              <div className="flex items-center justify-between text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
+                 <span>Totale: {stats.total}</span>
+                 <span className="font-bold text-green-600">Fatti: {stats.done}</span>
               </div>
-            </div>
-
-            <div className="settings-grid">
-              <div className="input-group">
-                <label>Filtro Sequenza</label>
-                <select id="filterLogic" className="styled-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
-                  <option value="NS">✱ N S (Richiesto)</option>
-                  <option value="SN">✱ S N (Standard)</option>
-                  <option value="NN">✱ N N</option>
-                  <option value="SS">✱ S S</option>
-                  <option value="ALL">Mostra Tutto</option>
-                </select>
-              </div>
-              
-              <div className="input-group">
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <label>Calibrazione Audio</label>
-                  <span id="freqVal" style={{ fontSize: '0.7em', color: 'var(--primary)' }}>{freq} Hz</span>
-                </div>
-                <input type="range" min="2000" max="4000" value={freq} onChange={(e) => setFreq(Number(e.target.value))} title="Frequenza" />
-                <input type="range" min="50" max="98" value={threshold} onChange={(e) => setThreshold(Number(e.target.value))} title="Soglia" style={{ marginTop: '8px', accentColor: 'var(--error)' }} />
-              </div>
-            </div>
-            
-            <div className="stats-bar">
-              <span id="statsTotal">In attesa file...</span>
-              <span id="statsDone" className="stats-highlight">0 Fatti</span>
-            </div>
-          </div>
-
-          <input type="text" className="search-box" id="searchInput" placeholder="🔍 Cerca spedizione o zona..." />
+           </div>
         </div>
 
-        {/* --- LISTA --- */}
-        <div className="list-container" id="scrollContainer">
-          <div id="listResult" className="barcode-list"></div>
-          <div id="emptyState" className="empty-state">Nessun dato caricato.</div>
+        {/* INPUT RICERCA */}
+        <div className="mt-3 relative">
+           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18}/>
+           <input 
+             ref={searchInputRef}
+             type="text" 
+             value={filterQuery}
+             onChange={handleSearch}
+             placeholder="🔍 Scansiona o cerca..." 
+             className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-[#0b2d51] focus:ring-2 focus:ring-[#0b2d51]/20 outline-none shadow-sm text-lg font-mono font-bold uppercase"
+           />
         </div>
       </div>
 
-      {/* --- CSS INTEGRATO (Portato dall'HTML originale) --- */}
-      <style jsx global>{`
-        :root {
-            --primary: #0b2d51; 
-            --accent: #fdb913;
-            --bg: #f0f2f5;
-            --text: #333;
-            --text-light: #666;
-            --white: #ffffff;
-            --success: #28a745;
-            --error: #dc3545;
-            --border: #dee2e6;
-            --shadow: 0 4px 12px rgba(0,0,0,0.08);
-            --card-radius: 12px;
-        }
+      {/* LISTA RISULTATI (Scrollabile) */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#e2e6ea]">
+         {items.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-gray-400">
+               <FileText size={48} className="mb-4 opacity-20"/>
+               <p className="text-sm italic">Nessun dato caricato</p>
+            </div>
+         ) : (
+            items
+              .filter(i => i.raw.includes(filterQuery))
+              .map((item) => (
+               <BarcodeCard key={item.id} item={item} />
+            ))
+         )}
+      </div>
 
-        .gls-app {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-          background-color: var(--bg);
-          color: var(--text);
-          height: 100vh;
-          width: 100vw;
-          overflow: hidden;
-          display: flex; 
-          flex-direction: column;
-        }
+      {/* MODALE MANUALE */}
+      {showModal && (
+         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+            <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border-t-4 border-[#fdb913]">
+               <h3 className="text-lg font-black text-[#0b2d51] uppercase border-b pb-2 mb-4">Inserimento Manuale</h3>
+               <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                     <label className="text-[10px] font-bold text-gray-500 uppercase">Sede</label>
+                     <input type="text" value={manual.sede} onChange={e => setManual({...manual, sede: e.target.value.toUpperCase()})} className="w-full border p-2 rounded font-mono font-bold uppercase" placeholder="AB"/>
+                  </div>
+                  <div>
+                     <label className="text-[10px] font-bold text-gray-500 uppercase">Spedizione</label>
+                     <input type="text" value={manual.sped} onChange={e => setManual({...manual, sped: e.target.value})} className="w-full border p-2 rounded font-mono font-bold" placeholder="123456789"/>
+                  </div>
+               </div>
+               
+               <div className="bg-gray-50 p-4 rounded-lg flex items-center justify-center mb-4 border border-dashed border-gray-300 min-h-[80px]">
+                  <BarcodePreview text={manual.sede + manual.sped} />
+               </div>
 
-        .top-section {
-            flex-shrink: 0; 
-            background-color: var(--bg); 
-            z-index: 200;
-            padding: 10px 15px 0 15px; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            position: relative;
-        }
-
-        header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            margin-bottom: 10px; 
-            padding: 0 5px;
-        }
-        
-        header h1 { 
-            color: var(--primary); 
-            margin: 0; 
-            font-size: 1.3rem; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-            font-weight: 800;
-        }
-
-        .control-card {
-            background: var(--white); 
-            border-radius: var(--card-radius); 
-            box-shadow: var(--shadow); 
-            border-top: 4px solid var(--primary);
-            padding: 15px; 
-            margin-bottom: 10px;
-        }
-
-        .controls-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            align-items: start; 
-        }
-        
-        .btn-mic {
-            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-            color: white; 
-            border: none; 
-            padding: 12px;
-            border-radius: 8px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 5px;
-            width: 100%; 
-            height: 100%; 
-            min-height: 80px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-            transition: all 0.2s;
-        }
-        .btn-mic:active { transform: translateY(1px); }
-
-        .visualizer-container {
-            height: 6px; 
-            background: #e9ecef; 
-            border-radius: 10px; 
-            margin-top: 8px; 
-            overflow: hidden; 
-            position: relative; 
-            width: 100%;
-        }
-        .visualizer-bar {
-            height: 100%; 
-            width: 0%; 
-            background: linear-gradient(90deg, var(--accent), var(--success));
-            transition: width 0.05s linear;
-        }
-        .visualizer-threshold { 
-            position: absolute; 
-            top: 0; 
-            bottom: 0; 
-            width: 2px; 
-            background: var(--error); 
-            z-index: 5; 
-        }
-
-        .drop-zone {
-            border: 2px dashed #cbd5e0; 
-            background-color: #f8f9fa; 
-            border-radius: 8px; 
-            padding: 10px; 
-            text-align: center; 
-            height: 100%; 
-            min-height: 80px;
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center;
-            position: relative; 
-            transition: all 0.2s;
-        }
-        .drop-zone p { 
-            margin: 0 0 8px 0; 
-            font-weight: 700; 
-            color: var(--primary); 
-            font-size: 0.85rem; 
-            text-transform: uppercase; 
-        }
-        
-        .drop-actions { 
-            display: flex; 
-            gap: 8px; 
-            width: 100%; 
-        }
-        
-        .btn-drop-action {
-            flex: 1; 
-            padding: 8px 5px; 
-            border: 1px solid #ced4da; 
-            border-radius: 6px;
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            cursor: pointer; 
-            text-decoration: none;
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 5px;
-            transition: all 0.2s; 
-            color: var(--text); 
-            background: white;
-        }
-        .btn-drop-action:hover { background-color: #e2e6ea; }
-        
-        .btn-server {
-            background-color: #e3f2fd; 
-            color: #0d47a1; 
-            border-color: #90caf9;
-        }
-
-        .input-group label { 
-            display: block; 
-            margin-bottom: 5px; 
-            font-weight: 700; 
-            font-size: 0.75rem; 
-            color: #666; 
-            text-transform: uppercase; 
-        }
-        
-        .styled-select, .search-box, .manual-input {
-            width: 100%; 
-            padding: 10px 12px; 
-            border: 1px solid #ced4da; 
-            border-radius: 6px; 
-            font-size: 0.95rem; 
-            background-color: #fff; 
-            color: var(--text);
-        }
-        
-        input[type=range] { 
-            width: 100%; 
-            cursor: pointer; 
-            accent-color: var(--primary); 
-            height: 4px; 
-            margin-top: 5px; 
-        }
-
-        .settings-grid {
-            display: grid; 
-            grid-template-columns: 1fr 1.5fr; 
-            gap: 10px; 
-            margin-top: 15px; 
-            padding-top: 15px; 
-            border-top: 1px dashed #eee;
-        }
-
-        .stats-bar {
-            display: flex; 
-            justify-content: space-between; 
-            font-size: 0.8rem; 
-            color: #888; 
-            padding: 5px 5px; 
-            border-top: 1px solid #eee; 
-            margin-top: 10px;
-        }
-        .stats-highlight { color: var(--primary); font-weight: 700; }
-
-        .btn-manual {
-            background-color: var(--accent); 
-            color: var(--primary); 
-            border: none;
-            padding: 8px 15px; 
-            border-radius: 20px; 
-            font-weight: bold; 
-            font-size: 0.8rem;
-            cursor: pointer; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .list-container {
-            flex-grow: 1; 
-            overflow-y: auto; 
-            position: relative;
-            padding: 0; 
-            scroll-behavior: smooth;
-            background: #e2e6ea;
-        }
-        .barcode-list { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center;
-            padding-top: 50vh; 
-            padding-bottom: 50vh; 
-        }
-
-        .empty-state { 
-            text-align: center; 
-            padding: 50px 20px; 
-            color: #aaa; 
-            font-style: italic; 
-            margin-top: -20vh; 
-        }
-        
-        .status-led {
-            width: 10px; 
-            height: 10px; 
-            border-radius: 50%; 
-            background: #ddd; 
-            border: 2px solid #fff; 
-            box-shadow: 0 0 2px rgba(0,0,0,0.1);
-        }
-
-        /* MODALE */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 2000; 
-            display: flex; justify-content: center; align-items: center; 
-            backdrop-filter: blur(5px);
-        }
-        .modal-card {
-            background: white; width: 90%; max-width: 400px;
-            border-radius: 16px; padding: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            border-top: 5px solid var(--accent);
-        }
-        .modal-card h3 { margin: 0 0 15px; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .modal-grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-bottom: 10px; }
-        .modal-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .btn-modal-close { background: #eee; color: #555; }
-        .btn-modal-add { background: var(--primary); color: white; }
-        .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
-        .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
-        .preview-box {
-            background: #f8f9fa; border: 1px dashed #ccc; padding: 10px;
-            text-align: center; border-radius: 8px; min-height: 80px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-      `}</style>
-    </>
+               <div className="flex gap-3">
+                  <button onClick={() => setShowModal(false)} className="flex-1 py-3 bg-gray-100 font-bold text-gray-600 rounded-lg text-xs uppercase">Annulla</button>
+                  <button onClick={() => {
+                     setItems([{ id: Date.now().toString(), raw: manual.sede+manual.sped, sede: manual.sede, sped: manual.sped, collo: '1', dest: 'MAN', status: 'pending' }, ...items]);
+                     setShowModal(false);
+                  }} className="flex-1 py-3 bg-[#0b2d51] font-bold text-white rounded-lg text-xs uppercase shadow-lg">Aggiungi</button>
+               </div>
+            </div>
+         </div>
+      )}
+    </div>
   );
 }
+
+// --- SOTTO-COMPONENTI PER PERFORMANCE ---
+
+const BarcodeCard = ({ item }: { item: Shipment }) => {
+   const isScanned = item.status === 'scanned';
+   
+   return (
+      <div className={`bg-white rounded-lg shadow-sm overflow-hidden flex transition-all duration-500 ${isScanned ? 'opacity-50 scale-95 grayscale' : 'opacity-100 scale-100'}`}>
+         {/* Zona Box */}
+         <div className={`w-20 bg-[#0b2d51] flex flex-col items-center justify-center text-[#fdb913] p-2 shrink-0`}>
+            <span className="text-2xl font-black leading-none">{item.dest.substring(0,2)}</span>
+            <span className="text-[9px] font-bold uppercase opacity-80 mt-1">{item.sede}</span>
+         </div>
+         {/* Contenuto */}
+         <div className="flex-1 p-3 flex flex-col items-center justify-center text-center relative">
+            <BarcodePreview text={item.sede + item.sped} />
+            <div className="mt-2 text-lg font-mono font-black text-[#0b2d51] tracking-widest">{item.sede} {item.sped}</div>
+            {isScanned && (
+               <div className="absolute inset-0 bg-green-500/10 flex items-center justify-center backdrop-blur-[1px]">
+                  <Check className="text-green-600 w-12 h-12 drop-shadow-md" strokeWidth={3} />
+               </div>
+            )}
+         </div>
+      </div>
+   );
+};
+
+// Generatore Barcode che usa la libreria globale
+const BarcodePreview = ({ text }: { text: string }) => {
+   const svgRef = useRef<SVGSVGElement>(null);
+   
+   useEffect(() => {
+      if (typeof window !== 'undefined' && (window as any).JsBarcode && svgRef.current && text) {
+         try {
+            (window as any).JsBarcode(svgRef.current, text, {
+               format: "CODE128",
+               width: 2,
+               height: 40,
+               displayValue: false,
+               margin: 0
+            });
+         } catch(e) {}
+      }
+   }, [text]);
+
+   return <svg ref={svgRef} className="w-full h-full max-h-[50px]"></svg>;
+};
