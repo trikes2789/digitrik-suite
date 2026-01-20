@@ -18,21 +18,37 @@ const styles = `
   .visualizer-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--success)); transition: width 0.05s linear; }
   .visualizer-threshold { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--error); z-index: 5; }
 
+  /* DROP ZONE AGGIORNATA */
   .drop-zone { border: 2px dashed #cbd5e0; background: #f8f9fa; border-radius: 8px; padding: 10px; text-align: center; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; }
-  .drop-zone:hover { background: #e8f0fe; border-color: var(--primary); }
+  .drop-zone.drag-active { background: #e8f0fe; border-color: var(--primary); transform: scale(1.02); }
+  .drop-zone:hover { border-color: var(--primary); }
 
-  /* Lista con padding extra per centrare comodamente */
-  .barcode-list { display: flex; flex-direction: column; align-items: center; padding-top: 20px; padding-bottom: 50vh; }
-  .list-container { flex-grow: 1; overflow-y: auto; background: #e2e6ea; scroll-behavior: smooth; position: relative; }
+  /* Lista con padding extra per centratura verticale perfetta */
+  .barcode-list { display: flex; flex-direction: column; align-items: center; padding-top: 50vh; padding-bottom: 50vh; }
+  .list-container { flex-grow: 1; overflow-y: auto; background: #e2e6ea; scroll-behavior: smooth; position: relative; height: 100%; }
 
-  /* CARD STYLES - Default sfocato */
-  .barcode-card { background: white; border-radius: 8px; display: grid; grid-template-columns: 80px 1fr; width: 90%; max-width: 700px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; cursor: pointer; border-left: 6px solid #ccc; transition: all 0.3s ease-out; opacity: 0.4; transform: scale(0.95); filter: blur(1px) grayscale(100%); }
+  /* CARD STYLES - Molto sfocate quando inattive */
+  .barcode-card { 
+      background: white; border-radius: 8px; display: grid; grid-template-columns: 80px 1fr; 
+      width: 90%; max-width: 700px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+      overflow: hidden; cursor: pointer; border-left: 6px solid #ccc; 
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
+      opacity: 0.15; transform: scale(0.9); filter: blur(6px) grayscale(100%); /* SFOCATURA FORTE */
+  }
   
-  /* CARD ATTIVA - CENTRATA E GRANDE */
-  .barcode-card.active-focus { opacity: 1; transform: scale(1.05); filter: none; border: 4px solid var(--accent); box-shadow: 0 20px 50px rgba(0,0,0,0.2); margin: 40px 0; z-index: 10; }
-  .barcode-card.active-focus svg { height: 150px !important; width: 100% !important; }
-  .barcode-card.active-focus .human-readable { font-size: 1.8rem; color: var(--primary); font-weight: 900; }
+  /* CARD ATTIVA - GIGANTE E NITIDA */
+  .barcode-card.active-focus { 
+      opacity: 1; transform: scale(1.3); filter: none; 
+      border: 4px solid var(--accent); 
+      box-shadow: 0 30px 80px rgba(0,0,0,0.4); 
+      margin: 100px 0; z-index: 100; position: relative; 
+  }
+  
+  /* Barcode SVG Gigante nella card attiva */
+  .barcode-card.active-focus svg { height: 180px !important; width: 100% !important; }
+  .barcode-card.active-focus .human-readable { font-size: 2.2rem; color: var(--primary); font-weight: 900; margin-top: 15px; }
   .barcode-card.active-focus .zone-box { background: var(--primary); }
+  .barcode-card.active-focus .details { font-size: 1rem; color: #333; font-weight: bold; }
 
   /* Stati */
   .barcode-card.scanned { display: none; }
@@ -40,7 +56,8 @@ const styles = `
 
   .zone-box { background: var(--primary); color: var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; transition: background 0.3s; }
   .human-readable { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 2px; color: var(--primary); margin-top: 10px; transition: font-size 0.3s; }
-  
+  .details { font-size: 0.8rem; color: #888; margin-top: 5px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
   /* COLORI ZONE */
   .border-A { border-left-color: #dc3545; } 
   .border-B { border-left-color: #0d6efd; }
@@ -53,7 +70,6 @@ const styles = `
   .status-led { width: 10px; height: 10px; border-radius: 50%; background: #ddd; border: 2px solid white; box-shadow: 0 0 2px rgba(0,0,0,0.1); transition: 0.1s; }
   .status-led.flash { background: #28a745; box-shadow: 0 0 10px #28a745; transform: scale(1.5); }
 
-  /* Select personalizzata */
   .styled-select { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; background-color: #fff; font-size: 0.9rem; font-weight: bold; color: #333; }
 `;
 
@@ -61,9 +77,10 @@ export default function GLSReader() {
   const [dataList, setDataList] = useState<any[]>([]);
   const [scannedCount, setScannedCount] = useState(0);
   const [filterQuery, setFilterQuery] = useState('');
-  const [filterLogic, setFilterLogic] = useState('ALL'); // NS, SN, NN, SS, ALL
+  const [filterLogic, setFilterLogic] = useState('ALL'); 
   const [activeId, setActiveId] = useState<number | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
   
   // Audio Config
   const [isListening, setIsListening] = useState(false);
@@ -82,72 +99,84 @@ export default function GLSReader() {
   const animationRef = useRef<number | null>(null);
   const cooldownRef = useRef(false);
 
-  // --- FILTRO LISTA (Memoized) ---
+  // --- FILTRO LISTA ---
   const filteredList = useMemo(() => {
     return dataList.filter(item => {
-      // 1. Filtro Ricerca
       const searchMatch = item.human.toLowerCase().includes(filterQuery) || item.zona.toLowerCase().includes(filterQuery);
       if (!searchMatch) return false;
 
-      // 2. Filtro Logico (NS, SN, ecc.) basato sul raw text
       if (filterLogic === 'ALL') return true;
-      
       const regexMap: Record<string, RegExp> = {
         'NS': /\*\s+N\s+S/,
         'SN': /\*\s+S\s+N/,
         'NN': /\*\s+N\s+N/,
         'SS': /\*\s+S\s+S/
       };
-      
       return regexMap[filterLogic] ? regexMap[filterLogic].test(item.raw || '') : true;
     });
   }, [dataList, filterQuery, filterLogic]);
 
-  // --- GESTIONE FOCUS & SCROLL ---
+  // --- FOCUS & SCROLL (Centratura Migliorata) ---
   const updateFocus = useCallback(() => {
-    // Cerca il primo elemento visibile e non scansionato NELLA LISTA FILTRATA
     const firstPending = filteredList.find(item => item.status !== 'scanned');
 
     if (firstPending) {
         setActiveId(firstPending.id);
-        
-        // Scroll preciso al centro
         setTimeout(() => {
             const el = document.querySelector(`[data-id="${firstPending.id}"]`);
             if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-        }, 50); // Piccolo delay per permettere il rendering
+        }, 50);
     } else {
         setActiveId(null);
     }
   }, [filteredList]);
 
-  // Trigger focus quando cambia la lista filtrata
   useEffect(() => {
     const t = setTimeout(updateFocus, 150);
     return () => clearTimeout(t);
   }, [updateFocus]);
 
-  // --- SHORTCUTS TASTIERA (Freccia Giù, Invio, Spazio) ---
+  // --- SHORTCUTS TASTIERA ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-        // Se c'è una modale aperta, ignora
         if (showModal) return;
-
         if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
-            e.preventDefault(); // Evita scroll pagina con spazio
-            if (activeId !== null) {
-                markAsDone(activeId);
-            }
+            e.preventDefault();
+            if (activeId !== null) markAsDone(activeId);
         }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeId, showModal]); 
 
-  // --- AUDIO ---
+  // --- DRAG & DROP HANDLERS ---
+  const onDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragActive(true);
+  };
+  const onDragLeave = () => setIsDragActive(false);
+  
+  const onDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragActive(false);
+      const file = e.dataTransfer.files?.[0];
+      if (file) readFile(file);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) readFile(file);
+  };
+
+  const readFile = (file: File) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => processText(ev.target?.result as string);
+      reader.readAsText(file);
+  };
+
+  // --- AUDIO DETECTION ---
   const toggleAudio = async () => {
     if (isListening) {
       if (audioCtxRef.current) audioCtxRef.current.close();
@@ -156,7 +185,6 @@ export default function GLSReader() {
       setAudioLevel(0);
       return;
     }
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -164,7 +192,6 @@ export default function GLSReader() {
       const analyser = ctx.createAnalyser();
       const source = ctx.createMediaStreamSource(stream);
 
-      // Filtri
       const filter1 = ctx.createBiquadFilter(); filter1.type = "highpass"; filter1.frequency.value = 3500;
       const filter2 = ctx.createBiquadFilter(); filter2.type = "highpass"; filter2.frequency.value = 3500;
       const bpFilter = ctx.createBiquadFilter(); bpFilter.type = "bandpass"; bpFilter.frequency.value = targetFreq; bpFilter.Q.value = 5;
@@ -190,7 +217,6 @@ export default function GLSReader() {
     let sum = 0;
     for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
     const average = sum / dataArray.length;
-    
     let visualVal = (average / 100) * 100;
     if (visualVal > 100) visualVal = 100;
     if (visualVal < 5) visualVal = 0;
@@ -207,20 +233,10 @@ export default function GLSReader() {
   const triggerAction = () => {
       setLedActive(true);
       setTimeout(() => setLedActive(false), 200);
-      if (activeId !== null) {
-          markAsDone(activeId);
-      }
+      if (activeId !== null) markAsDone(activeId);
   };
 
-  // --- DATI ---
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => processText(ev.target?.result as string);
-      reader.readAsText(file);
-  };
-
+  // --- PARSING ---
   const processText = (text: string) => {
       const lines = text.split('\n');
       const newData: any[] = [];
@@ -275,7 +291,6 @@ export default function GLSReader() {
       const { sede, sped, collo, tipo, dest } = manualData;
       if (!sede || !sped) return alert("Sede e Spedizione obbligatori");
 
-      // Applica la regola WW anche al salvataggio
       const finalSped = (sede.toUpperCase() === 'WW' && sped.length < 9) ? sped.padStart(9, '0') : sped;
       const finalCollo = collo.padStart(2, '0');
       const finalDest = dest.toUpperCase() || '???';
@@ -336,11 +351,31 @@ export default function GLSReader() {
                    </div>
                 </button>
 
-                <div className="drop-zone" onClick={() => document.getElementById('fileUpload')?.click()}>
-                   <input type="file" id="fileUpload" className="hidden" accept=".txt,.csv" onChange={handleFile} />
+                {/* DROP ZONE & BUTTONS */}
+                <div 
+                    className={`drop-zone ${isDragActive ? 'drag-active' : ''}`} 
+                    onDragOver={onDragOver}
+                    onDragLeave={onDragLeave}
+                    onDrop={onDrop}
+                >
                    <p className="font-bold text-[#0b2d51] text-xs uppercase mb-2">📂 Area Caricamento</p>
-                   <span className="bg-white border border-gray-300 px-3 py-1 rounded text-xs font-bold text-gray-600">Sfoglia PC</span>
-                   <span className="text-[10px] text-gray-400 mt-1">Trascina qui il file</span>
+                   
+                   <div className="flex gap-2 w-full px-2">
+                       {/* Input File Nascosto */}
+                       <input type="file" id="fileUpload" className="hidden" accept=".txt,.csv" onChange={handleFileChange} />
+                       
+                       {/* Pulsante Sfoglia PC */}
+                       <button onClick={() => document.getElementById('fileUpload')?.click()} className="flex-1 bg-white border border-gray-300 px-2 py-1 rounded text-[10px] font-bold text-gray-600 cursor-pointer hover:bg-gray-50">
+                           Sfoglia PC
+                       </button>
+
+                       {/* Link Apri Server (Windows) */}
+                       <a href="search-ms:displayname=Risultati%20ricerca%20in%20%5C%5C10.58.125.2%5Cpc&crumb=System.Generic.String%3Anatana&crumb=location:%5C%5C10.58.125.2%5Cpc" target="_blank" className="flex-1 bg-blue-50 border border-blue-200 px-2 py-1 rounded text-[10px] font-bold text-blue-700 text-center no-underline hover:bg-blue-100 flex items-center justify-center">
+                           Apri Server
+                       </a>
+                   </div>
+                   
+                   <span className="text-[9px] text-gray-400 mt-2">Trascina qui il file</span>
                 </div>
              </div>
 
@@ -392,7 +427,7 @@ export default function GLSReader() {
                        <div className="p-4 text-center flex flex-col items-center justify-center">
                           <BarcodeCanvas text={item.barcode} ready={isScriptLoaded} />
                           <div className="human-readable">{item.human}</div>
-                          <div className="text-xs text-gray-500 mt-1 truncate max-w-full">{item.details}</div>
+                          <div className="details">{item.details}</div>
                        </div>
                     </div>
                  );
@@ -423,8 +458,8 @@ export default function GLSReader() {
                     <div><label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">Dest</label><input maxLength={4} className="w-full border p-2 rounded font-bold uppercase" placeholder="V3" value={manualData.dest} onChange={e => setManualData({...manualData, dest: e.target.value.toUpperCase()})} /></div>
                  </div>
 
-                 {/* ANTEPRIMA CON REGOLA WW */}
                  <div className="bg-gray-50 p-4 rounded-lg flex items-center justify-center mb-4 border border-dashed border-gray-300 h-24">
+                    {/* ANTEPRIMA CON REGOLA WW */}
                     <BarcodeCanvas 
                         text={`
                             ${manualData.sede.toUpperCase()}
@@ -459,13 +494,12 @@ const BarcodeCanvas = ({ text, ready }: { text: string, ready: boolean }) => {
     
     useEffect(() => {
         const draw = () => {
-            // FIX: Usiamo (window as any) per zittire l'errore di build
             if ((window as any).JsBarcode && svgRef.current && text) {
                 try {
                     (window as any).JsBarcode(svgRef.current, text, {
                         format: "CODE128", 
-                        width: 2, 
-                        height: 100, 
+                        width: 4, // LARGO
+                        height: 150, // ALTO
                         displayValue: false, 
                         margin: 0
                     });
@@ -481,5 +515,5 @@ const BarcodeCanvas = ({ text, ready }: { text: string, ready: boolean }) => {
         }
     }, [text, ready]);
 
-    return <svg ref={svgRef} className="w-full h-full max-h-[80px]"></svg>;
+    return <svg ref={svgRef} className="w-full h-full"></svg>;
 };
