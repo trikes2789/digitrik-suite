@@ -8,7 +8,7 @@ import {
   ArrowLeft, Terminal, Activity, FileText 
 } from 'lucide-react';
 
-/* STILI CSS INLINE - FAST TRANSITIONS */
+/* STILI CSS INLINE - SUPER FAST */
 const styles = `
   :root { 
     --bg: #09090b; 
@@ -51,7 +51,7 @@ const styles = `
     width: 100%; 
     min-height: 80px; 
     cursor: pointer; 
-    transition: all 0.2s ease; /* Veloce */
+    transition: all 0.2s ease; 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
@@ -98,8 +98,8 @@ const styles = `
       grid-template-columns: 80px 1fr; 
       width: 90%; max-width: 600px; margin-bottom: 40px; 
       overflow: hidden; cursor: pointer; 
-      /* TRANSITION VELOCISSIMA (0.1s) */
-      transition: all 0.1s cubic-bezier(0.25, 0.8, 0.25, 1); 
+      /* TRANSITION ISTANTANEA */
+      transition: all 0.05s linear; 
       opacity: 0.15; transform: scale(0.9); filter: blur(6px) grayscale(100%); 
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
   }
@@ -112,25 +112,21 @@ const styles = `
       margin: 80px 0; z-index: 10; 
   }
   
+  /* Barcode SVG in Focus: Alto 180px e stretto */
   .barcode-card.active-focus svg { height: 180px !important; width: auto !important; max-width: 95%; filter: none; opacity: 1; }
   .barcode-card.active-focus .human-readable { font-size: 2rem; color: #000; font-weight: 900; letter-spacing: 2px; }
   .barcode-card.active-focus .zone-box { background: var(--primary); color: white; }
   
+  /* Stati */
   .barcode-card.scanned { display: none; }
   .barcode-card.hidden { display: none; }
 
-  .zone-box { 
-      background: #e4e4e7; color: #18181b; 
-      display: flex; flex-direction: column; align-items: center; justify-content: center; 
-      height: 100%; transition: background 0.1s; font-family: monospace; border-right: 1px solid #d4d4d8; 
-  }
+  .zone-box { background: #e4e4e7; color: #18181b; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; transition: background 0.1s; font-family: monospace; border-right: 1px solid #d4d4d8; }
   
-  .human-readable { 
-      font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #3f3f46; 
-      margin-top: 5px; transition: font-size 0.1s; 
-  }
+  .human-readable { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #3f3f46; margin-top: 5px; transition: font-size 0.1s; }
   .details { font-size: 0.8rem; color: #71717a; margin-top: 5px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; font-weight: bold; }
 
+  /* ZONE COLORS */
   .border-A { border-left: 6px solid #ef4444; } 
   .border-B { border-left: 6px solid #3b82f6; }
   .border-C { border-left: 6px solid #eab308; } 
@@ -157,20 +153,24 @@ export default function GLSReader() {
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
   
+  // Audio Config
   const [isListening, setIsListening] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
   const [threshold, setThreshold] = useState(85);
   const [targetFreq, setTargetFreq] = useState(3000);
   const [ledActive, setLedActive] = useState(false);
 
+  // Manual Modal
   const [showModal, setShowModal] = useState(false);
   const [manualData, setManualData] = useState({ sede: '', sped: '', collo: '1', tipo: '0', dest: '' });
 
+  // Refs
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationRef = useRef<number | null>(null);
   const cooldownRef = useRef(false);
 
+  // --- FILTRO LISTA ---
   const filteredList = useMemo(() => {
     return dataList.filter(item => {
       const searchMatch = item.human.toLowerCase().includes(filterQuery) || item.zona.toLowerCase().includes(filterQuery);
@@ -189,24 +189,28 @@ export default function GLSReader() {
     });
   }, [dataList, filterQuery, filterLogic]);
 
+  // --- FOCUS & SCROLL (ULTRA VELOCE) ---
   const updateFocus = useCallback(() => {
     const firstPending = filteredList.find(item => item.status !== 'scanned');
 
     if (firstPending) {
         setActiveId(firstPending.id);
+        // Timeout quasi zero per scroll immediato
         setTimeout(() => {
             const el = document.querySelector(`[data-id="${firstPending.id}"]`);
             if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-        }, 50);
+        }, 10);
     } else {
         setActiveId(null);
     }
   }, [filteredList]);
 
+  // Trigger immediato
   useEffect(() => {
-    const t = setTimeout(updateFocus, 100); // Ridotto delay iniziale
+    // 0ms delay: scatta appena React finisce il render
+    const t = setTimeout(updateFocus, 0); 
     return () => clearTimeout(t);
   }, [updateFocus]);
 
@@ -287,14 +291,14 @@ export default function GLSReader() {
     if (visualVal > threshold && !cooldownRef.current) {
         triggerAction();
         cooldownRef.current = true;
-        setTimeout(() => { cooldownRef.current = false; }, 400); // Reset più rapido (400ms)
+        setTimeout(() => { cooldownRef.current = false; }, 300); // Cooldown ridotto
     }
     animationRef.current = requestAnimationFrame(detectSound);
   };
 
   const triggerAction = () => {
       setLedActive(true);
-      setTimeout(() => setLedActive(false), 150);
+      setTimeout(() => setLedActive(false), 100);
       if (activeId !== null) markAsDone(activeId);
   };
 
