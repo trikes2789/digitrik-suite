@@ -8,23 +8,20 @@ import {
   ArrowLeft, Terminal, Activity, FileText 
 } from 'lucide-react';
 
-/* STILI CSS INLINE - THEME ORANGE / WHITE CARDS */
+/* STILI CSS INLINE */
 const styles = `
   :root { 
-    --bg: #09090b; /* zinc-950 */
-    --card-dark: #18181b; /* zinc-900 */
-    --card-light: #ffffff; /* white */
-    --border: #27272a; /* zinc-800 */
-    --text-main: #e4e4e7; /* zinc-200 */
-    --text-card: #18181b; /* zinc-900 */
-    
-    /* TEMA ARANCIO VIVO */
-    --primary: #f97316; /* orange-500 */
+    --bg: #09090b; 
+    --card-dark: #18181b; 
+    --card-light: #ffffff; 
+    --border: #27272a; 
+    --text-main: #e4e4e7; 
+    --text-card: #18181b; 
+    --primary: #f97316; 
     --primary-glow: rgba(249, 115, 22, 0.5);
     --primary-dim: rgba(249, 115, 22, 0.1);
-    
-    --success: #10b981; /* emerald-500 */
-    --error: #ef4444; /* red-500 */
+    --success: #10b981; 
+    --error: #ef4444; 
   }
   
   body { background-color: var(--bg); color: var(--text-main); }
@@ -94,21 +91,21 @@ const styles = `
   .barcode-list { display: flex; flex-direction: column; align-items: center; padding-top: 20vh; padding-bottom: 50vh; }
   .list-container { flex-grow: 1; overflow-y: auto; background: #000; scroll-behavior: smooth; position: relative; }
 
-  /* CARD STYLES - BIANCHE PER BARCODE */
+  /* CARD STYLES */
   .barcode-card { 
-      background: var(--card-light); /* SFONDO BIANCO */
-      color: var(--text-card);       /* TESTO SCURO */
+      background: var(--card-light); 
+      color: var(--text-card); 
       border-radius: 12px; 
       display: grid; 
       grid-template-columns: 80px 1fr; 
       width: 90%; max-width: 600px; margin-bottom: 40px; 
       overflow: hidden; cursor: pointer; 
       transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
-      opacity: 0.3; transform: scale(0.9); filter: blur(4px) grayscale(100%); 
+      opacity: 0.15; transform: scale(0.9); filter: blur(6px) grayscale(100%); 
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
   }
   
-  /* CARD ATTIVA - ORANGE GLOW */
+  /* CARD ATTIVA - ZONA BARCODE INGRANDITA */
   .barcode-card.active-focus { 
       opacity: 1; transform: scale(1.15); filter: none; 
       border: 4px solid var(--primary); 
@@ -116,18 +113,18 @@ const styles = `
       margin: 80px 0; z-index: 10; 
   }
   
-  .barcode-card.active-focus svg { height: 160px !important; width: 100% !important; filter: none; opacity: 1; }
-  .barcode-card.active-focus .human-readable { font-size: 2rem; color: #000; font-weight: 900; letter-spacing: 3px; }
+  /* Barcode SVG in Focus: Alto 180px e stretto */
+  .barcode-card.active-focus svg { height: 180px !important; width: auto !important; max-width: 95%; filter: none; opacity: 1; }
+  .barcode-card.active-focus .human-readable { font-size: 2rem; color: #000; font-weight: 900; letter-spacing: 2px; }
   .barcode-card.active-focus .zone-box { background: var(--primary); color: white; }
   
   /* Stati */
   .barcode-card.scanned { display: none; }
   .barcode-card.hidden { display: none; }
 
-  /* ZONA BOX */
   .zone-box { background: #e4e4e7; color: #18181b; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; transition: background 0.3s; font-family: monospace; border-right: 1px solid #d4d4d8; }
   
-  .human-readable { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #3f3f46; margin-top: 10px; transition: font-size 0.3s; }
+  .human-readable { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #3f3f46; margin-top: 5px; transition: font-size 0.3s; }
   .details { font-size: 0.8rem; color: #71717a; margin-top: 5px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; font-weight: bold; }
 
   /* ZONE COLORS */
@@ -166,10 +163,7 @@ export default function GLSReader() {
   const [dataList, setDataList] = useState<any[]>([]);
   const [scannedCount, setScannedCount] = useState(0);
   const [filterQuery, setFilterQuery] = useState('');
-  
-  // Default Filtro NS
   const [filterLogic, setFilterLogic] = useState('NS'); 
-  
   const [activeId, setActiveId] = useState<number | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -516,12 +510,12 @@ export default function GLSReader() {
                  return (
                     <div key={item.id} data-id={item.id} className={classes} onClick={() => markAsDone(item.id)}>
                        <div className="zone-box">
-                          <h2 className="text-4xl font-black m-0 leading-none text-white">{item.zona}</h2>
+                          <h2 className="text-4xl font-black m-0 leading-none">{item.zona}</h2>
                           <span className="text-[10px] font-bold opacity-50 mt-1">ZONA</span>
                        </div>
                        <div className="p-4 text-center flex flex-col items-center justify-center">
-                          {/* CARD BIANCA -> Barcode NERO */}
-                          <BarcodeCanvas text={item.barcode} ready={isScriptLoaded} />
+                          {/* LISTA: Barcode GRANDE (h=180, w=3) */}
+                          <BarcodeCanvas text={item.barcode} ready={isScriptLoaded} options={{ height: 180, width: 3 }} />
                           <div className="human-readable">{item.human}</div>
                           <div className="details">{item.details}</div>
                        </div>
@@ -557,6 +551,7 @@ export default function GLSReader() {
                  </div>
 
                  <div className="bg-white p-4 rounded-xl flex items-center justify-center mb-6 h-24 overflow-hidden border border-zinc-700">
+                    {/* MODALE: Barcode PICCOLO (h=80, w=2) per stare nel box */}
                     <BarcodeCanvas 
                         text={`
                             ${manualData.sede.toUpperCase()}
@@ -568,7 +563,8 @@ export default function GLSReader() {
                             ${manualData.tipo}
                             ${manualData.dest.toUpperCase()}
                         `.replace(/\s/g, '')} 
-                        ready={isScriptLoaded} 
+                        ready={isScriptLoaded}
+                        options={{ height: 80, width: 2 }}
                     />
                  </div>
 
@@ -585,23 +581,28 @@ export default function GLSReader() {
   );
 }
 
-// Componente Barcode Sicuro (NERO su BIANCO)
-const BarcodeCanvas = ({ text, ready }: { text: string, ready: boolean }) => {
+// Componente Barcode Flessibile
+const BarcodeCanvas = ({ text, ready, options }: { text: string, ready: boolean, options?: any }) => {
     const svgRef = useRef<SVGSVGElement>(null);
     
+    // Default options (se non passate)
+    const defaults = {
+        format: "CODE128", 
+        width: 3, 
+        height: 180, 
+        displayValue: false, 
+        margin: 0,
+        lineColor: "#000000",
+        background: "#ffffff"
+    };
+
+    const finalOptions = { ...defaults, ...options };
+
     useEffect(() => {
         const draw = () => {
             if ((window as any).JsBarcode && svgRef.current && text) {
                 try {
-                    (window as any).JsBarcode(svgRef.current, text, {
-                        format: "CODE128", 
-                        width: 4, 
-                        height: 100, 
-                        displayValue: false, 
-                        margin: 0,
-                        lineColor: "#000000", // Nero puro
-                        background: "#ffffff" // Sfondo bianco
-                    });
+                    (window as any).JsBarcode(svgRef.current, text, finalOptions);
                 } catch(e) {}
             }
         };
@@ -612,7 +613,7 @@ const BarcodeCanvas = ({ text, ready }: { text: string, ready: boolean }) => {
             const t = setTimeout(draw, 500);
             return () => clearTimeout(t);
         }
-    }, [text, ready]);
+    }, [text, ready, finalOptions]); // Dipendenze aggiornate
 
     return <svg ref={svgRef} className="w-full h-full"></svg>;
 };
