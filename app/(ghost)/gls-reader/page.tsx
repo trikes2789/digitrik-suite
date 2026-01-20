@@ -77,18 +77,15 @@ export default function GLSReader() {
   const animationRef = useRef<number | null>(null);
   const cooldownRef = useRef(false);
 
-  // --- EFFETTO FOCUS (FIX IMPORTANTE) ---
-  // Questo assicura che appena cambia la lista o il filtro, il primo elemento venga attivato
+  // --- EFFETTO FOCUS (Auto-Scroll) ---
   useEffect(() => {
-    // Piccolo timeout per dare tempo al DOM di renderizzare
     const timer = setTimeout(() => {
         updateFocus();
     }, 100);
     return () => clearTimeout(timer);
-  }, [dataList, filterQuery]); // Riesegui quando cambiano dati o ricerca
+  }, [dataList, filterQuery]); 
 
   const updateFocus = () => {
-      // Cerca il primo elemento visibile e non scansionato
       const allCards = Array.from(document.querySelectorAll('.barcode-card'));
       const firstVisible = allCards.find(card => 
           !card.classList.contains('scanned') && 
@@ -99,13 +96,11 @@ export default function GLSReader() {
           const id = Number(firstVisible.getAttribute('data-id'));
           setActiveId(id);
           
-          // Scroll automatico
           const container = document.getElementById('scrollContainer');
           if (container && firstVisible instanceof HTMLElement) {
               const elTop = firstVisible.offsetTop;
               const elHeight = firstVisible.offsetHeight;
               const contHeight = container.clientHeight;
-              // Offset 130px come richiesto per centrare
               const target = elTop - (contHeight / 2) + (elHeight / 2) + 130;
               container.scrollTo({ top: target, behavior: 'smooth' });
           }
@@ -131,7 +126,7 @@ export default function GLSReader() {
       const analyser = ctx.createAnalyser();
       const source = ctx.createMediaStreamSource(stream);
 
-      // Filtri per isolare il BEEP
+      // Filtri Audio
       const filter1 = ctx.createBiquadFilter(); filter1.type = "highpass"; filter1.frequency.value = 3500;
       const filter2 = ctx.createBiquadFilter(); filter2.type = "highpass"; filter2.frequency.value = 3500;
       const bpFilter = ctx.createBiquadFilter(); bpFilter.type = "bandpass"; bpFilter.frequency.value = targetFreq; bpFilter.Q.value = 5;
@@ -174,14 +169,12 @@ export default function GLSReader() {
   const triggerAction = () => {
       setLedActive(true);
       setTimeout(() => setLedActive(false), 200);
-      
-      // Marca come fatto l'elemento ATTIVO (quello in focus)
       if (activeId !== null) {
           markAsDone(activeId);
       }
   };
 
-  // --- DATI ---
+  // --- FILE HANDLING ---
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
@@ -227,7 +220,6 @@ export default function GLSReader() {
       });
       setDataList(newData);
       setScannedCount(0);
-      // Il useEffect chiamerà updateFocus automaticamente
   };
 
   const markAsDone = (id: number) => {
@@ -267,9 +259,9 @@ export default function GLSReader() {
       setManualData({ sede: '', sped: '', collo: '1', tipo: '0', dest: '' });
   };
 
+  // --- RENDER ---
   return (
     <>
-      {/* Carica JsBarcode e avvisa quando pronto */}
       <Script 
         src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js" 
         strategy="afterInteractive" 
@@ -332,7 +324,7 @@ export default function GLSReader() {
             type="text" 
             placeholder="🔍 Cerca spedizione o zona..." 
             value={filterQuery}
-            onChange={e => setFilterQuery(e.target.value.toLowerCase())}
+            onChange={e => { setFilterQuery(e.target.value.toLowerCase()); setTimeout(updateFocus, 100); }}
             className="w-full p-3 rounded-lg border border-gray-300 text-lg font-bold outline-none focus:border-[#0b2d51] shadow-sm"
           />
         </div>
@@ -370,7 +362,7 @@ export default function GLSReader() {
         {/* MODALE MANUALE */}
         {showModal && (
            <div className="fixed inset-0 z-[2000] bg-black/50 backdrop-blur-sm flex justify-center items-center p-4">
-              <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl border-t-4 border-[#fdb913]">
+              <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl border-t-4 border-[#fdb913] animate-in slide-in-from-bottom-10 fade-in duration-300">
                  <h3 className="text-[#0b2d51] font-black uppercase text-lg border-b pb-2 mb-4">Generazione Manuale</h3>
                  
                  <div className="grid grid-cols-2 gap-3 mb-3">
@@ -407,15 +399,16 @@ export default function GLSReader() {
   );
 }
 
-// Componente Barcode Sicuro
+// Componente Barcode Sicuro (CORRETTO PER TYPESCRIPT)
 const BarcodeCanvas = ({ text, ready }: { text: string, ready: boolean }) => {
     const svgRef = useRef<SVGSVGElement>(null);
     
     useEffect(() => {
         const draw = () => {
-            if (window.JsBarcode && svgRef.current && text) {
+            // FIX: Usiamo (window as any) per zittire l'errore di build
+            if ((window as any).JsBarcode && svgRef.current && text) {
                 try {
-                    window.JsBarcode(svgRef.current, text, {
+                    (window as any).JsBarcode(svgRef.current, text, {
                         format: "CODE128", 
                         width: 2, 
                         height: 100, 
@@ -429,7 +422,6 @@ const BarcodeCanvas = ({ text, ready }: { text: string, ready: boolean }) => {
         if (ready) {
             draw();
         } else {
-            // Fallback se "ready" tarda: polling leggero
             const t = setTimeout(draw, 500);
             return () => clearTimeout(t);
         }
