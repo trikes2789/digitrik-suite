@@ -2,13 +2,17 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // Import necessario per il redirect
 import { 
   Calculator, FileText, ShieldCheck, ArrowRight, Layers, 
   Globe, Heart, Check, Image as ImageIcon, QrCode, 
   ScanLine, Ghost, Cpu, Zap, MousePointerClick,
   Info, Mail, CreditCard, PlayCircle, Coffee, X,
-  Monitor, Briefcase, Lock, Palette, LayoutGrid
+  Monitor, Briefcase, Lock, Palette, LayoutGrid, KeyRound
 } from "lucide-react";
+
+// --- CONFIGURAZIONE SICUREZZA ---
+const SECRET_KEY = "Gennaio2026!"; // <--- CAMBIA QUESTA PASSWORD
 
 // --- DATI DEI TOOL (DATABASE) ---
 const TOOLS = [
@@ -19,7 +23,7 @@ const TOOLS = [
     color: "text-indigo-500",
     bg: "bg-indigo-500/10",
     barColor: "bg-indigo-500",
-    border: "border-indigo-500/30", // Cornice colorata
+    border: "border-indigo-500/30", 
     glow: "hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)]",
     icon: Zap,
     link: "/synapse"
@@ -296,11 +300,28 @@ const ToolsCarousel = ({ lang }: { lang: Language }) => {
 };
 
 export default function Home() {
+  const router = useRouter();
   const [lang, setLang] = useState<Language>('en');
   const t = TRANS[lang];
 
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
+  
+  // STATO PER LOGIN PRIVATO
+  const [showPrivateModal, setShowPrivateModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [loginError, setLoginError] = useState(false);
+
+  const handlePrivateLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === SECRET_KEY) {
+      // Password corretta: reindirizza alla dashboard fantasma
+      router.push('/dashboard'); 
+    } else {
+      setLoginError(true);
+      setTimeout(() => setLoginError(false), 1000);
+    }
+  };
 
   return (
     <main className="flex flex-col min-h-screen relative bg-zinc-950 text-zinc-100 font-sans selection:bg-blue-500/30">
@@ -422,13 +443,24 @@ export default function Home() {
             <Link href="/privacy-policy" className="hover:text-white transition-colors">{t.footer.privacy}</Link>
             <span className="text-zinc-600">© 2024 {t.footer.rights}</span>
           </div>
-          <button onClick={() => setShowSupportModal(true)} className="flex items-center gap-2 px-5 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold text-green-500 hover:border-green-500 transition-all hover:bg-green-500/10">
-            <Heart size={16} /> {t.footer.coffee}
-          </button>
+          <div className="flex items-center gap-4">
+             {/* LINK PRIVATO AGGIUNTO QUI */}
+             <button 
+                onClick={() => setShowPrivateModal(true)} 
+                className="flex items-center gap-1 text-[10px] font-bold text-zinc-800 hover:text-zinc-600 uppercase tracking-widest transition-colors"
+                title="Accesso Riservato"
+             >
+                <Lock size={10} /> Area Riservata
+             </button>
+
+             <button onClick={() => setShowSupportModal(true)} className="flex items-center gap-2 px-5 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold text-green-500 hover:border-green-500 transition-all hover:bg-green-500/10">
+                <Heart size={16} /> {t.footer.coffee}
+             </button>
+          </div>
         </div>
       </footer>
 
-      {/* MODALS */}
+      {/* MODAL INFO */}
       {showInfoModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
           <div className="bg-[#0a0a0a] border border-zinc-800 rounded-[2rem] w-[90%] max-w-lg overflow-hidden relative shadow-2xl">
@@ -441,6 +473,7 @@ export default function Home() {
         </div>
       )}
 
+      {/* MODAL SUPPORT */}
       {showSupportModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
           <div className="bg-[#0a0a0a] border border-green-500/30 rounded-[2rem] w-[90%] max-w-2xl overflow-hidden relative">
@@ -452,6 +485,37 @@ export default function Home() {
                 </div>
                 <div className="p-8 space-y-4 bg-zinc-950/30"><h4 className="text-purple-400 font-bold uppercase text-xs flex gap-2"><PlayCircle size={14}/> {t.modals.adTitle}</h4><button disabled className="w-full py-3 border border-zinc-800 rounded-xl text-zinc-500 text-xs font-bold uppercase cursor-not-allowed">{t.modals.adButton}</button></div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL LOGIN PRIVATO */}
+      {showPrivateModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md animate-in fade-in">
+          <div className="bg-zinc-900 w-[90%] max-w-sm rounded-2xl border border-zinc-800 p-8 relative shadow-2xl">
+             <button onClick={() => setShowPrivateModal(false)} className="absolute top-4 right-4 text-zinc-600 hover:text-white"><X size={18}/></button>
+             
+             <div className="flex flex-col items-center gap-4 mb-6">
+               <div className="p-4 bg-amber-500/10 rounded-full text-amber-500 mb-2">
+                 <KeyRound size={32} />
+               </div>
+               <h3 className="text-lg font-black text-white uppercase tracking-wider">Accesso Riservato</h3>
+               <p className="text-xs text-center text-zinc-500">Inserisci la chiave di sicurezza per accedere agli strumenti fantasma.</p>
+             </div>
+
+             <form onSubmit={handlePrivateLogin} className="space-y-4">
+               <input 
+                 type="password" 
+                 autoFocus
+                 placeholder="Password Segreta"
+                 value={passwordInput}
+                 onChange={(e) => setPasswordInput(e.target.value)}
+                 className={`w-full bg-black border p-3 rounded-xl text-center text-white outline-none font-bold placeholder:text-zinc-700 transition-all ${loginError ? 'border-red-500 animate-pulse' : 'border-zinc-700 focus:border-amber-500'}`}
+               />
+               <button type="submit" className="w-full py-3 bg-white text-black font-black uppercase text-xs rounded-xl hover:bg-zinc-200 transition-colors">
+                 Sblocca
+               </button>
+             </form>
           </div>
         </div>
       )}

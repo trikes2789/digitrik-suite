@@ -8,7 +8,7 @@ import {
   ArrowLeft, Terminal, Activity, FileText 
 } from 'lucide-react';
 
-/* STILI CSS INLINE - SUPER FAST */
+/* STILI CSS INLINE - TEMA AMBRA UNIFORME */
 const styles = `
   :root { 
     --bg: #09090b; 
@@ -17,14 +17,17 @@ const styles = `
     --border: #27272a; 
     --text-main: #e4e4e7; 
     --text-card: #18181b; 
-    --primary: #f97316; 
-    --primary-glow: rgba(249, 115, 22, 0.5);
-    --primary-dim: rgba(249, 115, 22, 0.1);
+    
+    /* TEMA AMBRA DIGITRIK */
+    --primary: #f59e0b; /* amber-500 */
+    --primary-glow: rgba(245, 158, 11, 0.5);
+    --primary-dim: rgba(245, 158, 11, 0.1);
+    
     --success: #10b981; 
     --error: #ef4444; 
   }
   
-  body { background-color: var(--bg); color: var(--text-main); }
+  body { background-color: var(--bg); color: var(--text-main); overflow: hidden; }
 
   .top-section { 
     background: rgba(9, 9, 11, 0.95); 
@@ -32,6 +35,7 @@ const styles = `
     padding: 15px; 
     z-index: 50; 
     position: relative; 
+    flex-shrink: 0; 
   }
 
   .control-card { 
@@ -45,7 +49,7 @@ const styles = `
   
   .btn-mic { 
     background: var(--primary-dim); 
-    border: 1px solid rgba(249, 115, 22, 0.2); 
+    border: 1px solid rgba(245, 158, 11, 0.2); 
     color: var(--primary); 
     border-radius: 12px; 
     width: 100%; 
@@ -57,7 +61,7 @@ const styles = `
     align-items: center; 
     justify-content: center; 
   }
-  .btn-mic:hover { background: rgba(249, 115, 22, 0.2); border-color: var(--primary); }
+  .btn-mic:hover { background: rgba(245, 158, 11, 0.2); border-color: var(--primary); }
   .btn-mic.active { 
     background: rgba(16, 185, 129, 0.1); 
     border-color: var(--success); 
@@ -86,38 +90,62 @@ const styles = `
   .drop-zone.drag-active { background: var(--primary-dim); border-color: var(--primary); }
   .drop-zone:hover { border-color: var(--primary); }
 
-  .barcode-list { display: flex; flex-direction: column; align-items: center; padding-top: 20vh; padding-bottom: 50vh; }
-  .list-container { flex-grow: 1; overflow-y: auto; background: #000; scroll-behavior: smooth; position: relative; }
+  /* LISTA SCORREVOLE */
+  .list-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    position: relative;
+    background: #000;
+    height: calc(100vh - 280px);
+  }
 
-  /* CARD STYLES */
+  .barcode-list { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    padding-top: 20px; 
+    padding-bottom: 300px; 
+    min-height: 100%;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #52525b;
+    text-align: center;
+    padding: 20px;
+  }
+
+  /* CARD STYLES - INCREASED SIZE */
   .barcode-card { 
       background: var(--card-light); 
       color: var(--text-card); 
       border-radius: 12px; 
       display: grid; 
-      grid-template-columns: 80px 1fr; 
-      width: 90%; max-width: 600px; margin-bottom: 40px; 
+      grid-template-columns: 90px 1fr; /* Leggermente più largo a sinistra */
+      width: 95%; max-width: 650px;   /* Cartella più larga */
+      margin-bottom: 20px; 
       overflow: hidden; cursor: pointer; 
-      /* TRANSITION ISTANTANEA */
-      transition: all 0.05s linear; 
-      opacity: 0.15; transform: scale(0.9); filter: blur(6px) grayscale(100%); 
+      transition: all 0.1s ease-out; 
+      opacity: 0.3; transform: scale(0.95); filter: blur(3px) grayscale(100%); 
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
   }
   
   /* CARD ATTIVA */
   .barcode-card.active-focus { 
-      opacity: 1; transform: scale(1.15); filter: none; 
+      opacity: 1; transform: scale(1.05); filter: none; 
       border: 4px solid var(--primary); 
       box-shadow: 0 0 50px -10px var(--primary-glow); 
-      margin: 80px 0; z-index: 10; 
+      margin: 40px 0; z-index: 10; 
   }
   
-  /* Barcode SVG in Focus: Alto 180px e stretto */
-  .barcode-card.active-focus svg { height: 180px !important; width: auto !important; max-width: 95%; filter: none; opacity: 1; }
+  .barcode-card.active-focus svg { height: 180px !important; width: auto !important; max-width: 90%; filter: none; opacity: 1; }
   .barcode-card.active-focus .human-readable { font-size: 2rem; color: #000; font-weight: 900; letter-spacing: 2px; }
-  .barcode-card.active-focus .zone-box { background: var(--primary); color: white; }
+  .barcode-card.active-focus .zone-box { background: var(--primary); color: black; }
   
-  /* Stati */
   .barcode-card.scanned { display: none; }
   .barcode-card.hidden { display: none; }
 
@@ -126,7 +154,6 @@ const styles = `
   .human-readable { font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #3f3f46; margin-top: 5px; transition: font-size 0.1s; }
   .details { font-size: 0.8rem; color: #71717a; margin-top: 5px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; font-weight: bold; }
 
-  /* ZONE COLORS */
   .border-A { border-left: 6px solid #ef4444; } 
   .border-B { border-left: 6px solid #3b82f6; }
   .border-C { border-left: 6px solid #eab308; } 
@@ -164,7 +191,6 @@ export default function GLSReader() {
   const [showModal, setShowModal] = useState(false);
   const [manualData, setManualData] = useState({ sede: '', sped: '', collo: '1', tipo: '0', dest: '' });
 
-  // Refs
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -189,13 +215,12 @@ export default function GLSReader() {
     });
   }, [dataList, filterQuery, filterLogic]);
 
-  // --- FOCUS & SCROLL (ULTRA VELOCE) ---
+  // --- FOCUS & SCROLL ---
   const updateFocus = useCallback(() => {
     const firstPending = filteredList.find(item => item.status !== 'scanned');
 
     if (firstPending) {
         setActiveId(firstPending.id);
-        // Timeout quasi zero per scroll immediato
         setTimeout(() => {
             const el = document.querySelector(`[data-id="${firstPending.id}"]`);
             if (el) {
@@ -207,9 +232,7 @@ export default function GLSReader() {
     }
   }, [filteredList]);
 
-  // Trigger immediato
   useEffect(() => {
-    // 0ms delay: scatta appena React finisce il render
     const t = setTimeout(updateFocus, 0); 
     return () => clearTimeout(t);
   }, [updateFocus]);
@@ -226,6 +249,7 @@ export default function GLSReader() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeId, showModal]); 
 
+  // Drag & Drop
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragActive(true); };
   const onDragLeave = () => setIsDragActive(false);
   const onDrop = (e: React.DragEvent) => {
@@ -243,6 +267,7 @@ export default function GLSReader() {
       reader.readAsText(file);
   };
 
+  // Audio Logic
   const toggleAudio = async () => {
     if (isListening) {
       if (audioCtxRef.current) audioCtxRef.current.close();
@@ -291,7 +316,7 @@ export default function GLSReader() {
     if (visualVal > threshold && !cooldownRef.current) {
         triggerAction();
         cooldownRef.current = true;
-        setTimeout(() => { cooldownRef.current = false; }, 300); // Cooldown ridotto
+        setTimeout(() => { cooldownRef.current = false; }, 300);
     }
     animationRef.current = requestAnimationFrame(detectSound);
   };
@@ -390,7 +415,7 @@ export default function GLSReader() {
 
       <style jsx global>{styles}</style>
 
-      <div className="flex flex-col h-screen overflow-hidden bg-black text-white font-sans selection:bg-orange-500/30">
+      <div className="flex flex-col h-screen overflow-hidden bg-black text-white font-sans selection:bg-amber-500/30">
         
         {/* HEADER */}
         <div className="top-section">
@@ -398,11 +423,11 @@ export default function GLSReader() {
             <div className="flex items-center gap-3">
                <Link href="/" className="text-zinc-400 hover:text-white transition-colors"><ArrowLeft size={20}/></Link>
                <h1 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
-                 <Terminal size={18} className="text-orange-500"/> Lettore Incongruenze
+                 <Terminal size={18} className="text-amber-500"/> Lettore Incongruenze
                </h1>
             </div>
             <div className="flex items-center gap-3">
-               <button onClick={() => setShowModal(true)} className="bg-zinc-800 border border-zinc-700 hover:border-orange-500 text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all">
+               <button onClick={() => setShowModal(true)} className="bg-zinc-800 border border-zinc-700 hover:border-amber-500 text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all">
                  <Plus size={14} /> Manuale
                </button>
                <div className={`status-led ${ledActive ? 'flash' : ''}`}></div>
@@ -420,14 +445,13 @@ export default function GLSReader() {
                    </div>
                 </button>
 
-                {/* DROP ZONE */}
                 <div 
                     className={`drop-zone ${isDragActive ? 'drag-active' : ''}`} 
                     onDragOver={onDragOver}
                     onDragLeave={onDragLeave}
                     onDrop={onDrop}
                 >
-                   <p className="font-bold text-orange-500 text-xs uppercase mb-2 flex items-center gap-2"><Upload size={14}/> Carica Dati</p>
+                   <p className="font-bold text-amber-500 text-xs uppercase mb-2 flex items-center gap-2"><Upload size={14}/> Carica Dati</p>
                    
                    <div className="flex gap-2 w-full px-2">
                        <input type="file" id="fileUpload" className="hidden" accept=".txt,.csv" onChange={handleFileChange} />
@@ -436,7 +460,7 @@ export default function GLSReader() {
                            Sfoglia PC
                        </button>
 
-                       <a href="search-ms:displayname=Risultati%20ricerca%20in%20%5C%5C10.58.125.2%5Cpc&crumb=System.Generic.String%3Anatana&crumb=location:%5C%5C10.58.125.2%5Cpc" target="_blank" className="flex-1 bg-orange-900/30 border border-orange-500/30 px-2 py-1 rounded text-[10px] font-bold text-orange-400 text-center hover:bg-orange-500/20 hover:border-orange-500 transition-all flex items-center justify-center">
+                       <a href="search-ms:displayname=Risultati%20ricerca%20in%20%5C%5C10.58.125.2%5Cpc&crumb=System.Generic.String%3Anatana&crumb=location:%5C%5C10.58.125.2%5Cpc" target="_blank" className="flex-1 bg-amber-900/30 border border-amber-500/30 px-2 py-1 rounded text-[10px] font-bold text-amber-400 text-center hover:bg-amber-500/20 hover:border-amber-500 transition-all flex items-center justify-center">
                            Apri Server
                        </a>
                    </div>
@@ -445,7 +469,6 @@ export default function GLSReader() {
                 </div>
              </div>
 
-             {/* FILTRI */}
              <div className="border-t border-zinc-800 pt-3 grid grid-cols-2 gap-4 items-center">
                 <div>
                    <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Filtro Sequenza</label>
@@ -477,13 +500,13 @@ export default function GLSReader() {
         </div>
 
         {/* LISTA SCORREVOLE */}
-        <div className="list-container" id="scrollContainer">
+        <div className="list-wrapper" id="scrollContainer">
            <div className="barcode-list">
               {filteredList.length === 0 && (
-                 <div className="flex flex-col items-center justify-center mt-20 opacity-30">
-                    <FileText size={48} className="mb-4 text-zinc-600"/>
+                 <div className="empty-state">
+                    <FileText size={48} className="mb-4 text-zinc-700"/>
                     <p className="text-sm font-bold text-zinc-500">Nessun dato da mostrare</p>
-                    <p className="text-[10px] text-zinc-600">Carica un file o cambia filtri</p>
+                    <p className="text-[10px] text-zinc-600 mt-1">Carica un file o cambia filtri</p>
                  </div>
               )}
               
@@ -497,9 +520,8 @@ export default function GLSReader() {
                           <h2 className="text-4xl font-black m-0 leading-none text-white">{item.zona}</h2>
                           <span className="text-[10px] font-bold opacity-50 mt-1">ZONA</span>
                        </div>
-                       <div className="p-4 text-center flex flex-col items-center justify-center">
-                          {/* LISTA: Barcode GRANDE (h=180, w=3) */}
-                          <BarcodeCanvas text={item.barcode} ready={isScriptLoaded} options={{ height: 180, width: 3 }} />
+                       <div className="p-6 text-center flex flex-col items-center justify-center"> {/* Increased padding p-6 */}
+                          <BarcodeCanvas text={item.barcode} ready={isScriptLoaded} options={{ height: 180, width: 2.5 }} /> {/* Thinner width 2.5 */}
                           <div className="human-readable">{item.human}</div>
                           <div className="details">{item.details}</div>
                        </div>
@@ -514,17 +536,17 @@ export default function GLSReader() {
            <div className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-md flex justify-center items-center p-6">
               <div className="bg-zinc-900 w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-zinc-800 animate-in zoom-in-95 duration-200">
                  <h3 className="text-white font-black uppercase text-lg border-b border-zinc-800 pb-4 mb-4 flex items-center gap-2">
-                    <Plus size={18} className="text-orange-500"/> Nuovo Pacco
+                    <Plus size={18} className="text-amber-500"/> Nuovo Pacco
                  </h3>
                  
                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                        <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Sede</label>
-                       <input className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white uppercase focus:border-orange-500 outline-none" maxLength={4} placeholder="AB" value={manualData.sede} onChange={e => setManualData({...manualData, sede: e.target.value.toUpperCase()})} />
+                       <input className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white uppercase focus:border-amber-500 outline-none" maxLength={4} placeholder="AB" value={manualData.sede} onChange={e => setManualData({...manualData, sede: e.target.value.toUpperCase()})} />
                     </div>
                     <div>
                        <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Spedizione</label>
-                       <input className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white focus:border-orange-500 outline-none" maxLength={9} placeholder="123456789" value={manualData.sped} onChange={e => setManualData({...manualData, sped: e.target.value.replace(/\D/g,'')})} />
+                       <input className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white focus:border-amber-500 outline-none" maxLength={9} placeholder="123456789" value={manualData.sped} onChange={e => setManualData({...manualData, sped: e.target.value.replace(/\D/g,'')})} />
                     </div>
                  </div>
 
@@ -535,7 +557,6 @@ export default function GLSReader() {
                  </div>
 
                  <div className="bg-white p-4 rounded-xl flex items-center justify-center mb-6 h-24 overflow-hidden border border-zinc-700">
-                    {/* MODALE: Barcode PICCOLO (h=80, w=2) */}
                     <BarcodeCanvas 
                         text={`
                             ${manualData.sede.toUpperCase()}
@@ -554,7 +575,7 @@ export default function GLSReader() {
 
                  <div className="flex gap-3">
                     <button onClick={() => setShowModal(false)} className="flex-1 py-3 bg-zinc-800 font-bold text-zinc-400 rounded-xl text-xs uppercase hover:bg-zinc-700 transition-colors">Annulla</button>
-                    <button onClick={addManual} className="flex-1 py-3 bg-orange-600 font-bold text-white rounded-xl text-xs uppercase shadow-lg shadow-orange-900/20 hover:bg-orange-500 transition-colors">Aggiungi</button>
+                    <button onClick={addManual} className="flex-1 py-3 bg-amber-600 font-bold text-white rounded-xl text-xs uppercase shadow-lg shadow-amber-900/20 hover:bg-amber-500 transition-colors">Aggiungi</button>
                  </div>
               </div>
            </div>
