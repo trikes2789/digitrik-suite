@@ -35,34 +35,42 @@ export default function FiltroSpedizioniPage() {
     }
   };
 
-  // --- LOGICA DI ELABORAZIONE FILE ---
+  // --- LOGICA DI ELABORAZIONE FILE CORRETTA ---
   const elaboraFile = (file) => {
     const reader = new FileReader();
 
     reader.onload = (evento) => {
       const testo = evento.target.result;
-      const righe = testo.split('\n');
+      
+      // Divisione sicura delle righe (supporta sia file Windows che Mac/Linux)
+      const righe = testo.split(/\r?\n/);
       const nuoviRisultati = [];
 
       // Partiamo da i = 1 per saltare l'intestazione
       for (let i = 1; i < righe.length; i++) {
-        const riga = righe[i].trim();
-        if (riga === "") continue;
+        const riga = righe[i];
+        
+        // Saltiamo solo le righe che sono letteralmente vuote
+        if (riga.trim() === "") continue;
 
+        // Dividiamo le colonne PRIMA di fare il trim per non perdere le colonne vuote alla fine
         const colonne = riga.split('\t');
 
-        if (colonne.length >= 15) {
-          const sede = colonne[0].trim();
-          const nSped = colonne[1].trim();
-          const firmaOra = colonne[11].trim().toUpperCase();
-          const autista = colonne[14].trim().toUpperCase();
+        // Ci bastano 12 colonne per arrivare all'indice 11 (Firma)
+        if (colonne.length > 11) {
+          
+          // Estrazione sicura con fallback "" se la colonna è vuota
+          const sede = (colonne[0] || "").trim();
+          const nSped = (colonne[1] || "").trim();
+          const firmaOra = (colonne[11] || "").trim().toUpperCase();
+          const autista = (colonne[14] || "").trim().toUpperCase();
 
-          // Filtro: Escludi se autista contiene "TEMPI DI RESA (48 E 72)"
-          if (autista.includes("TEMPI DI RESA (48 E 72)")) {
+          // Filtro 1: Se l'autista contiene "TEMPI DI RESA", è sul camion corretto -> SCARTA
+          if (autista.includes("TEMPI DI RESA")) {
             continue;
           }
 
-          // Filtro: Includi se firmaOra contiene "22 LOCALITA' SERVITA IN 48 ORE"
+          // Filtro 2: Se NON è sul quel camion, ma la località richiede 48 ORE -> INCONGRUENZA
           if (firmaOra.includes("22 LOCALITA' SERVITA IN 48 ORE")) {
             nuoviRisultati.push({ sede, nSped });
           }
@@ -73,7 +81,8 @@ export default function FiltroSpedizioniPage() {
       setHasSearched(true);
     };
 
-    reader.readAsText(file);
+    // Lettura con encoding per supportare correttamente gli apostrofi e accenti dei file testuali
+    reader.readAsText(file, 'ISO-8859-1');
   };
 
   // --- RESET APP ---
@@ -100,7 +109,7 @@ export default function FiltroSpedizioniPage() {
         </div>
 
         {/* CONTENITORE PRINCIPALE */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 min-h-[400px] print:border-none print:p-0 print:bg-white">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 min-h-[400px] print:border-none print:p-0 print:bg-white print:shadow-none">
            
            {/* AREA DRAG & DROP (nascosta in stampa) */}
            <div className="print:hidden">
@@ -167,7 +176,7 @@ export default function FiltroSpedizioniPage() {
 
                {/* TABELLA */}
                {risultati.length > 0 && (
-                 <div className="overflow-hidden rounded-xl border border-zinc-800 print:border-black">
+                 <div className="overflow-hidden rounded-xl border border-zinc-800 print:border-black print:rounded-none">
                    <table className="w-full text-left border-collapse">
                      <thead>
                        <tr className="bg-zinc-950 print:bg-gray-200">
