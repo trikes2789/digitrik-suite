@@ -2,12 +2,16 @@
 
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Truck, UploadCloud, Printer, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Truck, UploadCloud, Printer, RefreshCw, Copy, Check } from 'lucide-react';
 
 export default function FiltroSpedizioniPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [risultati, setRisultati] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
+  
+  // Stato per il feedback visivo della copia
+  const [copiedIndex, setCopiedIndex] = useState(null);
+  
   const fileInputRef = useRef(null);
 
   // --- GESTIONE DRAG & DROP ---
@@ -35,44 +39,35 @@ export default function FiltroSpedizioniPage() {
     }
   };
 
-  // --- LOGICA DI ELABORAZIONE FILE CORRETTA ---
+  // --- LOGICA DI ELABORAZIONE FILE ---
   const elaboraFile = (file) => {
     const reader = new FileReader();
 
     reader.onload = (evento) => {
       const testo = evento.target.result;
-      
-      // Divisione sicura delle righe (supporta sia file Windows che Mac/Linux)
       const righe = testo.split(/\r?\n/);
       const nuoviRisultati = [];
 
-      // Partiamo da i = 1 per saltare l'intestazione
       for (let i = 1; i < righe.length; i++) {
         const riga = righe[i];
-        
-        // Saltiamo solo le righe che sono letteralmente vuote
         if (riga.trim() === "") continue;
 
-        // Dividiamo le colonne PRIMA di fare il trim per non perdere le colonne vuote alla fine
         const colonne = riga.split('\t');
 
-        // Ci bastano 12 colonne per arrivare all'indice 11 (Firma)
         if (colonne.length > 11) {
-          
-          // Estrazione sicura con fallback "" se la colonna è vuota
           const sede = (colonne[0] || "").trim();
           const nSped = (colonne[1] || "").trim();
           const firmaOra = (colonne[11] || "").trim().toUpperCase();
           const autista = (colonne[14] || "").trim().toUpperCase();
 
-          // Filtro 1: Se l'autista contiene "TEMPI DI RESA", è sul camion corretto -> SCARTA
           if (autista.includes("TEMPI DI RESA")) {
             continue;
           }
 
-          // Filtro 2: Se NON è sul quel camion, ma la località richiede 48 ORE -> INCONGRUENZA
           if (firmaOra.includes("22 LOCALITA' SERVITA IN 48 ORE")) {
-            nuoviRisultati.push({ sede, nSped });
+            // Unifichiamo direttamente Sede e Numero Spedizione senza spazi
+            const spedizioneUnificata = `${sede}${nSped}`;
+            nuoviRisultati.push({ spedizioneUnificata });
           }
         }
       }
@@ -81,14 +76,52 @@ export default function FiltroSpedizioniPage() {
       setHasSearched(true);
     };
 
-    // Lettura con encoding per supportare correttamente gli apostrofi e accenti dei file testuali
     reader.readAsText(file, 'ISO-8859-1');
+  };
+
+  // --- FUNZIONI DI COPIA (CON FALLBACK DI SICUREZZA) ---
+  const copiaSingolo = (testo, index) => {
+    // Funzione che mostra la spunta verde e la rimuove dopo 2 secondi
+    const mostraSpunta = () => {
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    };
+
+    // Controllo se la Clipboard API è bloccata
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      // Metodo moderno
+      navigator.clipboard.writeText(testo)
+        .then(mostraSpunta)
+        .catch((err) => console.error('Errore copia moderna:', err));
+    } else {
+      // Metodo Fallback per HTTP / restrizioni browser
+      const textArea = document.createElement("textarea");
+      textArea.value = testo;
+      // Nascondi la textarea per non rovinare la grafica
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        mostraSpunta();
+      } catch (err) {
+        console.error('Fallback copia fallito', err);
+        alert("Il browser ha bloccato la copia automatica. Seleziona il testo manualmente.");
+      }
+      
+      document.body.removeChild(textArea);
+    }
   };
 
   // --- RESET APP ---
   const resetApp = () => {
     setRisultati([]);
     setHasSearched(false);
+    setCopiedIndex(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -98,7 +131,7 @@ export default function FiltroSpedizioniPage() {
     <div className="min-h-screen bg-[#09090b] text-zinc-200 p-8 font-sans flex flex-col items-center print:bg-white print:p-0 print:text-black">
       
       <div className="max-w-4xl w-full">
-        {/* INTESTAZIONE (nascosta in stampa) */}
+        {/* INTESTAZIONE */}
         <div className="flex items-center gap-4 mb-12 print:hidden">
            <Link href="/dashboard" className="p-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-all text-zinc-400 hover:text-white">
              <ArrowLeft size={20} />
@@ -111,7 +144,7 @@ export default function FiltroSpedizioniPage() {
         {/* CONTENITORE PRINCIPALE */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 min-h-[400px] print:border-none print:p-0 print:bg-white print:shadow-none">
            
-           {/* AREA DRAG & DROP (nascosta in stampa) */}
+           {/* AREA DRAG & DROP */}
            <div className="print:hidden">
              <div 
                onDragOver={handleDragOver}
@@ -147,11 +180,11 @@ export default function FiltroSpedizioniPage() {
                <div className="flex items-center justify-between mb-6 print:hidden">
                  <h2 className={`text-xl font-bold ${risultati.length > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                    {risultati.length > 0 
-                     ? `Trovate ${risultati.length} spedizioni incongruenti` 
-                     : "Nessun risultato trovato in questo file."}
+                     ? `Trovate ${risultati.length} spedizioni` 
+                     : "Nessun risultato trovato."}
                  </h2>
                  
-                 <div className="flex gap-3">
+                 <div className="flex gap-2">
                    {risultati.length > 0 && (
                      <button 
                        onClick={() => window.print()} 
@@ -164,15 +197,10 @@ export default function FiltroSpedizioniPage() {
                      onClick={resetApp} 
                      className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white rounded-lg font-medium transition-colors"
                    >
-                     <RefreshCw size={18} /> Nuovo File
+                     <RefreshCw size={18} /> Nuovo
                    </button>
                  </div>
                </div>
-
-               {/* Titolo visibile solo in fase di stampa */}
-               <h2 className="hidden print:block text-2xl font-bold mb-4 border-b border-black pb-2 text-black">
-                 Report Incongruenze Spedizioni (Totale: {risultati.length})
-               </h2>
 
                {/* TABELLA */}
                {risultati.length > 0 && (
@@ -180,15 +208,25 @@ export default function FiltroSpedizioniPage() {
                    <table className="w-full text-left border-collapse">
                      <thead>
                        <tr className="bg-zinc-950 print:bg-gray-200">
-                         <th className="p-4 font-semibold text-zinc-300 border-b border-zinc-800 print:text-black print:border-black">Sede</th>
-                         <th className="p-4 font-semibold text-zinc-300 border-b border-zinc-800 print:text-black print:border-black">N. Spedizione</th>
+                         <th className="p-4 font-semibold text-zinc-100 border-b border-zinc-800 print:text-black print:border-black">Spedizione</th>
+                         <th className="p-4 border-b border-zinc-800 print:hidden w-24"></th>
                        </tr>
                      </thead>
                      <tbody>
                        {risultati.map((item, index) => (
-                         <tr key={index} className="bg-zinc-900 hover:bg-zinc-800 transition-colors print:bg-white">
-                           <td className="p-4 border-b border-zinc-800/50 text-zinc-300 print:text-black print:border-black">{item.sede}</td>
-                           <td className="p-4 border-b border-zinc-800/50 font-mono text-amber-400 print:text-black print:border-black">{item.nSped}</td>
+                         <tr key={index} className="bg-zinc-900 hover:bg-zinc-800 transition-colors print:bg-white group">
+                           <td className="p-4 border-b border-zinc-800/50 font-mono text-lg font-bold text-amber-400 print:text-black print:border-black">
+                             {item.spedizioneUnificata}
+                           </td>
+                           <td className="p-4 border-b border-zinc-800/50 print:hidden text-right">
+                             <button
+                               onClick={() => copiaSingolo(item.spedizioneUnificata, index)}
+                               className="p-2 rounded-md bg-zinc-950 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 transition-all opacity-50 group-hover:opacity-100"
+                               title="Copia Spedizione"
+                             >
+                               {copiedIndex === index ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
+                             </button>
+                           </td>
                          </tr>
                        ))}
                      </tbody>
