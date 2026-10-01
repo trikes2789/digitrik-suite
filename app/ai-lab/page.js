@@ -94,9 +94,20 @@ const TRANSLATIONS = {
       audio: "Soundscape (Audio)"
     },
     seo: {
-      title: "Prompt Engineering Semplificato",
-      p1: "Digitrik Synapse è il ponte tra la tua immaginazione e l'Intelligenza Artificiale. Non serve essere esperti: tu metti l'idea, Synapse calcola i parametri tecnici.",
-      p2: "Il sistema genera prompt ottimizzati multipiattaforma (ChatGPT, Midjourney, Suno) garantendo coerenza stilistica e massima qualità dell'output."
+      title: "Guida al Prompt Engineering per AI Generativa",
+      intro: "Digitrik Synapse è un'interfaccia avanzata progettata per colmare il divario tra l'intento umano e l'interpretazione algoritmica. Utilizzando un sistema di calibrazione a tre assi (Intensità, Epoca, Realtà), Synapse traduce concetti astratti in token ottimizzati per LLM e modelli di diffusione.",
+      h1: "Come ottimizzare i Prompt per Midjourney e DALL-E 3",
+      p1: "La qualità di un'immagine generata dipende al 80% dalla struttura del prompt. Synapse automatizza la sintassi tecnica richiesta dai modelli moderni:",
+      ul1: [
+        "**Soggetto e Azione:** Definisce chiaramente chi fa cosa (es. 'Astronauta beve caffè').",
+        "**Parametri Stilistici:** Converte le tue scelte (es. 'Cyberpunk') in keyword specifiche come 'neon lights, chromatic aberration'.",
+        "**Modificatori di Rendering:** Aggiunge automaticamente termini tecnici come 'Octane Render', 'Unreal Engine 5' o 'Macro Photography' in base allo slider Realtà.",
+        "**Rapporto d'aspetto (--ar):** Ottimizza i suffissi per garantire la corretta inquadratura."
+      ],
+      h2: "Ottimizzazione per ChatGPT e Scrittura Creativa",
+      p2: "Per la generazione di testo, Synapse imposta il 'System Persona'. Invece di chiedere semplicemente 'scrivi una storia', il tool costruisce un contesto: 'Agisci come uno scrittore professionista. Tono: Minimal Zen. Scrivi una storia su...'. Questo pre-condizionamento migliora drasticamente la coerenza e la qualità dell'output testuale.",
+      h3: "Perché usare un generatore di prompt?",
+      p3: "Evita la 'Sindrome del foglio bianco' e riduce i tentativi falliti (e i costi dei crediti AI). Standardizzando la struttura dei prompt, ottieni risultati riproducibili e stilisticamente coerenti per interi progetti editoriali o artistici."
     }
   }
 };
@@ -377,17 +388,39 @@ export default function Synapse() {
                     </div>
                 )}
 
-                {/* SEO */}
-                <div className="mt-8 pt-12 border-t border-white/5 text-zinc-400">
+                {/* SEO CONTENT (ADSENSE OPTIMIZED) */}
+                <div className="mt-16 pt-12 border-t border-white/5 text-zinc-400">
                     <div className="flex items-center gap-2 mb-6">
                         <BookOpen size={20} className="text-indigo-500"/>
                         <h2 className="text-2xl font-black text-white tracking-tight">{t.seo.title}</h2>
                     </div>
                     <div className="prose prose-invert prose-sm max-w-none">
-                        <p className="leading-relaxed mb-8 text-zinc-300">{t.seo.p1}</p>
-                        <div className="bg-indigo-900/10 p-6 rounded-2xl border border-indigo-500/10">
-                            <h3 className="text-lg font-bold text-indigo-400 mb-2 flex items-center gap-2"><Layers size={16}/> Multimodale</h3>
-                            <p className="text-xs leading-relaxed text-indigo-100/70">{t.seo.p2}</p>
+                        <p className="leading-relaxed mb-8 text-zinc-300">{t.seo.intro}</p>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                             <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5">
+                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><Layers size={18} className="text-indigo-500"/> {t.seo.h1}</h3>
+                                <p className="mb-4 text-xs leading-relaxed">{t.seo.p1}</p>
+                                <ul className="space-y-3">
+                                    {t.seo.ul1.map((item, idx) => (
+                                        <li key={idx} className="flex items-start gap-2 text-xs leading-relaxed">
+                                            <div className="min-w-[4px] h-[4px] mt-1.5 rounded-full bg-indigo-500/50"></div>
+                                            <span>{item.includes('**') ? <><strong className="text-zinc-200">{item.split('**')[1]}</strong>{item.split('**')[2]}</> : item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                             </div>
+                             
+                             <div className="space-y-6">
+                                <div className="bg-zinc-950/50 p-6 rounded-2xl border border-white/5">
+                                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><MessageSquare size={18} className="text-indigo-500"/> {t.seo.h2}</h3>
+                                    <p className="text-xs leading-relaxed">{t.seo.p2}</p>
+                                </div>
+                                <div className="bg-indigo-900/10 p-6 rounded-2xl border border-indigo-500/10">
+                                    <h3 className="text-lg font-bold text-indigo-400 mb-2 flex items-center gap-2"><Zap size={16}/> {t.seo.h3}</h3>
+                                    <p className="text-xs leading-relaxed text-indigo-100/70">{t.seo.p3}</p>
+                                </div>
+                             </div>
                         </div>
                     </div>
                 </div>

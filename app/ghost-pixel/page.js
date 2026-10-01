@@ -128,20 +128,20 @@ const TRANSLATIONS = {
         WIFI: { key: "Tech", text: "Si possono nascondere dati non solo nelle immagini, ma anche nei file audio (MP3) e persino nel ritardo dei pacchetti di rete." }
     },
     seo: {
-      title: "Guida Completa alla Steganografia Digitale",
-      intro: "Ghost Pixel è uno strumento professionale per la steganografia che ti permette di nascondere messaggi di testo segreti all'interno di normali immagini. A differenza della crittografia, che rende i dati illeggibili, la steganografia nasconde l'esistenza stessa dei dati.",
-      h1: "Come funziona la tecnica LSB?",
-      p1: "LSB sta per **Least Significant Bit** (Bit Meno Significativo). Le immagini digitali sono composte da pixel, e ogni pixel è formato da 3 canali colore (Rosso, Verde, Blu). Ogni canale è un numero da 0 a 255.",
+      title: "Steganografia LSB: Guida alla Sicurezza Digitale",
+      intro: "Ghost Pixel è un'implementazione lato client dell'algoritmo di steganografia LSB (Least Significant Bit). Questo strumento didattico e professionale dimostra come sia possibile proteggere informazioni sensibili nascondendole all'interno di file multimediali non sospetti, una tecnica fondamentale nella cybersecurity moderna.",
+      h1: "Come funziona l'algoritmo LSB (Least Significant Bit)?",
+      p1: "Le immagini digitali sono matrici di pixel. Ogni pixel è composto da tre canali colore (Rosso, Verde, Blu), ciascuno rappresentato da un byte (8 bit). L'algoritmo opera come segue:",
       ul1: [
-        "Ghost Pixel converte il tuo messaggio segreto in codice binario (serie di 0 e 1).",
-        "Sostituisce l'ultimo bit del valore numerico del colore del pixel con un bit del tuo messaggio.",
-        "Poiché la variazione di colore è infinitesimale (es. il Rosso passa da 255 a 254), l'occhio umano **non può percepire la differenza**.",
-        "L'immagine risultante appare identica all'originale, ma trasporta un carico nascosto."
+        "**Codifica Binaria:** Il testo segreto viene convertito in una stringa di bit (0 e 1).",
+        "**Iniezione:** L'algoritmo sostituisce l'ultimo bit (il meno significativo) del valore colore di ogni pixel con un bit del messaggio.",
+        "**Invisibilità:** Poiché la modifica avviene solo sull'ultimo bit, il valore colore cambia in modo impercettibile (es. da 255 a 254). L'occhio umano non può distinguere l'immagine modificata dall'originale.",
+        "**Nessun Aumento di Dimensione:** A differenza di altri metodi, la dimensione del file in pixel rimane invariata."
       ],
-      h2: "Perché è obbligatorio usare il formato PNG?",
-      p2: "La steganografia è fragile. Formati come **JPG/JPEG** usano una 'compressione lossy', cioè eliminano alcuni dati dell'immagine per risparmiare spazio. Se salvi un'immagine Ghost Pixel in JPG, l'algoritmo di compressione cancellerà il rumore di fondo, **distruggendo il tuo messaggio segreto**. Il PNG è un formato 'lossless' (senza perdita), che conserva i bit esattamente come sono stati scritti.",
-      h3: "Privacy e Sicurezza",
-      p3: "Molti strumenti online caricano le tue foto su un server per elaborarle. Ghost Pixel funziona al 100% nel tuo browser usando JavaScript. Le tue foto e i tuoi segreti non lasciano mai il tuo dispositivo."
+      h2: "L'importanza del formato PNG 'Lossless'",
+      p2: "La steganografia è estremamente fragile rispetto alla compressione. Formati come il **JPEG** utilizzano algoritmi 'lossy' che approssimano i colori per risparmiare spazio, distruggendo di fatto i bit meno significativi dove risiede il messaggio. Ghost Pixel forza l'uso del formato **PNG (Portable Network Graphics)**, che è 'lossless', garantendo che ogni singolo bit di informazione venga preservato bit-per-bit durante il salvataggio.",
+      h3: "Privacy 'Client-Side' Assoluta",
+      p3: "In un'epoca di sorveglianza digitale, la privacy è fondamentale. Ghost Pixel esegue tutti i calcoli crittografici localmente tramite JavaScript. Le immagini e i messaggi non vengono mai inviati a un server, eliminando il rischio di intercettazione 'Man-in-the-Middle' o archiviazione non autorizzata."
     }
   }
 };

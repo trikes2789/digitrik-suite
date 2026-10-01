@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Terminal, FileSpreadsheet, Ghost, ArrowLeft } from 'lucide-react';
+// Ho aggiunto l'icona "Truck" (Camion) per il filtro spedizioni
+import { Terminal, FileSpreadsheet, Ghost, ArrowLeft, Truck } from 'lucide-react';
 
 export default function GhostDashboard() {
   return (
@@ -36,6 +37,15 @@ export default function GhostDashboard() {
              </div>
              <h3 className="text-2xl font-bold text-white mb-2">Filtro Excel</h3>
              <p className="text-sm text-zinc-500">Analisi file XLSX per individuare duplicati e barcode errati.</p>
+          </Link>
+
+          {/* NUOVO LINK: FILTRO SPEDIZIONI */}
+          <Link href="/filtro-spedizioni" className="group block p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-blue-500/50 hover:bg-zinc-900/80 transition-all">
+             <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 mb-6 group-hover:scale-110 transition-transform">
+               <Truck size={28} />
+             </div>
+             <h3 className="text-2xl font-bold text-white mb-2">Filtro Spedizioni TEMPI DI RESA</h3>
+             <p className="text-sm text-zinc-500">Monitoraggio e analisi dei tempi di resa delle spedizioni.</p>
           </Link>
 
         </div>

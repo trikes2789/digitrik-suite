@@ -89,18 +89,18 @@ const TRANSLATIONS = {
     },
     seo: {
       title: "Guida Completa all'Ottimizzazione Immagini",
-      intro: "Digitrik Pro Image Studio è una suite all-in-one per la gestione delle immagini digitali. A differenza dei convertitori tradizionali, questo strumento lavora al 100% nel tuo browser, garantendo che le tue foto personali non vengano mai caricate su server esterni.",
-      h1: "Compressione Lossy vs Lossless: Quale scegliere?",
-      p1: "Quando riduci il peso di un'immagine, devi scegliere tra qualità e dimensione.",
+      intro: "Digitrik Pro Image Studio è una suite all-in-one per la gestione professionale delle immagini digitali. Progettato per webmaster, fotografi e creatori di contenuti, questo strumento offre potenti algoritmi di compressione e manipolazione direttamente nel browser, garantendo zero perdita di dati e massima privacy.",
+      h1: "Compressione Lossy vs Lossless: Guida alla Scelta",
+      p1: "Ridurre il peso delle immagini è cruciale per la SEO e la velocità del sito (Core Web Vitals). Ecco come scegliere il formato giusto:",
       ul1: [
-        "**JPEG (Lossy):** Ideale per fotografie. Elimina dati invisibili all'occhio umano. Riduce il peso fino all'80% con perdita di qualità minima.",
-        "**PNG (Lossless):** Perfetto per grafiche, loghi e screenshot. Mantiene ogni singolo pixel e supporta la trasparenza, ma genera file più pesanti.",
-        "**WebP:** Il formato moderno di Google. Offre la qualità del JPEG e la trasparenza del PNG, ma con un peso inferiore del 30%. È lo standard per il web moderno."
+        "**JPEG (Lossy):** Lo standard per la fotografia. Utilizza algoritmi di compressione che scartano le frequenze di colore meno visibili all'occhio umano. Ideale per ridurre foto pesanti fino all'80%.",
+        "**PNG (Lossless):** Utilizza la compressione DEFLATE senza perdita di dati. È essenziale per loghi, grafiche con testo e immagini che richiedono trasparenza (canale Alpha).",
+        "**WebP (Moderno):** Sviluppato da Google, offre il meglio dei due mondi: compressione superiore al JPEG e supporto trasparenza del PNG, con un risparmio medio del 30% in termini di peso."
       ],
-      h2: "Ridimensionamento e DPI",
-      p2: "Ridimensionare un'immagine (Resize) significa cambiare il numero effettivo di pixel. Se devi stampare una foto, assicurati di avere almeno 300 DPI (Punti per pollice). Per il web, 72 DPI sono sufficienti, ma è più importante guardare la risoluzione in pixel (es. 1920x1080 per il Full HD).",
-      h3: "Privacy e Metadati EXIF",
-      p3: "Ogni volta che scatti una foto con lo smartphone, nel file vengono salvati dati nascosti (EXIF): modello del telefono, data, ora e spesso le coordinate GPS esatte. Image Studio rimuove automaticamente questi dati durante la compressione per proteggere la tua privacy."
+      h2: "Ridimensionamento Intelligente e DPI",
+      p2: "Il ridimensionamento (Resizing) non influenza solo le dimensioni visive, ma il numero effettivo di pixel nel file. Per il web, una densità di 72 DPI è standard, mentre per la stampa è necessario mantenere almeno 300 DPI. Image Studio calcola automaticamente il rapporto d'aspetto (Aspect Ratio) per evitare distorsioni durante il ridimensionamento.",
+      h3: "Privacy Digitale: Rimozione Metadati EXIF",
+      p3: "Le foto scattate con smartphone e fotocamere digitali contengono metadati nascosti chiamati EXIF (Exchangeable Image File Format), che possono includere data, ora, modello della fotocamera e coordinate GPS precise. Questo strumento agisce come un 'Privacy Shield', rimuovendo automaticamente tutti i metadati sensibili durante il processo di elaborazione."
     }
   },
   en: {
@@ -683,7 +683,7 @@ export default function ImageStudio() {
     // HYBRID LAYOUT: min-h-screen for mobile scrolling, fixed height for desktop
     <div className="min-h-screen lg:h-screen bg-zinc-950 text-zinc-100 font-sans flex flex-col lg:flex-row lg:overflow-hidden selection:bg-green-500/30">
       
-      {/* SIDEBAR LEFT (TOOLS) - Visible on Mobile as Top Menu or Sidebar depending on pref. Keeping as Sidebar for now but Full Width */}
+      {/* SIDEBAR LEFT (TOOLS) */}
       <aside className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-white/5 bg-zinc-950 flex flex-col p-4 z-20 shrink-0">
         <div className="mb-6 px-2 flex items-center gap-2">
           <Link href="/" className="w-8 h-8 bg-zinc-800/50 hover:bg-green-600/20 rounded-lg flex items-center justify-center transition-colors group">
@@ -695,6 +695,11 @@ export default function ImageStudio() {
           </div>
         </div>
 
+        <div className="flex bg-zinc-900 rounded-lg p-1 mb-6 border border-zinc-800">
+          <button onClick={() => setLang('it')} className={`flex-1 py-1 text-[10px] font-bold uppercase rounded ${lang === 'it' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>IT</button>
+          <button onClick={() => setLang('en')} className={`flex-1 py-1 text-[10px] font-bold uppercase rounded ${lang === 'en' ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>EN</button>
+        </div>
+
         <nav className="grid grid-cols-2 lg:flex lg:flex-col gap-1 mb-6">
             <div className="col-span-2 lg:col-span-1"><SectionTitle icon={Sliders} title="Tools" /></div>
             <NavItem active={activeTab === 'compress'} onClick={() => setActiveTab('compress')} icon={Zap} label={t.nav.compress} />
@@ -703,7 +708,7 @@ export default function ImageStudio() {
             <NavItem active={activeTab === 'watermark'} onClick={() => setActiveTab('watermark')} icon={Type} label={t.nav.watermark} />
         </nav>
 
-        {/* File List - Hidden on Mobile to save space, shown on Desktop, OR kept compact */}
+        {/* File List */}
         <div className="hidden lg:block flex-1 overflow-y-auto mb-4">
             <SectionTitle icon={LayoutGrid} title={t.controls.fileList} />
             <div className="space-y-2">
@@ -785,12 +790,12 @@ export default function ImageStudio() {
                         )}
                     </div>
                     
-                    {/* MOBILE CONTROLS (Only visible on Mobile/Tablet) */}
+                    {/* MOBILE CONTROLS */}
                     <div className="lg:hidden w-full bg-zinc-950 border border-white/5 p-6 rounded-3xl shadow-sm">
                         <ToolControls />
                     </div>
 
-                    {/* SEO CONTENT SECTION */}
+                    {/* SEO CONTENT SECTION (RICH ADSENSE CONTENT) */}
                     <div className="mt-12 pt-12 border-t border-white/5 text-zinc-400">
                         <div className="flex items-center gap-2 mb-6">
                             <BookOpen size={20} className="text-green-500"/>

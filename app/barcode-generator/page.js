@@ -159,20 +159,20 @@ const TRANSLATIONS = {
       VECTOR: { text: "Il formato SVG ha risoluzione infinita. Usalo per la stampa professionale sui pacchi.", key: "Pro Tip" }
     },
     seo: {
-      title: "Guida Completa alla Generazione di Codici a Barre",
-      intro: "Digitrik Pro Barcode Studio è uno strumento professionale e sicuro per generare codici a barre di alta qualità direttamente nel browser. Che tu abbia bisogno di un EAN-13 per un prodotto da vendere, o un Code128 per la logistica, questa suite copre tutti gli standard industriali.",
-      h1: "Quale formato di Barcode scegliere?",
-      p1: "Scegliere il formato giusto è essenziale per garantire la leggibilità alla cassa o in magazzino. Ecco una panoramica degli standard più usati:",
+      title: "Generatore Codici a Barre Professionale: Guida Tecnica",
+      intro: "Digitrik Pro Barcode Studio è una suite di generazione codici a barre vettoriali compliant con gli standard GS1. A differenza dei generatori basati su server, questo strumento utilizza librerie JavaScript lato client per garantire che i dati sensibili dei prodotti non lascino mai il tuo dispositivo.",
+      h1: "Guida alla scelta dello standard (EAN, UPC, Code128)",
+      p1: "La scelta del formato corretto è cruciale per evitare errori di scansione nella GDO e nella logistica:",
       ul1: [
-        "**EAN-13:** Lo standard globale per la vendita al dettaglio (Europa, Asia, Italia). Richiede 12 cifre in input (la 13ª è il codice di controllo calcolato automaticamente).",
-        "**UPC-A:** Lo standard predominante per la vendita al dettaglio in USA e Canada.",
-        "**Code128:** Un formato ad alta densità capace di codificare lettere, numeri e simboli. È lo standard per le etichette di spedizione (Amazon, corrieri).",
-        "**ITF-14:** Progettato specificamente per la stampa su cartone ondulato (imballaggi esterni). Ha bordi spessi per tollerare la qualità di stampa inferiore."
+        "**EAN-13 (European Article Number):** Lo standard obbligatorio per la vendita al dettaglio in Europa e gran parte del mondo. Richiede 12 cifre; la 13ª è un checksum calcolato automaticamente per verificare l'integrità.",
+        "**UPC-A (Universal Product Code):** L'equivalente americano dell'EAN. Utilizzato prevalentemente in USA e Canada per il retail.",
+        "**Code128:** Un codice alfanumerico ad alta densità. È lo standard de-facto per la logistica e i corrieri (spedizioni) perché può contenere lettere e numeri in uno spazio compatto.",
+        "**ITF-14:** Specifico per imballaggi terziari (scatoloni). Le barre spesse e la cornice ('Bearer Bar') garantiscono la leggibilità anche su cartone ondulato poroso."
       ],
-      h2: "Perché usare il formato Vettoriale (SVG)?",
-      p2: "Se devi stampare il codice a barre sul packaging del prodotto, **usa sempre SVG**. A differenza del PNG (fatto di pixel, che sgrana se ingrandito), l'SVG è un formato matematico vettoriale. Rimane perfettamente nitido a qualsiasi dimensione, garantendo che i lettori laser possano scansionarlo al primo colpo.",
-      h3: "Privacy e Sicurezza Totale",
-      p3: "A differenza di molti generatori online, Digitrik Pro elabora tutto **localmente** sul tuo dispositivo. I codici dei tuoi prodotti non vengono mai caricati su un server esterno, garantendo la massima riservatezza industriale."
+      h2: "Perché il formato SVG è essenziale per la stampa?",
+      p2: "Per il packaging professionale, i formati raster (JPG/PNG) sono sconsigliati. Un'immagine PNG è composta da pixel e perde nitidezza se ridimensionata, causando errori di lettura nei laser scanner. Il formato **SVG (Scalable Vector Graphics)** generato da questo tool è matematico: mantiene linee perfettamente nitide a qualsiasi risoluzione, garantendo una scansione di 'Grado A' secondo gli standard ISO/IEC.",
+      h3: "Sicurezza dei Dati e Privacy",
+      p3: "Questo strumento opera in modalità 'Zero-Knowledge'. La generazione del codice a barre avviene interamente nella RAM del tuo browser. Nessun database esterno registra i tuoi codici prodotto, rendendolo ideale per la creazione di codici interni protetti da segreto industriale."
     }
   }
 };
