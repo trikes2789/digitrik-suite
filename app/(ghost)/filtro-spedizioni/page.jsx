@@ -9,8 +9,11 @@ export default function FiltroSpedizioniPage() {
   const [risultati, setRisultati] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
   
-  // Stato per il feedback visivo della copia
+  // Stato per la spunta temporanea (2 secondi)
   const [copiedIndex, setCopiedIndex] = useState(null);
+  
+  // NUOVO STATO: Memoria delle righe lavorate (rimane finché non si resetta)
+  const [righeCompletate, setRigheCompletate] = useState([]);
   
   const fileInputRef = useRef(null);
 
@@ -65,7 +68,6 @@ export default function FiltroSpedizioniPage() {
           }
 
           if (firmaOra.includes("22 LOCALITA' SERVITA IN 48 ORE")) {
-            // Unifichiamo direttamente Sede e Numero Spedizione senza spazi
             const spedizioneUnificata = `${sede}${nSped}`;
             nuoviRisultati.push({ spedizioneUnificata });
           }
@@ -74,30 +76,32 @@ export default function FiltroSpedizioniPage() {
 
       setRisultati(nuoviRisultati);
       setHasSearched(true);
+      setRigheCompletate([]); // Resetta le righe lavorate se si carica un nuovo file trascinandolo
     };
 
     reader.readAsText(file, 'ISO-8859-1');
   };
 
-  // --- FUNZIONI DI COPIA (CON FALLBACK DI SICUREZZA) ---
+  // --- FUNZIONI DI COPIA (CON FALLBACK E MEMORIA VISIVA) ---
   const copiaSingolo = (testo, index) => {
-    // Funzione che mostra la spunta verde e la rimuove dopo 2 secondi
+    
+    // Segna la riga come lavorata per sempre
+    if (!righeCompletate.includes(index)) {
+      setRigheCompletate(prev => [...prev, index]);
+    }
+
     const mostraSpunta = () => {
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
     };
 
-    // Controllo se la Clipboard API è bloccata
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      // Metodo moderno
       navigator.clipboard.writeText(testo)
         .then(mostraSpunta)
         .catch((err) => console.error('Errore copia moderna:', err));
     } else {
-      // Metodo Fallback per HTTP / restrizioni browser
       const textArea = document.createElement("textarea");
       textArea.value = testo;
-      // Nascondi la textarea per non rovinare la grafica
       textArea.style.position = "fixed";
       textArea.style.opacity = "0";
       document.body.appendChild(textArea);
@@ -122,6 +126,7 @@ export default function FiltroSpedizioniPage() {
     setRisultati([]);
     setHasSearched(false);
     setCopiedIndex(null);
+    setRigheCompletate([]); // Resetta le righe lavorate
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -213,22 +218,39 @@ export default function FiltroSpedizioniPage() {
                        </tr>
                      </thead>
                      <tbody>
-                       {risultati.map((item, index) => (
-                         <tr key={index} className="bg-zinc-900 hover:bg-zinc-800 transition-colors print:bg-white group">
-                           <td className="p-4 border-b border-zinc-800/50 font-mono text-lg font-bold text-amber-400 print:text-black print:border-black">
-                             {item.spedizioneUnificata}
-                           </td>
-                           <td className="p-4 border-b border-zinc-800/50 print:hidden text-right">
-                             <button
-                               onClick={() => copiaSingolo(item.spedizioneUnificata, index)}
-                               className="p-2 rounded-md bg-zinc-950 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 transition-all opacity-50 group-hover:opacity-100"
-                               title="Copia Spedizione"
+                       {risultati.map((item, index) => {
+                         const isLavorata = righeCompletate.includes(index);
+                         
+                         return (
+                           <tr 
+                             key={index} 
+                             className={`group transition-all duration-300 print:bg-white border-l-4
+                               ${isLavorata 
+                                 ? 'bg-emerald-950/30 hover:bg-emerald-950/50 border-emerald-500' 
+                                 : 'bg-zinc-900 hover:bg-zinc-800 border-transparent'
+                               }`}
+                           >
+                             <td className={`p-4 border-b border-zinc-800/50 font-mono text-lg font-bold print:text-black print:border-black transition-colors duration-300
+                               ${isLavorata ? 'text-emerald-400' : 'text-amber-400'}`}
                              >
-                               {copiedIndex === index ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
-                             </button>
-                           </td>
-                         </tr>
-                       ))}
+                               {item.spedizioneUnificata}
+                             </td>
+                             <td className="p-4 border-b border-zinc-800/50 print:hidden text-right">
+                               <button
+                                 onClick={() => copiaSingolo(item.spedizioneUnificata, index)}
+                                 className={`p-2 rounded-md border transition-all duration-300 
+                                   ${isLavorata 
+                                     ? 'bg-emerald-900/40 border-emerald-700/50 text-emerald-400 hover:bg-emerald-800/50 hover:text-emerald-300' 
+                                     : 'bg-zinc-950 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 opacity-50 group-hover:opacity-100'
+                                   }`}
+                                 title={isLavorata ? "Copia di nuovo" : "Copia Spedizione"}
+                               >
+                                 {copiedIndex === index ? <Check size={18} className="text-emerald-400" /> : <Copy size={18} />}
+                               </button>
+                             </td>
+                           </tr>
+                         );
+                       })}
                      </tbody>
                    </table>
                  </div>
