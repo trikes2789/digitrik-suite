@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Script from 'next/script';
 import { 
   Upload, Search, Plus, 
-  Terminal, FileText, Settings 
+  Terminal, FileText, Settings, MapPin, ChevronDown
 } from 'lucide-react';
 
 /* STILI CSS INLINE - TEMA AMBRA UNIFORME */
@@ -158,6 +158,12 @@ export default function GeneratoreSpedizioni() {
   const [dataList, setDataList] = useState<any[]>([]);
   const [scannedCount, setScannedCount] = useState(0);
   const [filterQuery, setFilterQuery] = useState('');
+  
+  // --- STATI PER IL FILTRO LOCALITÀ MULTIPLO ---
+  const [localitaDisponibili, setLocalitaDisponibili] = useState<string[]>([]);
+  const [localitaSelezionate, setLocalitaSelezionate] = useState<string[]>([]);
+  const [menuLocalitaAperto, setMenuLocalitaAperto] = useState(false);
+  
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -177,12 +183,29 @@ export default function GeneratoreSpedizioni() {
       }));
   }, []);
 
+  // Gestione della spunta multipla delle località
+  const toggleLocalita = (loc: string) => {
+      setLocalitaSelezionate(prev => 
+          prev.includes(loc) 
+              ? prev.filter(l => l !== loc) // Rimuovi se c'è
+              : [...prev, loc]              // Aggiungi se non c'è
+      );
+  };
+
   // Filtro
   const filteredList = useMemo(() => {
     return dataList.filter(item => {
+      // 1. Filtro Località Multiplo (se non c'è nessuna selezione, mostra tutte)
+      if (localitaSelezionate.length > 0 && item.localita !== 'MANUALE') {
+          if (!localitaSelezionate.includes(item.localita)) {
+              return false;
+          }
+      }
+      
+      // 2. Filtro Ricerca Testuale
       return item.human.toLowerCase().includes(filterQuery) || item.zona.toLowerCase().includes(filterQuery);
     });
-  }, [dataList, filterQuery]);
+  }, [dataList, filterQuery, localitaSelezionate]);
 
   // Focus
   const updateFocus = useCallback(() => {
@@ -206,7 +229,7 @@ export default function GeneratoreSpedizioni() {
   // Tastiera
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-        if (showModal) return;
+        if (showModal || menuLocalitaAperto) return; // Disabilita quando menu/modale sono aperti
         if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
             e.preventDefault();
             if (activeId !== null) {
@@ -216,7 +239,7 @@ export default function GeneratoreSpedizioni() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeId, showModal, markAsDone]); 
+  }, [activeId, showModal, menuLocalitaAperto, markAsDone]); 
 
   // Eventi Drag & Drop
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragActive(true); };
@@ -240,6 +263,8 @@ export default function GeneratoreSpedizioni() {
   const processText = (text: string) => {
       const lines = text.split('\n');
       const newData: any[] = [];
+      const unicheLocalita = new Set<string>();
+      
       const regex = /(\d+)\s+[\d,]+\s+([A-Z0-9]{2})\s*(\d+)\s*$/;
       
       lines.forEach((line, idx) => {
@@ -249,6 +274,13 @@ export default function GeneratoreSpedizioni() {
               const sedeMittente = match[2].toUpperCase();
               const numeroSpedizione = match[3];
               const destMatch = line.substring(36, 62).trim(); 
+              
+              // Estrazione Località (dal carattere 7 al 26)
+              let localitaEstratta = "";
+              if (line.length > 27) {
+                  localitaEstratta = line.substring(7, 27).trim().toUpperCase();
+                  if (localitaEstratta) unicheLocalita.add(localitaEstratta);
+              }
               
               for (let i = 1; i <= colliTotali; i++) {
                   const progressivoCollo = i.toString().padStart(2, '0');
@@ -266,6 +298,7 @@ export default function GeneratoreSpedizioni() {
                       sped: numeroSpedizione,
                       collo: progressivoCollo,
                       tipo: tipo,
+                      localita: localitaEstratta, 
                       details: `Collo ${i} di ${colliTotali} - ${destMatch || 'Sconosciuto'}`,
                       barcode: barcodeString,
                       human: humanString,
@@ -275,8 +308,13 @@ export default function GeneratoreSpedizioni() {
               }
           }
       });
+      
       setDataList(newData);
       setScannedCount(0);
+      
+      // Aggiorna lista località e resetta la selezione
+      setLocalitaDisponibili(Array.from(unicheLocalita).sort());
+      setLocalitaSelezionate([]); 
   };
 
   // Aggiunta manuale
@@ -295,6 +333,7 @@ export default function GeneratoreSpedizioni() {
           sped: sped,
           collo: finalCollo,
           tipo,
+          localita: "MANUALE", 
           details: "INSERIMENTO MANUALE",
           barcode: `${sede.toUpperCase()}${sped}${finalCollo}${tipo}${finalDest}`,
           human: `${sede.toUpperCase()} ${sped} ${finalCollo} ${tipo} ${finalDest}`,
@@ -306,7 +345,6 @@ export default function GeneratoreSpedizioni() {
       setShowModal(false);
   };
 
-  // Testo preprocessato per il Canvas del Modale (evita espressioni JS complesse nel JSX)
   const testoBarcodeManuale = `${manualData.sede.toUpperCase()}${manualData.sped}${manualData.collo.padStart(2,'0')}${manualData.tipo}${manualData.dest.toUpperCase()}`.replace(/\s/g, '');
 
   return (
@@ -372,21 +410,75 @@ export default function GeneratoreSpedizioni() {
                     Premi <span className="bg-zinc-800 text-white px-2 py-1 rounded">SPAZIO</span> per marcare
                 </div>
                 <div className="text-right text-xs text-zinc-500 font-mono">
-                   <div>DA FARE: <b className="text-white">{dataList.length - scannedCount}</b></div>
-                   <div className="text-emerald-500">COMPLETATI: <b>{scannedCount}</b></div>
+                   <div>DA FARE: <b className="text-white">{filteredList.length - filteredList.filter(i => i.status === 'scanned').length}</b> / {filteredList.length}</div>
                 </div>
              </div>
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16}/>
-            <input 
-              type="text" 
-              placeholder="Cerca numero o sede..." 
-              value={filterQuery}
-              onChange={(e) => setFilterQuery(e.target.value.toLowerCase())}
-              className="search-input w-full pl-10 pr-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider outline-none transition-all"
-            />
+          {/* BARRA RICERCA E FILTRO LOCALITÀ (CUSTOM DROPDOWN) */}
+          <div className="flex gap-2 relative">
+            <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16}/>
+                <input 
+                  type="text" 
+                  placeholder="Cerca numero o sede..." 
+                  value={filterQuery}
+                  onChange={(e) => setFilterQuery(e.target.value.toLowerCase())}
+                  className="search-input w-full pl-10 pr-4 py-3 rounded-xl text-sm font-bold uppercase tracking-wider outline-none transition-all"
+                />
+            </div>
+
+            {localitaDisponibili.length > 0 && (
+                <div className="relative flex-[0.7]">
+                    <div 
+                        onClick={() => setMenuLocalitaAperto(!menuLocalitaAperto)}
+                        className="search-input w-full pl-10 pr-10 py-3 rounded-xl text-sm font-bold uppercase tracking-wider cursor-pointer flex justify-between items-center select-none"
+                    >
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16}/>
+                        
+                        <span className="truncate">
+                            {localitaSelezionate.length === 0 
+                                ? 'TUTTE LE LOCALITÀ' 
+                                : `${localitaSelezionate.length} SELEZIONATE`}
+                        </span>
+
+                        <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-transform ${menuLocalitaAperto ? 'rotate-180' : ''}`} size={16}/>
+                    </div>
+
+                    {/* MENU A DISCESA */}
+                    {menuLocalitaAperto && (
+                        <>
+                            {/* Overlay per chiudere cliccando fuori */}
+                            <div 
+                                className="fixed inset-0 z-40" 
+                                onClick={() => setMenuLocalitaAperto(false)}
+                            />
+                            
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto">
+                                {/* Opzione "Deseleziona Tutte" / "Tutte" */}
+                                <div 
+                                    className="p-3 border-b border-zinc-800 flex items-center justify-between cursor-pointer hover:bg-zinc-800 sticky top-0 bg-zinc-900/95 backdrop-blur z-10"
+                                    onClick={() => setLocalitaSelezionate([])}
+                                >
+                                    <span className="text-xs font-black text-amber-500">AZZERA FILTRI</span>
+                                </div>
+
+                                {localitaDisponibili.map(loc => (
+                                    <label key={loc} className="flex items-center gap-3 p-3 hover:bg-zinc-800 cursor-pointer border-b border-zinc-800/50 last:border-0">
+                                        <input
+                                            type="checkbox"
+                                            checked={localitaSelezionate.includes(loc)}
+                                            onChange={() => toggleLocalita(loc)}
+                                            className="w-4 h-4 accent-amber-500 cursor-pointer"
+                                        />
+                                        <span className="text-sm font-bold text-white uppercase select-none truncate">{loc}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+            )}
           </div>
         </div>
 
@@ -396,8 +488,8 @@ export default function GeneratoreSpedizioni() {
               {filteredList.length === 0 && (
                  <div className="empty-state">
                     <FileText size={48} className="mb-4 text-zinc-700"/>
-                    <p className="text-sm font-bold text-zinc-500">Carica il file di testo</p>
-                    <p className="text-[10px] text-zinc-600 mt-1">Trascina natana.txt nel box in alto</p>
+                    <p className="text-sm font-bold text-zinc-500">Nessun dato disponibile</p>
+                    <p className="text-[10px] text-zinc-600 mt-1">Modifica i filtri di ricerca</p>
                  </div>
               )}
               
@@ -414,7 +506,7 @@ export default function GeneratoreSpedizioni() {
                        <div className="p-6 text-center flex flex-col items-center justify-center">
                           <BarcodeCanvas text={item.barcode} ready={isScriptLoaded} options={{ height: 180, width: 2.5 }} />
                           <div className="human-readable">{item.human}</div>
-                          <div className="details">{item.details}</div>
+                          <div className="details">{item.localita && item.localita !== 'MANUALE' ? `[${item.localita}] ` : ''}{item.details}</div>
                        </div>
                     </div>
                  );
