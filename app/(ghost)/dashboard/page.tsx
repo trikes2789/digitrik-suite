@@ -2,8 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-// Ho aggiunto l'icona "Truck" (Camion) per il filtro spedizioni
-import { Terminal, FileSpreadsheet, Ghost, ArrowLeft, Truck } from 'lucide-react';
+import { Terminal, FileSpreadsheet, Ghost, ArrowLeft, Truck, ClipboardList } from 'lucide-react';
 
 export default function GhostDashboard() {
   return (
@@ -21,7 +20,7 @@ export default function GhostDashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* LINK CORRETTO ALLA CARTELLA 'barcode_private_tool' */}
+          {/* LINK ALL'INCONGRUENZE */}
           <Link href="/barcode_private_tool" className="group block p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-amber-500/50 hover:bg-zinc-900/80 transition-all">
              <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 mb-6 group-hover:scale-110 transition-transform">
                <Terminal size={28} />
@@ -39,13 +38,22 @@ export default function GhostDashboard() {
              <p className="text-sm text-zinc-500">Analisi file XLSX per individuare duplicati e barcode errati.</p>
           </Link>
 
-          {/* NUOVO LINK: FILTRO SPEDIZIONI */}
+          {/* LINK AL FILTRO SPEDIZIONI */}
           <Link href="/filtro-spedizioni" className="group block p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-blue-500/50 hover:bg-zinc-900/80 transition-all">
              <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 mb-6 group-hover:scale-110 transition-transform">
                <Truck size={28} />
              </div>
              <h3 className="text-2xl font-bold text-white mb-2">Filtro Spedizioni TEMPI DI RESA</h3>
              <p className="text-sm text-zinc-500">Monitoraggio e analisi dei tempi di resa delle spedizioni.</p>
+          </Link>
+
+          {/* NUOVO LINK: RECUPERO LETTURE AUTISTI */}
+          <Link href="/recupero-letture-autista" className="group block p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-purple-500/50 hover:bg-zinc-900/80 transition-all">
+             <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-500 mb-6 group-hover:scale-110 transition-transform">
+               <ClipboardList size={28} />
+             </div>
+             <h3 className="text-2xl font-bold text-white mb-2">Recupero Letture Autisti</h3>
+             <p className="text-sm text-zinc-500">Strumento per il recupero e la gestione dei dati delle letture.</p>
           </Link>
 
         </div>
