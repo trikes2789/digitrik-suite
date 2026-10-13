@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Script from 'next/script';
 import { 
   Upload, Search, Plus, 
-  Terminal, FileText, Settings, MapPin, ChevronDown
+  Terminal, FileText, Settings, MapPin, ChevronDown, Filter, Info
 } from 'lucide-react';
 
 /* STILI CSS INLINE - TEMA AMBRA UNIFORME */
@@ -150,8 +150,8 @@ const stiliCSS = `
   .border-V { border-left: 6px solid #eab308; } 
   .border-D { border-left: 6px solid #3b82f6; }
 
-  .search-input { background: var(--card-dark); border: 1px solid var(--border); color: white; }
-  .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-dim); }
+  .search-input, .eu-select { background: var(--card-dark); border: 1px solid var(--border); color: white; }
+  .search-input:focus, .eu-select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-dim); }
 `;
 
 export default function GeneratoreSpedizioni() {
@@ -159,7 +159,7 @@ export default function GeneratoreSpedizioni() {
   const [scannedCount, setScannedCount] = useState(0);
   const [filterQuery, setFilterQuery] = useState('');
   
-  // --- STATI PER IL FILTRO LOCALITÀ MULTIPLO ---
+  const [filtroEU, setFiltroEU] = useState<string>('S N'); 
   const [localitaDisponibili, setLocalitaDisponibili] = useState<string[]>([]);
   const [localitaSelezionate, setLocalitaSelezionate] = useState<string[]>([]);
   const [menuLocalitaAperto, setMenuLocalitaAperto] = useState(false);
@@ -172,7 +172,6 @@ export default function GeneratoreSpedizioni() {
   const [showModal, setShowModal] = useState(false);
   const [manualData, setManualData] = useState({ sede: '', sped: '', collo: '1', tipo: '0', dest: 'V8' });
 
-  // Funzione di spunta
   const markAsDone = useCallback((id: string) => {
       setDataList(prev => prev.map(item => {
           if (item.id === id && item.status !== 'scanned') {
@@ -183,31 +182,22 @@ export default function GeneratoreSpedizioni() {
       }));
   }, []);
 
-  // Gestione della spunta multipla delle località
   const toggleLocalita = (loc: string) => {
       setLocalitaSelezionate(prev => 
-          prev.includes(loc) 
-              ? prev.filter(l => l !== loc) // Rimuovi se c'è
-              : [...prev, loc]              // Aggiungi se non c'è
+          prev.includes(loc) ? prev.filter(l => l !== loc) : [...prev, loc]
       );
   };
 
-  // Filtro
   const filteredList = useMemo(() => {
     return dataList.filter(item => {
-      // 1. Filtro Località Multiplo (se non c'è nessuna selezione, mostra tutte)
-      if (localitaSelezionate.length > 0 && item.localita !== 'MANUALE') {
-          if (!localitaSelezionate.includes(item.localita)) {
-              return false;
-          }
+      if (item.localita !== 'MANUALE') {
+          if (filtroEU !== 'TUTTI' && item.eu !== filtroEU) return false;
+          if (localitaSelezionate.length > 0 && !localitaSelezionate.includes(item.localita)) return false;
       }
-      
-      // 2. Filtro Ricerca Testuale
       return item.human.toLowerCase().includes(filterQuery) || item.zona.toLowerCase().includes(filterQuery);
     });
-  }, [dataList, filterQuery, localitaSelezionate]);
+  }, [dataList, filterQuery, localitaSelezionate, filtroEU]);
 
-  // Focus
   const updateFocus = useCallback(() => {
     const firstPending = filteredList.find(item => item.status !== 'scanned');
     if (firstPending) {
@@ -226,22 +216,18 @@ export default function GeneratoreSpedizioni() {
     return () => clearTimeout(t);
   }, [updateFocus]);
 
-  // Tastiera
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-        if (showModal || menuLocalitaAperto) return; // Disabilita quando menu/modale sono aperti
+        if (showModal || menuLocalitaAperto) return;
         if (['ArrowDown', 'Enter', ' '].includes(e.key)) {
             e.preventDefault();
-            if (activeId !== null) {
-                markAsDone(activeId);
-            }
+            if (activeId !== null) markAsDone(activeId);
         }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeId, showModal, menuLocalitaAperto, markAsDone]); 
 
-  // Eventi Drag & Drop
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragActive(true); };
   const onDragLeave = () => setIsDragActive(false);
   const onDrop = (e: React.DragEvent) => {
@@ -259,68 +245,70 @@ export default function GeneratoreSpedizioni() {
       reader.readAsText(file);
   };
 
-  // Parsing del TXT
   const processText = (text: string) => {
       const lines = text.split('\n');
       const newData: any[] = [];
       const unicheLocalita = new Set<string>();
       
-      const regex = /(\d+)\s+[\d,]+\s+([A-Z0-9]{2})\s*(\d+)\s*$/;
+      const regex = /^[A-Z0-9]{2}\s+\d+/;
       
       lines.forEach((line, idx) => {
-          const match = line.match(regex);
-          if (match) {
-              const colliTotali = parseInt(match[1], 10);
-              const sedeMittente = match[2].toUpperCase();
-              const numeroSpedizione = match[3];
-              const destMatch = line.substring(36, 62).trim(); 
-              
-              // Estrazione Località (dal carattere 7 al 26)
-              let localitaEstratta = "";
-              if (line.length > 27) {
-                  localitaEstratta = line.substring(7, 27).trim().toUpperCase();
-                  if (localitaEstratta) unicheLocalita.add(localitaEstratta);
-              }
-              
-              for (let i = 1; i <= colliTotali; i++) {
-                  const progressivoCollo = i.toString().padStart(2, '0');
-                  const tipo = '0';
-                  const zona = sedeDestinataria.toUpperCase() || 'V8';
-                  
-                  const barcodeString = `${sedeMittente}${numeroSpedizione}${progressivoCollo}${tipo}${zona}`;
-                  const humanString = `${sedeMittente} ${numeroSpedizione} ${progressivoCollo} ${tipo} ${zona}`;
+          if (regex.test(line) && line.length > 100) {
+              const sigla = line.substring(0, 3).trim().toUpperCase();
+              let sped = line.substring(4, 13).trim();
+              const collo = line.substring(13, 19).trim().padStart(2, '0');
+              const tipo = line.substring(20, 21).trim();
+              const dest = line.substring(22, 26).trim();
 
-                  newData.push({
-                      id: `${Date.now()}-${idx}-${i}`,
-                      raw: line,
-                      zona: zona,
-                      sigla: sedeMittente,
-                      sped: numeroSpedizione,
-                      collo: progressivoCollo,
-                      tipo: tipo,
-                      localita: localitaEstratta, 
-                      details: `Collo ${i} di ${colliTotali} - ${destMatch || 'Sconosciuto'}`,
-                      barcode: barcodeString,
-                      human: humanString,
-                      colorClass: `border-${zona.charAt(0)}`,
-                      status: 'pending'
-                  });
+              let euRaw = line.substring(46, 51).replace(/\*/g, '').trim();
+              let eu = euRaw.replace(/\s+/g, ' '); 
+
+              let destinatario = line.substring(64, 79).trim();
+              let indirizzo = line.substring(79, 99).trim();
+              let localita = line.substring(99, 120).trim().toUpperCase();
+              let zona = line.substring(120, 124).trim();
+
+              if (sigla === 'WW' && sped.length < 9) {
+                  sped = sped.padStart(9, '0');
               }
+
+              if (localita) unicheLocalita.add(localita);
+
+              const destFinale = dest || sedeDestinataria.toUpperCase();
+              const barcodeString = `${sigla}${sped}${collo}${tipo}${destFinale}`;
+              const humanString = `${sigla} ${sped} ${collo} ${tipo} ${destFinale}`;
+
+              newData.push({
+                  id: `${Date.now()}-${idx}`,
+                  raw: line,
+                  zona: zona || destFinale,
+                  sigla, sped, collo, tipo,
+                  localita,
+                  eu,
+                  details: `${destinatario} - ${indirizzo}`,
+                  barcode: barcodeString,
+                  human: humanString,
+                  colorClass: `border-${(zona || destFinale).charAt(0)}`,
+                  status: 'pending'
+              });
           }
       });
       
       setDataList(newData);
       setScannedCount(0);
       
-      // Aggiorna lista località e resetta la selezione
       setLocalitaDisponibili(Array.from(unicheLocalita).sort());
       setLocalitaSelezionate([]); 
   };
 
-  // Aggiunta manuale
   const addManual = () => {
       const { sede, sped, collo, tipo, dest } = manualData;
       if (!sede || !sped) return alert("Sede e Spedizione obbligatori");
+
+      let finalSped = sped;
+      if (sede.toUpperCase() === 'WW' && sped.length < 9) {
+          finalSped = sped.padStart(9, '0');
+      }
 
       const finalCollo = collo.padStart(2, '0');
       const finalDest = dest.toUpperCase() || 'V8';
@@ -330,13 +318,14 @@ export default function GeneratoreSpedizioni() {
           raw: "GENERATO MANUALMENTE",
           zona: finalDest,
           sigla: sede.toUpperCase(),
-          sped: sped,
+          sped: finalSped,
           collo: finalCollo,
           tipo,
           localita: "MANUALE", 
+          eu: "S N", 
           details: "INSERIMENTO MANUALE",
-          barcode: `${sede.toUpperCase()}${sped}${finalCollo}${tipo}${finalDest}`,
-          human: `${sede.toUpperCase()} ${sped} ${finalCollo} ${tipo} ${finalDest}`,
+          barcode: `${sede.toUpperCase()}${finalSped}${finalCollo}${tipo}${finalDest}`,
+          human: `${sede.toUpperCase()} ${finalSped} ${finalCollo} ${tipo} ${finalDest}`,
           colorClass: `border-${finalDest.charAt(0)}`,
           status: 'pending'
       };
@@ -345,7 +334,10 @@ export default function GeneratoreSpedizioni() {
       setShowModal(false);
   };
 
-  const testoBarcodeManuale = `${manualData.sede.toUpperCase()}${manualData.sped}${manualData.collo.padStart(2,'0')}${manualData.tipo}${manualData.dest.toUpperCase()}`.replace(/\s/g, '');
+  const prevSped = (manualData.sede.toUpperCase() === 'WW' && manualData.sped.length < 9) 
+      ? manualData.sped.padStart(9, '0') 
+      : manualData.sped;
+  const testoBarcodeManuale = `${manualData.sede.toUpperCase()}${prevSped}${manualData.collo.padStart(2,'0')}${manualData.tipo}${manualData.dest.toUpperCase()}`.replace(/\s/g, '');
 
   return (
     <>
@@ -376,7 +368,6 @@ export default function GeneratoreSpedizioni() {
 
           <div className="control-card">
              <div className="grid grid-cols-2 gap-4 mb-4">
-                
                 <div className="settings-box">
                    <Settings size={20} className="mb-1" />
                    <span className="text-[10px] font-bold uppercase tracking-widest">Sede Destinataria</span>
@@ -395,7 +386,7 @@ export default function GeneratoreSpedizioni() {
                     onDragLeave={onDragLeave}
                     onDrop={onDrop}
                 >
-                   <p className="font-bold text-amber-500 text-xs uppercase mb-2 flex items-center gap-2"><Upload size={14}/> Carica Natana.txt</p>
+                   <p className="font-bold text-amber-500 text-xs uppercase mb-2 flex items-center gap-2"><Upload size={14}/> Carica Segnacolli.txt</p>
                    <div className="flex gap-2 w-full px-2">
                        <input type="file" id="fileUpload" className="hidden" accept=".txt,.csv" onChange={handleFileChange} />
                        <button onClick={() => document.getElementById('fileUpload')?.click()} className="flex-1 bg-zinc-800 border border-zinc-700 px-2 py-1.5 rounded text-[10px] font-bold text-zinc-400 hover:text-white hover:border-zinc-500 transition-all">
@@ -415,9 +406,18 @@ export default function GeneratoreSpedizioni() {
              </div>
           </div>
 
-          {/* BARRA RICERCA E FILTRO LOCALITÀ (CUSTOM DROPDOWN) */}
+          {/* ISTRUZIONI DI ESPORTAZIONE */}
+          <div className="flex items-start gap-3 bg-zinc-800/40 border border-zinc-700/50 p-3 rounded-xl mb-4 text-xs font-mono text-zinc-400">
+             <Info size={16} className="text-amber-500 shrink-0 mt-0.5" />
+             <p className="leading-relaxed">
+               " A Spedizioni, C Magazzino, E Stampa Arrivi, Data odierna, Selezione C, tipo collo T, Autista ( inserire codice autista o di magazzino), da sede AA a sede ZZ, Solo sed SI. Premi F9 seleziona la stampante bolle o una stampante virtuale. F4 stampa e carica il file stampato nel riquadro. Seleziona in base ai filtri che vuoi."
+             </p>
+          </div>
+
+          {/* BARRA RICERCA E FILTRI MULTIPLI */}
           <div className="flex gap-2 relative">
-            <div className="relative flex-1">
+            
+            <div className="relative flex-[1.2]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16}/>
                 <input 
                   type="text" 
@@ -428,41 +428,44 @@ export default function GeneratoreSpedizioni() {
                 />
             </div>
 
+            <div className="relative w-36 shrink-0">
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={14}/>
+                <select 
+                    value={filtroEU}
+                    onChange={(e) => setFiltroEU(e.target.value)}
+                    className="eu-select w-full pl-9 pr-8 py-3 rounded-xl text-sm font-bold tracking-wider outline-none transition-all cursor-pointer appearance-none"
+                >
+                    <option value="TUTTI">TUTTI E/U</option>
+                    <option value="S S">S S</option>
+                    <option value="S N">S N</option>
+                    <option value="N S">N S</option>
+                    <option value="N N">N N</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16}/>
+            </div>
+
             {localitaDisponibili.length > 0 && (
-                <div className="relative flex-[0.7]">
+                <div className="relative flex-1">
                     <div 
                         onClick={() => setMenuLocalitaAperto(!menuLocalitaAperto)}
                         className="search-input w-full pl-10 pr-10 py-3 rounded-xl text-sm font-bold uppercase tracking-wider cursor-pointer flex justify-between items-center select-none"
                     >
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16}/>
-                        
                         <span className="truncate">
                             {localitaSelezionate.length === 0 
                                 ? 'TUTTE LE LOCALITÀ' 
                                 : `${localitaSelezionate.length} SELEZIONATE`}
                         </span>
-
                         <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-transform ${menuLocalitaAperto ? 'rotate-180' : ''}`} size={16}/>
                     </div>
 
-                    {/* MENU A DISCESA */}
                     {menuLocalitaAperto && (
                         <>
-                            {/* Overlay per chiudere cliccando fuori */}
-                            <div 
-                                className="fixed inset-0 z-40" 
-                                onClick={() => setMenuLocalitaAperto(false)}
-                            />
-                            
+                            <div className="fixed inset-0 z-40" onClick={() => setMenuLocalitaAperto(false)} />
                             <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto">
-                                {/* Opzione "Deseleziona Tutte" / "Tutte" */}
-                                <div 
-                                    className="p-3 border-b border-zinc-800 flex items-center justify-between cursor-pointer hover:bg-zinc-800 sticky top-0 bg-zinc-900/95 backdrop-blur z-10"
-                                    onClick={() => setLocalitaSelezionate([])}
-                                >
+                                <div className="p-3 border-b border-zinc-800 flex items-center justify-between cursor-pointer hover:bg-zinc-800 sticky top-0 bg-zinc-900/95 backdrop-blur z-10" onClick={() => setLocalitaSelezionate([])}>
                                     <span className="text-xs font-black text-amber-500">AZZERA FILTRI</span>
                                 </div>
-
                                 {localitaDisponibili.map(loc => (
                                     <label key={loc} className="flex items-center gap-3 p-3 hover:bg-zinc-800 cursor-pointer border-b border-zinc-800/50 last:border-0">
                                         <input
@@ -488,8 +491,8 @@ export default function GeneratoreSpedizioni() {
               {filteredList.length === 0 && (
                  <div className="empty-state">
                     <FileText size={48} className="mb-4 text-zinc-700"/>
-                    <p className="text-sm font-bold text-zinc-500">Nessun dato disponibile</p>
-                    <p className="text-[10px] text-zinc-600 mt-1">Modifica i filtri di ricerca</p>
+                    <p className="text-sm font-bold text-zinc-500">Nessun dato corrispondente ai filtri</p>
+                    <p className="text-[10px] text-zinc-600 mt-1">Carica un file o modifica E/U - Località</p>
                  </div>
               )}
               
@@ -503,7 +506,12 @@ export default function GeneratoreSpedizioni() {
                           <h2 className="text-4xl font-black m-0 leading-none text-white">{item.zona}</h2>
                           <span className="text-[10px] font-bold opacity-50 mt-1">DEST.</span>
                        </div>
-                       <div className="p-6 text-center flex flex-col items-center justify-center">
+                       <div className="p-6 text-center flex flex-col items-center justify-center relative">
+                          {item.eu && item.localita !== 'MANUALE' && (
+                              <span className="absolute top-2 right-4 text-[10px] bg-zinc-200 text-black px-2 py-1 rounded font-bold uppercase tracking-widest">
+                                  {item.eu}
+                              </span>
+                          )}
                           <BarcodeCanvas text={item.barcode} ready={isScriptLoaded} options={{ height: 180, width: 2.5 }} />
                           <div className="human-readable">{item.human}</div>
                           <div className="details">{item.localita && item.localita !== 'MANUALE' ? `[${item.localita}] ` : ''}{item.details}</div>
@@ -525,7 +533,7 @@ export default function GeneratoreSpedizioni() {
                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
                        <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Sede Mitt.</label>
-                       <input className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white uppercase focus:border-amber-500 outline-none" maxLength={2} placeholder="E9" value={manualData.sede} onChange={(e) => setManualData({...manualData, sede: e.target.value.toUpperCase()})} />
+                       <input className="w-full bg-black border border-zinc-800 p-2 rounded-lg font-bold text-white uppercase focus:border-amber-500 outline-none" maxLength={2} placeholder="WW" value={manualData.sede} onChange={(e) => setManualData({...manualData, sede: e.target.value.toUpperCase()})} />
                     </div>
                     <div>
                        <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Spedizione</label>
