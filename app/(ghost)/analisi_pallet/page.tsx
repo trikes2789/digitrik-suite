@@ -61,7 +61,7 @@ const stiliCSS = `
 
   .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
     margin-bottom: 12px;
   }
@@ -151,7 +151,7 @@ const stiliCSS = `
     flex-grow: 1;
     overflow-y: auto;
     background: #000;
-    height: 0; /* Let flexbox handle height */
+    height: 0; 
     padding: 0 20px 20px 20px;
   }
 
@@ -260,7 +260,7 @@ export default function GeneratoreLavorazioniCSV() {
     });
 
     return Array.from(map.values())
-      .sort((a, b) => a.id.localeCompare(b.id)) // Ordine cronologico
+      .sort((a, b) => a.id.localeCompare(b.id)) 
       .map(g => {
         let oreCalcolo = 1;
         let stringaOre = "0h 0m";
@@ -339,7 +339,7 @@ export default function GeneratoreLavorazioniCSV() {
           let giornoId = "Sconosciuto";
           let giornoLabel = "Sconosciuto";
           
-          const partiData = dataOraRaw.split('_'); // es: 2026_07_08_15_31_56
+          const partiData = dataOraRaw.split('_'); 
           if (partiData.length >= 6) {
              const Y = parseInt(partiData[0], 10);
              const M = parseInt(partiData[1], 10); 
@@ -348,7 +348,6 @@ export default function GeneratoreLavorazioniCSV() {
              const min = parseInt(partiData[4], 10);
              const sec = parseInt(partiData[5], 10);
              
-             // ID e Label per il raggruppamento per giorno
              giornoId = `${Y}-${M.toString().padStart(2, '0')}-${D.toString().padStart(2, '0')}`;
              giornoLabel = `${D.toString().padStart(2, '0')}/${M.toString().padStart(2, '0')}/${Y}`;
 
@@ -453,15 +452,27 @@ export default function GeneratoreLavorazioniCSV() {
             </div>
             <div className="stat-card">
               <Scale size={24} className="stat-icon text-zinc-500" />
-              <span className="stat-label">Peso / Ora (Medio)</span>
+              <span className="stat-label">Peso Totale</span>
+              <span className="stat-value text-emerald">{statistiche.pesoTot.toLocaleString('it-IT', {maximumFractionDigits: 1})} <span className="text-xs">kg</span></span>
+              <span className="stat-sub">Somma ponderale</span>
+            </div>
+            <div className="stat-card">
+              <Scale size={24} className="stat-icon text-zinc-500" />
+              <span className="stat-label">Peso / Ora</span>
               <span className="stat-value text-emerald">{statistiche.pesoOra.toLocaleString('it-IT', {maximumFractionDigits: 1})} <span className="text-xs">kg/h</span></span>
-              <span className="stat-sub">Peso tot: {statistiche.pesoTot.toLocaleString('it-IT', {maximumFractionDigits: 0})} kg</span>
+              <span className="stat-sub">Media oraria kg</span>
             </div>
             <div className="stat-card">
               <Box size={24} className="stat-icon text-zinc-500" />
-              <span className="stat-label">Volume / Ora (Medio)</span>
+              <span className="stat-label">Volume Totale</span>
+              <span className="stat-value text-emerald">{statistiche.volTot.toLocaleString('it-IT', {maximumFractionDigits: 2})} <span className="text-xs">m³</span></span>
+              <span className="stat-sub">Cubo totale</span>
+            </div>
+            <div className="stat-card">
+              <Box size={24} className="stat-icon text-zinc-500" />
+              <span className="stat-label">Volume / Ora</span>
               <span className="stat-value text-emerald">{statistiche.volOra.toLocaleString('it-IT', {maximumFractionDigits: 2})} <span className="text-xs">m³/h</span></span>
-              <span className="stat-sub">Vol tot: {statistiche.volTot.toLocaleString('it-IT', {maximumFractionDigits: 2})} m³</span>
+              <span className="stat-sub">Media oraria cubo</span>
             </div>
             <div className="stat-card">
               <Calculator size={24} className="stat-icon text-zinc-500" />
