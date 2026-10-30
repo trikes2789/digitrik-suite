@@ -76,8 +76,15 @@ const stiliCSS = `
     justify-content: center;
     position: relative;
     overflow: hidden;
+    transition: all 0.2s ease-in-out;
   }
+  
   .stat-card.alert { border-color: var(--error); background: var(--error-dim); }
+  
+  /* STAT CARD CLICCABILE PER FILTRO DOPPI */
+  .stat-card.clickable { cursor: pointer; }
+  .stat-card.clickable:hover { border-color: var(--error); box-shadow: 0 0 15px var(--error-dim); transform: translateY(-2px); }
+  .stat-card.active-filter { border: 2px solid var(--error); background: rgba(239, 68, 68, 0.2); transform: scale(1.02); box-shadow: 0 0 20px var(--error-dim); }
 
   .stat-icon { position: absolute; top: 12px; right: 12px; opacity: 0.15; }
   .stat-label { font-size: 0.65rem; text-transform: uppercase; font-weight: 800; color: #71717a; letter-spacing: 1px; margin-bottom: 2px; }
@@ -204,28 +211,53 @@ export default function GeneratoreLavorazioniCSV() {
   const [filesCaricati, setFilesCaricati] = useState<string[]>([]);
   const [datiFusi, setDatiFusi] = useState<any[]>([]);
   
-  // STATI PER I FILTRI DELLA LISTA
+  // STATI PER I FILTRI DELLA LISTA E DELLA DASHBOARD
   const [ricercaSpedizione, setRicercaSpedizione] = useState('');
   const [filtroTurno, setFiltroTurno] = useState('TUTTI');
   const [filtroDataInizio, setFiltroDataInizio] = useState('');
   const [filtroDataFine, setFiltroDataFine] = useState('');
+  const [filtroSoloDoppi, setFiltroSoloDoppi] = useState(false); // NUOVO STATO
 
-  // 1. CALCOLO STATISTICHE GLOBALI (Sull'intero Dataset)
+  // 1. TROVA I DOPPIONI GLOBALI (indipendentemente dai filtri attivi, serve per evidenziare le righe)
+  const globalDuplicati = useMemo(() => {
+    let viste = new Set();
+    let doppie = new Set();
+    datiFusi.forEach(r => {
+      if (r.spedizione) {
+        if (viste.has(r.spedizione)) doppie.add(r.spedizione);
+        else viste.add(r.spedizione);
+      }
+    });
+    return Array.from(doppie);
+  }, [datiFusi]);
+
+  // 2. APPLICAZIONE DEI FILTRI (Crea il dataset che alimenterà tabella e dashboard)
+  const datiFiltrati = useMemo(() => {
+    return datiFusi.filter(r => {
+      if (ricercaSpedizione && !r.spedizione.includes(ricercaSpedizione.toUpperCase())) return false;
+      if (filtroTurno !== 'TUTTI' && r.turno !== filtroTurno) return false;
+      if (filtroDataInizio && r.giornoId < filtroDataInizio) return false;
+      if (filtroDataFine && r.giornoId > filtroDataFine) return false;
+      if (filtroSoloDoppi && !globalDuplicati.includes(r.spedizione)) return false;
+      return true;
+    });
+  }, [datiFusi, ricercaSpedizione, filtroTurno, filtroDataInizio, filtroDataFine, filtroSoloDoppi, globalDuplicati]);
+
+  // 3. CALCOLO STATISTICHE GLOBALI (Ora Reattivo a datiFiltrati)
   const statistiche = useMemo(() => {
-    let duplicati = new Set<string>();
-    let spedViste = new Set<string>();
+    let duplicatiCount = new Set<string>();
+    let spedVisteLocal = new Set<string>();
     let pesoTotale = 0;
     let volumeTotale = 0;
     let minTime = Infinity;
     let maxTime = -Infinity;
-    
     let colliArrivi = 0;
     let colliPartenze = 0;
 
-    datiFusi.forEach(riga => {
+    datiFiltrati.forEach(riga => {
       if (riga.spedizione) {
-        if (spedViste.has(riga.spedizione)) duplicati.add(riga.spedizione);
-        else spedViste.add(riga.spedizione);
+        if (spedVisteLocal.has(riga.spedizione)) duplicatiCount.add(riga.spedizione);
+        else spedVisteLocal.add(riga.spedizione);
       }
       if (riga.timestamp) {
         if (riga.timestamp < minTime) minTime = riga.timestamp;
@@ -244,14 +276,14 @@ export default function GeneratoreLavorazioniCSV() {
       const diffMs = maxTime - minTime;
       const diffHours = diffMs / (1000 * 60 * 60);
       let hEffettive = diffHours;
-      if (hEffettive === 0 && datiFusi.length > 0) hEffettive = 1/60; 
+      if (hEffettive === 0 && datiFiltrati.length > 0) hEffettive = 1/60; 
       oreCalcolo = hEffettive > 0 ? hEffettive : 1;
       const h = Math.floor(hEffettive);
       const m = Math.floor((hEffettive - h) * 60);
       stringaOre = `${h}h ${m}m`;
     }
 
-    const numLavorazioni = datiFusi.length;
+    const numLavorazioni = datiFiltrati.length;
     return {
       totale: numLavorazioni,
       colliArrivi,
@@ -263,16 +295,17 @@ export default function GeneratoreLavorazioniCSV() {
       volTot: volumeTotale,
       volOra: volumeTotale / oreCalcolo,
       rapportoPV: volumeTotale / 300,
-      numDuplicati: duplicati.size,
-      listaDuplicati: Array.from(duplicati)
+      
+      // Se il filtro doppi è attivo, mostriamo il totale dei doppi globali per chiarezza
+      numDuplicati: filtroSoloDoppi ? globalDuplicati.length : duplicatiCount.size
     };
-  }, [datiFusi]);
+  }, [datiFiltrati, filtroSoloDoppi, globalDuplicati]);
 
-  // 2. CALCOLO CONFRONTO GIORNALIERO
+  // 4. CALCOLO CONFRONTO GIORNALIERO (Ora Reattivo a datiFiltrati)
   const statsGiornaliere = useMemo(() => {
     const map = new Map();
 
-    datiFusi.forEach(riga => {
+    datiFiltrati.forEach(riga => {
       if (!map.has(riga.giornoId)) {
         map.set(riga.giornoId, {
           id: riga.giornoId,
@@ -285,7 +318,7 @@ export default function GeneratoreLavorazioniCSV() {
           minTime: Infinity,
           maxTime: -Infinity,
           duplicatiSet: new Set(),
-          spedViste: new Set()
+          spedVisteLocal: new Set()
         });
       }
       
@@ -300,8 +333,8 @@ export default function GeneratoreLavorazioniCSV() {
       if (riga.timestamp < g.minTime) g.minTime = riga.timestamp;
       if (riga.timestamp > g.maxTime) g.maxTime = riga.timestamp;
 
-      if (g.spedViste.has(riga.spedizione)) g.duplicatiSet.add(riga.spedizione);
-      else g.spedViste.add(riga.spedizione);
+      if (g.spedVisteLocal.has(riga.spedizione)) g.duplicatiSet.add(riga.spedizione);
+      else g.spedVisteLocal.add(riga.spedizione);
     });
 
     return Array.from(map.values())
@@ -329,24 +362,7 @@ export default function GeneratoreLavorazioniCSV() {
           numDuplicati: g.duplicatiSet.size
         };
       });
-  }, [datiFusi]);
-
-  // 3. APPLICAZIONE DEI FILTRI SULLA LISTA
-  const datiFiltrati = useMemo(() => {
-    return datiFusi.filter(r => {
-      // Filtro testo Spedizione
-      if (ricercaSpedizione && !r.spedizione.includes(ricercaSpedizione.toUpperCase())) return false;
-      
-      // Filtro Turno
-      if (filtroTurno !== 'TUTTI' && r.turno !== filtroTurno) return false;
-
-      // Filtro Date (giornoId è già in formato YYYY-MM-DD, perfetto per la comparazione stringhe)
-      if (filtroDataInizio && r.giornoId < filtroDataInizio) return false;
-      if (filtroDataFine && r.giornoId > filtroDataFine) return false;
-
-      return true;
-    });
-  }, [datiFusi, ricercaSpedizione, filtroTurno, filtroDataInizio, filtroDataFine]);
+  }, [datiFiltrati]);
 
   // Gestione Drag & Drop e Parser
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragActive(true); };
@@ -404,10 +420,8 @@ export default function GeneratoreLavorazioniCSV() {
              const sec = parseInt(partiData[5], 10);
              
              turno = ore < 13 ? 'ARRIVI' : 'PARTENZE';
-
              giornoId = `${Y}-${M.toString().padStart(2, '0')}-${D.toString().padStart(2, '0')}`;
              giornoLabel = `${D.toString().padStart(2, '0')}/${M.toString().padStart(2, '0')}/${Y}`;
-
              timestamp = new Date(Y, M - 1, D, ore, min, sec).getTime();
              dataOraFormattata = `${giornoLabel} ${partiData[3]}:${partiData[4]}:${partiData[5]}`;
           }
@@ -435,17 +449,23 @@ export default function GeneratoreLavorazioniCSV() {
     setFiltroTurno('TUTTI');
     setFiltroDataInizio('');
     setFiltroDataFine('');
+    setFiltroSoloDoppi(false);
+  };
+
+  const azzeraFiltri = () => {
+    setRicercaSpedizione('');
+    setFiltroTurno('TUTTI');
+    setFiltroDataInizio('');
+    setFiltroDataFine('');
+    setFiltroSoloDoppi(false);
   };
 
   const scaricaFileUnico = () => {
     if (datiFiltrati.length === 0) return;
-    
-    // Esporta solo i dati attualmente visibili/filtrati
     const intestazioni = "Spedizione;Peso_Kg;Lungh_cm;Largh_cm;Alt_cm;Volume_m3;Rapporto_PV;Turno;Data_Ora\n";
     const contenuto = datiFiltrati.map(r => 
       `${r.spedizione};${r.pesoKg.toFixed(2)};${r.l};${r.w};${r.h};${r.volumeM3.toFixed(4)};${r.rapportoPVRiga.toFixed(6)};${r.turno};${r.dataOraFormattata}`
     ).join('\n');
-
     const blob = new Blob([intestazioni + contenuto], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -469,7 +489,7 @@ export default function GeneratoreLavorazioniCSV() {
             </h1>
             <div className="flex gap-2">
               <button onClick={svuotaTutto} className="bg-zinc-800 border border-zinc-700 hover:border-red-500 text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all">
-                Reset
+                Reset App
               </button>
               <button onClick={scaricaFileUnico} disabled={datiFiltrati.length === 0} className="bg-amber-600 border border-amber-500 hover:bg-amber-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(245,158,11,0.2)]">
                 <Download size={14} /> Esporta Vista ({datiFiltrati.length})
@@ -488,7 +508,7 @@ export default function GeneratoreLavorazioniCSV() {
                   <Upload size={24} className="text-amber-500"/>
                   <div className="text-left flex-1">
                     <p className="font-bold text-white text-sm uppercase">Carica i file CSV per compararli</p>
-                    <p className="text-xs text-zinc-500 font-mono">Trascina qui i tuoi estrapolati ({filesCaricati.length} file attuali).</p>
+                    <p className="text-xs text-zinc-500 font-mono">Trascina qui i tuoi estrapolati ({filesCaricati.length} file in memoria).</p>
                   </div>
                   <input type="file" multiple id="fileUpload" className="hidden" accept=".txt,.csv" onChange={handleFileChange} />
                   <button onClick={() => document.getElementById('fileUpload')?.click()} className="bg-zinc-800 border border-zinc-700 px-6 py-2 rounded text-xs font-bold text-zinc-300 hover:text-white hover:border-amber-500 transition-all uppercase tracking-wider">
@@ -498,60 +518,67 @@ export default function GeneratoreLavorazioniCSV() {
              </div>
           </div>
 
-          {/* STATISTICHE GLOBALI (SOMMA DI TUTTO, INDIPENDENTI DAI FILTRI SOTTOSTANTI) */}
-          <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 mt-4 ml-1">Statistiche Globali (Intero Dataset)</h2>
+          {/* STATISTICHE (Reattive ai filtri attivi in basso) */}
+          <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 mt-4 ml-1 flex items-center gap-2">
+            Statistiche Relazionali {filtroSoloDoppi || filtroDataInizio || filtroDataFine || filtroTurno !== 'TUTTI' || ricercaSpedizione ? <span className="bg-amber-500 text-black px-2 py-0.5 rounded text-[10px] font-black">FILTRATE</span> : ''}
+          </h2>
+          
           <div className="dashboard-grid">
             <div className="stat-card">
               <Hash size={24} className="stat-icon text-zinc-500" />
-              <span className="stat-label">Lavorazioni Totali</span>
+              <span className="stat-label">Lavorazioni Viste</span>
               <span className="stat-value text-primary">{statistiche.totale}</span>
               <span className="stat-sub">Arrivi: <span className="text-blue">{statistiche.colliArrivi}</span> | Part: <span className="text-orange">{statistiche.colliPartenze}</span></span>
             </div>
             <div className="stat-card">
               <Activity size={24} className="stat-icon text-zinc-500" />
-              <span className="stat-label">Media Oraria Globale</span>
+              <span className="stat-label">Media Oraria Vista</span>
               <span className="stat-value text-white">{statistiche.mediaColli}</span>
-              <span className="stat-sub">Sped. / ora esatta</span>
+              <span className="stat-sub">Sped. / ora calcolata</span>
             </div>
             <div className="stat-card">
               <Scale size={24} className="stat-icon text-zinc-500" />
-              <span className="stat-label">Peso Totale</span>
+              <span className="stat-label">Peso Totale (Filtro)</span>
               <span className="stat-value text-emerald">{statistiche.pesoTot.toLocaleString('it-IT', {maximumFractionDigits: 1})} <span className="text-xs">kg</span></span>
               <span className="stat-sub">Somma ponderale</span>
             </div>
             <div className="stat-card">
               <Scale size={24} className="stat-icon text-zinc-500" />
-              <span className="stat-label">Peso / Ora</span>
+              <span className="stat-label">Peso / Ora (Filtro)</span>
               <span className="stat-value text-emerald">{statistiche.pesoOra.toLocaleString('it-IT', {maximumFractionDigits: 1})} <span className="text-xs">kg/h</span></span>
               <span className="stat-sub">Media oraria kg</span>
             </div>
             <div className="stat-card">
               <Box size={24} className="stat-icon text-zinc-500" />
-              <span className="stat-label">Volume Totale</span>
+              <span className="stat-label">Volume Tot (Filtro)</span>
               <span className="stat-value text-emerald">{statistiche.volTot.toLocaleString('it-IT', {maximumFractionDigits: 2})} <span className="text-xs">m³</span></span>
               <span className="stat-sub">Cubo totale</span>
             </div>
             <div className="stat-card">
               <Box size={24} className="stat-icon text-zinc-500" />
-              <span className="stat-label">Volume / Ora</span>
+              <span className="stat-label">Volume / Ora (Filtro)</span>
               <span className="stat-value text-emerald">{statistiche.volOra.toLocaleString('it-IT', {maximumFractionDigits: 2})} <span className="text-xs">m³/h</span></span>
               <span className="stat-sub">Media oraria cubo</span>
             </div>
             <div className="stat-card">
               <Calculator size={24} className="stat-icon text-zinc-500" />
-              <span className="stat-label">Rapp. P/V Globale</span>
+              <span className="stat-label">Rapp. P/V Vista</span>
               <span className="stat-value text-purple">{statistiche.rapportoPV.toLocaleString('it-IT', {maximumFractionDigits: 4})}</span>
-              <span className="stat-sub">Volume Totale / 300</span>
+              <span className="stat-sub">Volume Vista / 300</span>
             </div>
             
-            {/* RIQUADRO DOPPIE SPEDIZIONI */}
-            <div className={`stat-card ${statistiche.numDuplicati > 0 ? 'alert' : ''}`}>
+            {/* RIQUADRO DOPPIE SPEDIZIONI - ORA CLICCABILE */}
+            <div 
+              onClick={() => setFiltroSoloDoppi(!filtroSoloDoppi)}
+              title="Clicca per isolare e analizzare solo i pacchi passati 2 o più volte"
+              className={`stat-card clickable ${statistiche.numDuplicati > 0 ? 'alert' : ''} ${filtroSoloDoppi ? 'active-filter' : ''}`}
+            >
               <AlertTriangle size={24} className={`stat-icon ${statistiche.numDuplicati > 0 ? 'text-error opacity-40' : 'text-zinc-500'}`} />
               <span className={`stat-label ${statistiche.numDuplicati > 0 ? 'text-error' : ''}`}>Sped. Doppie</span>
               <span className={`stat-value ${statistiche.numDuplicati > 0 ? 'text-error' : 'text-white'}`}>
                 {statistiche.numDuplicati}
               </span>
-              <span className="stat-sub">Processate più volte</span>
+              <span className="stat-sub">{filtroSoloDoppi ? 'FILTRO ATTIVO (Clicca x togliere)' : 'Clicca per isolarle'}</span>
             </div>
 
           </div>
@@ -559,7 +586,7 @@ export default function GeneratoreLavorazioniCSV() {
           {/* CONFRONTO GIORNALIERO */}
           {statsGiornaliere.length > 0 && (
             <>
-              <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Confronto Giornaliero ({statsGiornaliere.length} giorni)</h2>
+              <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Confronto Giornaliero (Vista Filtrata)</h2>
               <div className="daily-comparison-wrapper">
                 {statsGiornaliere.map((g) => (
                   <div key={g.id} className="daily-card">
@@ -567,13 +594,13 @@ export default function GeneratoreLavorazioniCSV() {
                       <Calendar size={16} className="text-amber-500"/>
                       <h3>{g.label}</h3>
                     </div>
-                    <div className="daily-row"><span className="daily-label">Colli Totali:</span> <span className="text-primary daily-val">{g.totale}</span></div>
+                    <div className="daily-row"><span className="daily-label">Colli Lavorati:</span> <span className="text-primary daily-val">{g.totale}</span></div>
                     <div className="daily-row"><span className="daily-label ml-2">↳ ARRIVI:</span> <span className="text-blue daily-val">{g.colliArrivi}</span></div>
                     <div className="daily-row"><span className="daily-label ml-2">↳ PARTENZE:</span> <span className="text-orange daily-val">{g.colliPartenze}</span></div>
                     <div className="daily-row mt-2"><span className="daily-label">Media (Colli/h):</span> <span className="daily-val">{g.mediaColli}</span></div>
                     <div className="daily-row"><span className="daily-label">Vol/h (m³/h):</span> <span className="text-emerald daily-val">{g.volOra.toLocaleString('it-IT', {maximumFractionDigits: 2})}</span></div>
                     <div className="daily-row"><span className="daily-label">Rapporto P/V:</span> <span className="text-purple daily-val">{g.rapportoPV.toLocaleString('it-IT', {maximumFractionDigits: 4})}</span></div>
-                    <div className="daily-row"><span className="daily-label">Doppioni:</span> <span className={g.numDuplicati > 0 ? "text-error font-bold" : "daily-val"}>{g.numDuplicati}</span></div>
+                    <div className="daily-row"><span className="daily-label">Doppioni in data:</span> <span className={g.numDuplicati > 0 ? "text-error font-bold" : "daily-val"}>{g.numDuplicati}</span></div>
                   </div>
                 ))}
               </div>
@@ -588,7 +615,7 @@ export default function GeneratoreLavorazioniCSV() {
             <Search size={16} className="search-icon" />
             <input 
               type="text" 
-              placeholder="Cerca numero di spedizione..." 
+              placeholder="Cerca numero di spedizione specifico..." 
               value={ricercaSpedizione}
               onChange={(e) => setRicercaSpedizione(e.target.value)}
               className="search-input"
@@ -628,10 +655,10 @@ export default function GeneratoreLavorazioniCSV() {
                 />
              </div>
              
-             {(filtroTurno !== 'TUTTI' || filtroDataInizio || filtroDataFine) && (
+             {(filtroTurno !== 'TUTTI' || filtroDataInizio || filtroDataFine || filtroSoloDoppi || ricercaSpedizione) && (
                <button 
-                 onClick={() => { setFiltroTurno('TUTTI'); setFiltroDataInizio(''); setFiltroDataFine(''); }}
-                 className="text-xs font-bold text-amber-500 hover:text-white uppercase ml-auto"
+                 onClick={azzeraFiltri}
+                 className="text-xs font-bold text-amber-500 hover:text-white uppercase ml-auto border border-amber-500/50 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-all"
                >
                  Azzera Filtri
                </button>
@@ -671,7 +698,7 @@ export default function GeneratoreLavorazioniCSV() {
                </thead>
                <tbody>
                  {datiFiltrati.map((riga, i) => {
-                   const isDuplicato = statistiche.listaDuplicati.includes(riga.spedizione);
+                   const isDuplicato = globalDuplicati.includes(riga.spedizione);
                    return (
                      <tr key={i} className={isDuplicato ? 'row-duplicate' : ''}>
                        <td className="text-zinc-600 font-bold">{i + 1}</td>
