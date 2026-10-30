@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Upload, FileText, Download, AlertTriangle, 
-  Clock, Hash, Box, Scale, Activity, Search
+  Clock, Hash, Box, Scale, Activity, Search, Calculator
 } from 'lucide-react';
 
 /* STILI CSS INLINE - TEMA AMBRA UNIFORME */
@@ -61,7 +61,7 @@ const stiliCSS = `
 
   .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 12px;
     margin-bottom: 12px;
   }
@@ -175,7 +175,7 @@ export default function GeneratoreLavorazioniCSV() {
       const diffMs = maxTime - minTime;
       const diffHours = diffMs / (1000 * 60 * 60);
       
-      // Se c'è almeno un pacco ma diff è zero (es. un singolo collo caricato), calcola 1 minuto base
+      // Se c'è almeno un pacco ma diff è zero, calcola 1 minuto base
       let hEffettive = diffHours;
       if (hEffettive === 0 && datiFusi.length > 0) hEffettive = 1/60; 
       
@@ -198,6 +198,9 @@ export default function GeneratoreLavorazioniCSV() {
       
       volTot: volumeTotale,
       volOra: volumeTotale / oreCalcolo,
+
+      // Nuovo calcolo: Rapporto Peso Volume (Vol / 300)
+      rapportoPV: volumeTotale / 300,
 
       numDuplicati: duplicati.size,
       listaDuplicati: Array.from(duplicati)
@@ -247,16 +250,18 @@ export default function GeneratoreLavorazioniCSV() {
           const h = parseFloat(clean(campi[5])) || 0;
           const volumeM3 = (l * w * h) / 1000000;
           
+          // Nuovo calcolo per riga: Rapporto Peso Volume (Vol / 300)
+          const rapportoPVRiga = volumeM3 / 300;
+          
           const dataOraRaw = clean(campi[14]);
           
-          // Estrai il timestamp per il calcolo preciso
           let dataOraFormattata = dataOraRaw;
           let timestamp = null;
           
           const partiData = dataOraRaw.split('_'); // 2026_07_08_15_31_56
           if (partiData.length >= 6) {
              const Y = parseInt(partiData[0], 10);
-             const M = parseInt(partiData[1], 10) - 1; // Mesi 0-11 in JS
+             const M = parseInt(partiData[1], 10) - 1; 
              const D = parseInt(partiData[2], 10);
              const ore = parseInt(partiData[3], 10);
              const min = parseInt(partiData[4], 10);
@@ -270,6 +275,7 @@ export default function GeneratoreLavorazioniCSV() {
             nuoviDati.push({
               spedizione,
               pesoKg, l, w, h, volumeM3,
+              rapportoPVRiga,
               dataOraFormattata, timestamp
             });
           }
@@ -287,9 +293,9 @@ export default function GeneratoreLavorazioniCSV() {
   const scaricaFileUnico = () => {
     if (datiFusi.length === 0) return;
     
-    const intestazioni = "Spedizione;Peso_Kg;Lungh_cm;Largh_cm;Alt_cm;Volume_m3;Data_Ora\n";
+    const intestazioni = "Spedizione;Peso_Kg;Lungh_cm;Largh_cm;Alt_cm;Volume_m3;Rapporto_PV;Data_Ora\n";
     const contenuto = datiFusi.map(r => 
-      `${r.spedizione};${r.pesoKg.toFixed(2)};${r.l};${r.w};${r.h};${r.volumeM3.toFixed(4)};${r.dataOraFormattata}`
+      `${r.spedizione};${r.pesoKg.toFixed(2)};${r.l};${r.w};${r.h};${r.volumeM3.toFixed(4)};${r.rapportoPVRiga.toFixed(6)};${r.dataOraFormattata}`
     ).join('\n');
 
     const blob = new Blob([intestazioni + contenuto], { type: 'text/csv;charset=utf-8;' });
@@ -332,7 +338,7 @@ export default function GeneratoreLavorazioniCSV() {
             
             <div className="stat-card">
               <Activity size={32} className="stat-icon text-zinc-500" />
-              <span className="stat-label">Media Oraria (Colli)</span>
+              <span className="stat-label">Media Oraria</span>
               <span className="stat-value text-white">{statistiche.mediaColli}</span>
               <span className="stat-sub">Sped. / ora esatta</span>
             </div>
@@ -363,6 +369,13 @@ export default function GeneratoreLavorazioniCSV() {
               <span className="stat-label">Volume / Ora</span>
               <span className="stat-value text-white">{statistiche.volOra.toLocaleString('it-IT', {maximumFractionDigits: 3})} <span className="text-sm">m³/h</span></span>
               <span className="stat-sub">Media oraria cubo</span>
+            </div>
+
+            <div className="stat-card">
+              <Calculator size={32} className="stat-icon text-zinc-500" />
+              <span className="stat-label">Rapp. P/V Totale</span>
+              <span className="stat-value text-primary">{statistiche.rapportoPV.toLocaleString('it-IT', {maximumFractionDigits: 4})}</span>
+              <span className="stat-sub">Vol Totale / 300</span>
             </div>
 
             <div className="stat-card">
@@ -438,6 +451,7 @@ export default function GeneratoreLavorazioniCSV() {
                    <th>W (cm)</th>
                    <th>H (cm)</th>
                    <th>Volume (m³)</th>
+                   <th>Rapp. P/V</th>
                  </tr>
                </thead>
                <tbody>
@@ -453,6 +467,7 @@ export default function GeneratoreLavorazioniCSV() {
                        <td>{riga.w}</td>
                        <td>{riga.h}</td>
                        <td className="text-emerald-500/80">{riga.volumeM3.toFixed(4)}</td>
+                       <td className="text-purple-400/80">{riga.rapportoPVRiga.toFixed(6)}</td>
                      </tr>
                    );
                  })}
