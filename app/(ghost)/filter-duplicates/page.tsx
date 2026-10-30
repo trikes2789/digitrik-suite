@@ -1,413 +1,927 @@
 'use client';
 
-import React, { useState } from 'react';
-import * as XLSX from 'xlsx';
-import Link from 'next/link';
+import React, { useState, useMemo } from 'react';
 import { 
-  Upload, FileSpreadsheet, Download, Home, 
-  AlertCircle, CheckCircle, ArrowLeft, Filter 
+  Upload, FileText, Download, AlertTriangle, 
+  Clock, Hash, Box, Scale, Activity, Search, Calculator, Calendar, Filter, XOctagon, Copy, Check
 } from 'lucide-react';
 
-/* STILE AMBRA DIGITRIK PRO */
-const styles = `
-  :root {
+/* STILI CSS INLINE - TEMA AMBRA UNIFORME */
+const stiliCSS = `
+  :root { 
     --bg: #09090b; 
-    --card: #18181b; 
+    --card-dark: #18181b; 
+    --card-light: #ffffff; 
     --border: #27272a; 
-    --text: #e4e4e7; 
+    --text-main: #e4e4e7; 
+    --text-card: #18181b; 
     --primary: #f59e0b; 
     --primary-dim: rgba(245, 158, 11, 0.1);
-    --primary-glow: rgba(245, 158, 11, 0.5);
-    --success: #10b981;
-    --error: #ef4444;
+    --success: #10b981; 
+    --error: #ef4444; 
+    --error-dim: rgba(239, 68, 68, 0.1);
   }
 
-  body { background-color: var(--bg); color: var(--text); }
+  body { background-color: var(--bg); color: var(--text-main); overflow: hidden; font-family: sans-serif; }
 
-  .ghost-container {
-    min-height: 100vh;
+  .top-section { 
+    background: rgba(9, 9, 11, 0.95); 
+    border-bottom: 1px solid var(--border);
+    padding: 15px; 
+    z-index: 50; 
+    position: relative; 
+    flex-shrink: 0; 
+  }
+
+  .control-card { 
+    background: var(--card-dark); 
+    border: 1px solid var(--border); 
+    border-radius: 16px; 
+    padding: 16px; 
+    margin-bottom: 12px;
+    box-shadow: 0 4px 20px -10px rgba(0,0,0,0.5);
+  }
+
+  .drop-zone { 
+    border: 2px dashed var(--border); 
+    background: rgba(255,255,255,0.02); 
+    border-radius: 12px; 
+    padding: 20px; 
+    text-align: center; 
+    min-height: 80px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    cursor: pointer; 
+    transition: 0.2s; 
+  }
+  .drop-zone.drag-active { background: var(--primary-dim); border-color: var(--primary); }
+  .drop-zone:hover { border-color: var(--primary); }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card {
+    background: var(--card-dark);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    font-family: ui-sans-serif, system-ui, sans-serif;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease-in-out;
   }
+  
+  .stat-card.alert { border-color: var(--error); background: var(--error-dim); }
+  
+  .stat-card.clickable { cursor: pointer; }
+  .stat-card.clickable:hover { border-color: var(--error); box-shadow: 0 0 15px var(--error-dim); transform: translateY(-2px); }
+  .stat-card.active-filter { border: 2px solid var(--error); background: rgba(239, 68, 68, 0.2); transform: scale(1.02); box-shadow: 0 0 20px var(--error-dim); }
 
-  .top-bar {
-    background: rgba(24, 24, 27, 0.9);
+  .stat-icon { position: absolute; top: 12px; right: 12px; opacity: 0.15; }
+  .stat-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 800; color: #71717a; letter-spacing: 1px; margin-bottom: 2px; }
+  .stat-value { font-size: 1.4rem; font-weight: 900; color: var(--text-main); line-height: 1; margin-bottom: 2px; }
+  .stat-sub { font-size: 0.65rem; color: #a1a1aa; font-family: monospace; }
+
+  /* COMPONENTI PER CONFRONTO GIORNALIERO */
+  .daily-comparison-wrapper {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .daily-card {
+    min-width: 270px;
+    background: #121214;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--primary);
+    border-radius: 12px;
+    padding: 14px;
+    flex-shrink: 0;
+  }
+  .daily-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     border-bottom: 1px solid var(--border);
-    padding: 1rem 1.5rem;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+  .daily-header h3 { font-size: 1rem; font-weight: 900; color: white; margin: 0; }
+  .daily-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 50;
+    font-size: 0.75rem;
+    margin-bottom: 6px;
+    font-family: monospace;
   }
+  .daily-label { color: #a1a1aa; }
+  .daily-val { font-weight: bold; color: white; }
 
-  .drop-zone {
-    border: 2px dashed var(--border);
-    background: rgba(255,255,255,0.02);
-    border-radius: 1rem;
-    padding: 3rem;
-    text-align: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    margin-bottom: 2rem;
+  .text-primary { color: var(--primary) !important; }
+  .text-error { color: var(--error) !important; }
+  .text-emerald { color: var(--success) !important; }
+  .text-purple { color: #c084fc !important; }
+  .text-blue { color: #60a5fa !important; }
+  .text-orange { color: #fb923c !important; }
+
+  .search-wrapper {
+    padding: 0 20px 10px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
-  .drop-zone:hover { border-color: var(--primary); background: var(--primary-dim); }
-  .drop-zone.active { border-color: var(--primary); background: var(--primary-dim); transform: scale(1.02); }
-
-  .btn-primary {
-    background: var(--primary);
-    color: black;
-    font-weight: 800;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
+  .search-bar-row {
+    position: relative;
+    width: 100%;
+  }
+  .filters-row {
+    display: flex;
+    gap: 10px;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
+    flex-wrap: wrap;
+  }
+  .search-input {
+    width: 100%;
+    background: var(--card-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 10px 10px 38px;
+    color: white;
+    outline: none;
     text-transform: uppercase;
-    font-size: 0.875rem;
+    font-weight: bold;
+    font-size: 0.8rem;
+    transition: 0.2s;
   }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px var(--primary-glow); }
+  .search-input:focus { border-color: var(--primary); }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #71717a; }
+  
+  .filter-input {
+    background: var(--card-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: white;
+    outline: none;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .filter-input:focus { border-color: var(--primary); }
+  .filter-label { font-size: 0.7rem; color: #a1a1aa; text-transform: uppercase; font-weight: bold; margin-right: 4px; }
 
-  .results-table {
+  .list-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    background: #000;
+    height: 0; 
+    padding: 0 20px 20px 20px;
+  }
+
+  .data-table {
     width: 100%;
     border-collapse: collapse;
+    font-family: monospace;
     font-size: 0.8rem;
-    margin-top: 1rem;
   }
-  .results-table th {
-    background: var(--card);
-    color: var(--primary);
-    text-transform: uppercase;
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .results-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--border);
-    color: #a1a1aa;
-  }
+  .data-table th { background: var(--bg); color: var(--primary); padding: 10px; text-align: left; position: sticky; top: 0px; z-index: 10; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+  .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: #a1a1aa; }
+  .data-table tr:hover td { background: var(--card-dark); color: white; }
   
-  /* STILI DI GRUPPO */
-  .group-odd { background-color: rgba(255, 255, 255, 0.02); }
-  .group-even { background-color: transparent; }
+  .row-duplicate { background: rgba(239, 68, 68, 0.05); }
+  .row-duplicate td { color: var(--error); }
+  .row-error td { color: var(--error) !important; font-weight: bold; }
+  .row-weight-issue td { color: #fbbf24; } 
   
-  /* SEPARATORE MARCATO TRA GRUPPI */
-  .group-separator td {
-    border-top: 2px solid rgba(245, 158, 11, 0.4); /* Amber separator */
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #52525b; text-align: center; margin-top: 40px;
   }
 
-  .col-highlight { color: var(--primary) !important; font-weight: bold; font-family: monospace; }
-  .bg-highlight { background: rgba(245, 158, 11, 0.1) !important; }
+  .copy-btn {
+    padding: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    color: #a1a1aa;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .copy-btn:hover {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--primary);
+    border-color: var(--primary-dim);
+  }
 `;
 
-export default function DuplicateFilterPage() {
-  const [dragActive, setDragActive] = useState(false);
-  const [status, setStatus] = useState({ msg: 'In attesa di file...', type: 'idle' });
-  const [results, setResults] = useState<any[]>([]);
-  const [fileName, setFileName] = useState('');
+export default function GeneratoreTransitiCSV() {
+  const [isDragActive, setIsDragActive] = useState(false);
+  const [filesCaricati, setFilesCaricati] = useState<string[]>([]);
+  const [datiFusi, setDatiFusi] = useState<any[]>([]);
+  
+  // STATI PER I FILTRI E COPIA
+  const [ricercaSpedizione, setRicercaSpedizione] = useState('');
+  const [filtroTurno, setFiltroTurno] = useState('TUTTI');
+  const [filtroErrore, setFiltroErrore] = useState('TUTTI');
+  const [filtroDataInizio, setFiltroDataInizio] = useState('');
+  const [filtroDataFine, setFiltroDataFine] = useState('');
+  const [filtroSoloDoppi, setFiltroSoloDoppi] = useState(false); 
+  const [filtroIncongruenzaPeso, setFiltroIncongruenzaPeso] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Funzione di pulizia (dal tuo script originale)
-  const cleanValue = (value: any) => {
-    return String(value || '').trim().replace(/\s+/g, '').toLowerCase();
-  };
-
-  const processFile = (file: File) => {
-    if (!file) return;
-    console.log("Inizio elaborazione file:", file.name);
-    
-    setFileName(file.name);
-    setStatus({ msg: `Elaborazione di "${file.name}"...`, type: 'loading' });
-    setResults([]);
-
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        
-        if (!workbook.SheetNames.length) throw new Error("File Excel vuoto");
-        
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false }) as any[][];
-
-        if (!jsonData || jsonData.length < 2) throw new Error("Nessun dato trovato nel file.");
-
-        const headers = jsonData[0];
-        const dataRows = jsonData.slice(1);
-
-        console.log("Headers trovati:", headers);
-
-        // Mappa Header Puliti -> Header Originali
-        let headerMap: Record<string, string> = {};
-        let cleanedHeaders = headers.map((header: any) => {
-          const originalHeader = String(header);
-          const cleaned = cleanValue(originalHeader);
-          headerMap[cleaned] = originalHeader;
-          return cleaned;
-        });
-
-        // Crea array di oggetti con chiavi pulite
-        let datiPuliti = dataRows.map(row => {
-          let newRow: Record<string, any> = {};
-          row.forEach((value, index) => {
-            if (cleanedHeaders[index]) {
-                newRow[cleanedHeaders[index]] = value;
-            }
-          });
-          return newRow;
-        });
-
-        // Colonne da preservare (come da tuo script)
-        const colonneDaMantenerePulite = [
-          'oratransito', 'errore', 'barcodematch', 
-          'lunghezzacollocm', 'larghezzacollocm', 'altezzacollocm', 'pesocollokg'
-        ];
-
-        let barcodeCounts: Record<string, number> = {};
-        
-        // 1. Conta le occorrenze dei Barcode
-        datiPuliti.forEach(riga => {
-            const val = riga['barcodematch'];
-            if (val) {
-                const clean = cleanValue(val);
-                barcodeCounts[clean] = (barcodeCounts[clean] || 0) + 1;
-            }
-        });
-
-        // 2. Filtra e Costruisci le righe finali
-        let risultatiFinali: any[] = [];
-
-        datiPuliti.forEach(riga => {
-            const barcodeVal = riga['barcodematch'];
-            const barcodeClean = cleanValue(barcodeVal);
-
-            // SE è un duplicato (count > 1)
-            if (barcodeVal && barcodeCounts[barcodeClean] > 1) {
-                const nuovaRiga: Record<string, any> = {};
-                
-                colonneDaMantenerePulite.forEach(chiavePulita => {
-                    // Usa il valore dalla riga pulita
-                    const valore = riga[chiavePulita] !== undefined ? riga[chiavePulita] : '';
-                    // Usa il nome colonna originale per l'export (o fallback alla chiave pulita)
-                    const chiaveOriginale = headerMap[chiavePulita] || chiavePulita;
-                    nuovaRiga[chiaveOriginale] = valore;
-                });
-                
-                risultatiFinali.push(nuovaRiga);
-            }
-        });
-
-        // 3. Ordina per Barcode
-        risultatiFinali.sort((a, b) => {
-            const key = headerMap['barcodematch'] || 'barcodematch';
-            const valA = String(a[key] || '');
-            const valB = String(b[key] || '');
-            return valA.localeCompare(valB);
-        });
-
-        console.log("Risultati trovati:", risultatiFinali.length);
-
-        if (risultatiFinali.length > 0) {
-            setResults(risultatiFinali);
-            setStatus({ msg: `Trovati ${risultatiFinali.length} duplicati!`, type: 'success' });
-        } else {
-            setStatus({ msg: "Nessun duplicato trovato.", type: 'error' });
+  const handleCopy = async (testo: string, rowId: string) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(testo);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = testo;
+        textArea.style.position = "absolute";
+        textArea.style.left = "-999999px";
+        document.body.prepend(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+        } catch (error) {
+          console.error("Fallback execCommand fallito", error);
+        } finally {
+          textArea.remove();
         }
-
-      } catch (error: any) {
-        console.error("Errore elaborazione:", error);
-        setStatus({ msg: `Errore: ${error.message}`, type: 'error' });
       }
-    };
-    
-    reader.readAsArrayBuffer(file);
-  };
-
-  const exportExcel = () => {
-    if (results.length === 0) return;
-    const ws = XLSX.utils.json_to_sheet(results);
-    const columnWidths = [{ wpx: 60 }, { wpx: 140 }, { wpx: 140 }, { wpx: 100 }, { wpx: 100 }, { wpx: 100 }, { wpx: 80 }];
-    ws['!cols'] = columnWidths;
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Duplicati Filtrati");
-    XLSX.writeFile(wb, `Report_Duplicati_${new Date().toISOString().slice(0, 10)}.xlsx`);
-  };
-
-  // --- GESTIONE EVENTI DRAG & DROP ---
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
-    else if (e.type === 'dragleave') setDragActive(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        processFile(e.dataTransfer.files[0]);
+      setCopiedId(rowId);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error('Errore durante la copia: ', err);
     }
   };
 
-  const handleManualSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files[0]) {
-          processFile(e.target.files[0]);
+  // 1. TROVA I DOPPIONI GLOBALI E LE INCONGRUENZE DI PESO SUI DOPPI
+  const { globalDuplicati, spedizioniConErrori, spedizioniDiffPeso } = useMemo(() => {
+    let viste = new Set<string>();
+    let doppie = new Set<string>();
+    let conErrore = new Set<string>();
+    let pesiPerSpedizione = new Map<string, number[]>();
+    
+    datiFusi.forEach(r => {
+      if (r.spedizione && !r.spedizione.includes('ERR_NO_READ')) {
+        if (viste.has(r.spedizione)) doppie.add(r.spedizione);
+        else viste.add(r.spedizione);
+        
+        if (!pesiPerSpedizione.has(r.spedizione)) {
+          pesiPerSpedizione.set(r.spedizione, []);
+        }
+        pesiPerSpedizione.get(r.spedizione)?.push(r.pesoKg);
       }
-      // Reset input value per permettere di ricaricare lo stesso file
-      e.target.value = '';
+      if (r.errore && r.spedizione) {
+        conErrore.add(r.spedizione);
+      }
+    });
+    
+    let conDiffPeso = new Set<string>();
+    doppie.forEach(sped => {
+       const pesi = pesiPerSpedizione.get(sped);
+       if (pesi && pesi.length > 1) {
+          const minPeso = Math.min(...pesi);
+          const maxPeso = Math.max(...pesi);
+          if (maxPeso - minPeso >= 0.5) {
+             conDiffPeso.add(sped);
+          }
+       }
+    });
+
+    return { 
+      globalDuplicati: Array.from(doppie), 
+      spedizioniConErrori: conErrore,
+      spedizioniDiffPeso: conDiffPeso
+    };
+  }, [datiFusi]);
+
+  // 2. APPLICAZIONE DEI FILTRI E ORDINAMENTO
+  const datiFiltrati = useMemo(() => {
+    let filtered = datiFusi.filter(r => {
+      if (ricercaSpedizione && !r.spedizione.includes(ricercaSpedizione.toUpperCase())) return false;
+      if (filtroTurno !== 'TUTTI' && r.turno !== filtroTurno) return false;
+      if (filtroErrore === 'ERRORI' && !r.errore) return false;
+      if (filtroErrore === 'NO_ERRORI' && spedizioniConErrori.has(r.spedizione)) return false;
+      if (filtroDataInizio && r.giornoId < filtroDataInizio) return false;
+      if (filtroDataFine && r.giornoId > filtroDataFine) return false;
+      
+      if (filtroSoloDoppi && !globalDuplicati.includes(r.spedizione)) return false;
+      if (filtroIncongruenzaPeso && !spedizioniDiffPeso.has(r.spedizione)) return false;
+
+      return true;
+    });
+
+    if (filtroSoloDoppi || filtroIncongruenzaPeso) {
+      filtered.sort((a, b) => {
+        const compSped = a.spedizione.localeCompare(b.spedizione);
+        if (compSped !== 0) return compSped;
+        return a.timestamp - b.timestamp; 
+      });
+    }
+
+    return filtered;
+  }, [datiFusi, ricercaSpedizione, filtroTurno, filtroErrore, filtroDataInizio, filtroDataFine, filtroSoloDoppi, filtroIncongruenzaPeso, globalDuplicati, spedizioniConErrori, spedizioniDiffPeso]);
+
+  // 3. CALCOLO STATISTICHE GLOBALI
+  const statistiche = useMemo(() => {
+    let duplicatiCount = new Set<string>();
+    let diffPesoCountLocal = new Set<string>();
+    let spedVisteLocal = new Set<string>();
+    let pesoTotale = 0;
+    let volumeTotale = 0;
+    let minTime = Infinity;
+    let maxTime = -Infinity;
+    let colliArrivi = 0;
+    let colliPartenze = 0;
+    let erroriCount = 0;
+
+    datiFiltrati.forEach(riga => {
+      if (riga.spedizione && !riga.spedizione.includes('ERR_NO_READ')) {
+        if (spedVisteLocal.has(riga.spedizione)) duplicatiCount.add(riga.spedizione);
+        else spedVisteLocal.add(riga.spedizione);
+        
+        if (spedizioniDiffPeso.has(riga.spedizione)) {
+           diffPesoCountLocal.add(riga.spedizione);
+        }
+      }
+      if (riga.timestamp) {
+        if (riga.timestamp < minTime) minTime = riga.timestamp;
+        if (riga.timestamp > maxTime) maxTime = riga.timestamp;
+      }
+      pesoTotale += riga.pesoKg;
+      volumeTotale += riga.volumeM3;
+
+      if (riga.turno === 'ARRIVI') colliArrivi++;
+      else colliPartenze++;
+      
+      if (riga.errore) erroriCount++;
+    });
+
+    let oreCalcolo = 1; 
+    let stringaOre = "0h 0m";
+    if (minTime !== Infinity && maxTime !== -Infinity) {
+      const diffMs = maxTime - minTime;
+      const diffHours = diffMs / (1000 * 60 * 60);
+      let hEffettive = diffHours;
+      if (hEffettive === 0 && datiFiltrati.length > 0) hEffettive = 1/60; 
+      oreCalcolo = hEffettive > 0 ? hEffettive : 1;
+      const h = Math.floor(hEffettive);
+      const m = Math.floor((hEffettive - h) * 60);
+      stringaOre = `${h}h ${m}m`;
+    }
+
+    const numLavorazioni = datiFiltrati.length;
+    return {
+      totale: numLavorazioni,
+      colliArrivi,
+      colliPartenze,
+      erroriCount,
+      incongruenzePesoCount: filtroIncongruenzaPeso ? spedizioniDiffPeso.size : diffPesoCountLocal.size,
+      mediaColli: numLavorazioni > 0 ? Math.round(numLavorazioni / oreCalcolo) : 0,
+      oreRealiFormattate: stringaOre,
+      pesoTot: pesoTotale,
+      pesoOra: pesoTotale / oreCalcolo,
+      volTot: volumeTotale,
+      volOra: volumeTotale / oreCalcolo,
+      rapportoPV: volumeTotale / 300,
+      numDuplicati: filtroSoloDoppi ? globalDuplicati.length : duplicatiCount.size
+    };
+  }, [datiFiltrati, filtroSoloDoppi, filtroIncongruenzaPeso, globalDuplicati, spedizioniDiffPeso]);
+
+  // 4. CALCOLO CONFRONTO GIORNALIERO
+  const statsGiornaliere = useMemo(() => {
+    const map = new Map();
+
+    datiFiltrati.forEach(riga => {
+      if (!map.has(riga.giornoId)) {
+        map.set(riga.giornoId, {
+          id: riga.giornoId,
+          label: riga.giornoLabel,
+          totale: 0,
+          colliArrivi: 0,
+          colliPartenze: 0,
+          erroriCount: 0,
+          pesoTot: 0,
+          volTot: 0,
+          minTime: Infinity,
+          maxTime: -Infinity,
+          duplicatiSet: new Set(),
+          spedVisteLocal: new Set()
+        });
+      }
+      
+      const g = map.get(riga.giornoId);
+      g.totale += 1;
+      g.pesoTot += riga.pesoKg;
+      g.volTot += riga.volumeM3;
+      
+      if (riga.turno === 'ARRIVI') g.colliArrivi++;
+      else g.colliPartenze++;
+      
+      if (riga.errore) g.erroriCount++;
+
+      if (riga.timestamp < g.minTime) g.minTime = riga.timestamp;
+      if (riga.timestamp > g.maxTime) g.maxTime = riga.timestamp;
+
+      if (riga.spedizione && !riga.spedizione.includes('ERR_NO_READ')) {
+        if (g.spedVisteLocal.has(riga.spedizione)) g.duplicatiSet.add(riga.spedizione);
+        else g.spedVisteLocal.add(riga.spedizione);
+      }
+    });
+
+    return Array.from(map.values())
+      .sort((a, b) => a.id.localeCompare(b.id)) 
+      .map(g => {
+        let oreCalcolo = 1;
+        let stringaOre = "0h 0m";
+        if (g.minTime !== Infinity && g.maxTime !== -Infinity) {
+          const diffMs = g.maxTime - g.minTime;
+          let diffHours = diffMs / (1000 * 60 * 60);
+          if (diffHours === 0 && g.totale > 0) diffHours = 1/60;
+          oreCalcolo = diffHours > 0 ? diffHours : 1;
+          const h = Math.floor(diffHours);
+          const m = Math.floor((diffHours - h) * 60);
+          stringaOre = `${h}h ${m}m`;
+        }
+
+        return {
+          ...g,
+          stringaOre,
+          mediaColli: g.totale > 0 ? Math.round(g.totale / oreCalcolo) : 0,
+          pesoOra: g.pesoTot / oreCalcolo,
+          volOra: g.volTot / oreCalcolo,
+          rapportoPV: g.volTot / 300,
+          numDuplicati: g.duplicatiSet.size
+        };
+      });
+  }, [datiFiltrati]);
+
+  // Gestione Upload con Riconoscimento Tracciati
+  const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragActive(true); };
+  const onDragLeave = () => setIsDragActive(false);
+  const onDrop = async (e: React.DragEvent) => {
+    e.preventDefault(); setIsDragActive(false);
+    if (e.dataTransfer.files) processaListaFiles(e.dataTransfer.files);
+  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) processaListaFiles(e.target.files);
   };
 
-  // Helper per il rendering con raggruppamento visivo
-  const renderTableRows = () => {
-    if (results.length === 0) return null;
+  const processaListaFiles = async (files: FileList) => {
+    const nuoviFiles = Array.from(files);
+    setFilesCaricati(prev => [...prev, ...nuoviFiles.map(f => f.name)]);
 
-    const headers = Object.keys(results[0]);
-    // Trova la colonna che contiene "barcode" per il raggruppamento
-    const barcodeKey = headers.find(h => h.toLowerCase().includes('barcode')) || headers[0];
+    let nuoviDati: any[] = [];
 
-    let groupCounter = 0;
-    
-    return results.map((row, i) => {
-      const currentBarcode = row[barcodeKey];
-      const prevBarcode = i > 0 ? results[i - 1][barcodeKey] : null;
+    for (let file of nuoviFiles) {
+      const fileName = file.name;
+      const testo = await file.text();
+      const linee = testo.split('\n').filter(l => l.trim() !== '');
+      if (linee.length === 0) continue;
+
+      const separatore = linee[0].includes(';') ? ';' : ',';
       
-      // Se il barcode cambia rispetto al precedente, è un nuovo gruppo
-      const isNewGroup = i === 0 || currentBarcode !== prevBarcode;
-      
-      if (isNewGroup && i > 0) {
-        groupCounter++;
+      // Valori di default per il tracciato Odierno
+      let idxId = 0, idxData = 2, idxOra = 3, idxErrore = 4, idxSped = 8, idxL = 9, idxW = 10, idxH = 11, idxPeso = 12, idxZona = 14;
+
+      for (let i = 0; i < linee.length; i++) {
+        const linea = linee[i];
+        const campi = linea.split(separatore);
+        
+        // RICONOSCIMENTO AUTOMATICO TRACCIATO (Storico vs Odierno)
+        if (i === 0) {
+            const headerB = campi[1]?.trim().toLowerCase();
+            if (headerB === 'data transito') {
+                // E' un file STORICO
+                idxId = 0;    // A
+                idxData = 1;  // B
+                idxOra = 2;   // C
+                idxErrore = 3;// D
+                idxSped = 7;  // H (Barcode Match)
+                idxL = 9;     // J
+                idxW = 10;    // K
+                idxH = 11;    // L
+                idxPeso = 12; // M
+                idxZona = 18; // S (Filiale Destinazione)
+            } else {
+                // E' un file ODIERNO (Vid in colonna B)
+                idxId = 0;    // A
+                idxData = 2;  // C
+                idxOra = 3;   // D
+                idxErrore = 4;// E
+                idxSped = 8;  // I (Barcode Match)
+                idxL = 9;     // J
+                idxW = 10;    // K
+                idxH = 11;    // L
+                idxPeso = 12; // M
+                idxZona = 14; // O (Filiale Partenza)
+            }
+            continue; // Salta la riga delle intestazioni
+        }
+        
+        if (campi.length >= 10) {
+          const clean = (val: string) => val?.trim().replace(/["\r]/g, '') || '';
+          
+          const idTransito = clean(campi[idxId]);  
+          const dataStr = clean(campi[idxData]);     
+          const oraStr = clean(campi[idxOra]);      
+          const errore = clean(campi[idxErrore]);      
+          
+          let spedizione = clean(campi[idxSped]); 
+          if (!spedizione || spedizione === '?') spedizione = "ERR_NO_READ_" + idTransito;
+          
+          const l = parseFloat(clean(campi[idxL]).replace(',','.')) || 0;    
+          const w = parseFloat(clean(campi[idxW]).replace(',','.')) || 0;   
+          const h = parseFloat(clean(campi[idxH]).replace(',','.')) || 0;   
+          const volumeM3 = (l * w * h) / 1000000;
+          
+          const pesoKg = parseFloat(clean(campi[idxPeso]).replace(',','.')) || 0; 
+          const zona = clean(campi[idxZona]); 
+          
+          const rapportoPVRiga = volumeM3 / 300;
+          
+          let dataOraFormattata = dataStr ? `${dataStr} ${oraStr}` : '';
+          let timestamp = null;
+          let giornoId = "Sconosciuto";
+          let giornoLabel = "Sconosciuto";
+          let turno = "Sconosciuto";
+          
+          if (dataStr && oraStr) {
+             const partiData = dataStr.split('/');
+             const partiOra = oraStr.split(':');
+             
+             if (partiData.length >= 3 && partiOra.length >= 2) {
+                 const D = parseInt(partiData[0], 10);
+                 const M = parseInt(partiData[1], 10); 
+                 const Y = parseInt(partiData[2], 10);
+                 const ore = parseInt(partiOra[0], 10);
+                 const min = parseInt(partiOra[1], 10);
+                 const sec = partiOra.length > 2 ? parseInt(partiOra[2], 10) : 0;
+                 
+                 turno = ore < 13 ? 'ARRIVI' : 'PARTENZE';
+                 giornoId = `${Y}-${M.toString().padStart(2, '0')}-${D.toString().padStart(2, '0')}`;
+                 giornoLabel = `${D.toString().padStart(2, '0')}/${M.toString().padStart(2, '0')}/${Y}`;
+                 timestamp = new Date(Y, M - 1, D, ore, min, sec).getTime();
+             }
+          }
+
+          if (idTransito) {
+            nuoviDati.push({
+              idTransito, spedizione, errore, zona,
+              pesoKg, l, w, h, volumeM3, rapportoPVRiga,
+              dataOraFormattata, timestamp, giornoId, giornoLabel, turno,
+              fileName 
+            });
+          }
+        }
       }
+    }
 
-      // Alterna lo sfondo del gruppo (Pari/Dispari)
-      const rowClass = groupCounter % 2 === 0 ? 'group-even' : 'group-odd';
-      // Aggiungi bordo superiore se è l'inizio di un nuovo gruppo (tranne il primo assoluto)
-      const separatorClass = (isNewGroup && i > 0) ? 'group-separator' : '';
+    setDatiFusi(prev => [...prev, ...nuoviDati]);
+  };
 
-      return (
-        <tr key={i} className={`${rowClass} ${separatorClass}`}>
-          {headers.map((key, j) => {
-            const isBarcode = key.toLowerCase().includes('barcode');
-            return (
-              <td key={j} className={isBarcode ? 'col-highlight bg-highlight' : ''}>
-                {row[key]}
-              </td>
-            );
-          })}
-        </tr>
-      );
-    });
+  const svuotaTutto = () => {
+    setDatiFusi([]); 
+    setFilesCaricati([]); 
+    azzeraFiltri();
+  };
+
+  const azzeraFiltri = () => {
+    setRicercaSpedizione('');
+    setFiltroTurno('TUTTI');
+    setFiltroErrore('TUTTI');
+    setFiltroDataInizio('');
+    setFiltroDataFine('');
+    setFiltroSoloDoppi(false);
+    setFiltroIncongruenzaPeso(false);
+  };
+
+  const scaricaFileUnico = () => {
+    if (datiFiltrati.length === 0) return;
+    const intestazioni = "Transito_ID;Spedizione;Data_Ora;Turno;Zona;Errore;Peso_Kg;L_cm;W_cm;H_cm;Volume_m3;Rapporto_PV;File_Sorgente\n";
+    const contenuto = datiFiltrati.map(r => 
+      `${r.idTransito};${r.spedizione};${r.dataOraFormattata};${r.turno};${r.zona};${r.errore};${r.pesoKg.toFixed(2)};${r.l};${r.w};${r.h};${r.volumeM3.toFixed(4)};${r.rapportoPVRiga.toFixed(6)};${r.fileName}`
+    ).join('\n');
+    const blob = new Blob([intestazioni + contenuto], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Analisi_Transiti_Excel_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <div className="ghost-container">
-      <style jsx global>{styles}</style>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: stiliCSS }} />
+      <div className="flex flex-col h-screen bg-black text-white selection:bg-amber-500/30">
 
-      {/* Header */}
-      <div className="top-bar">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-zinc-400 hover:text-white transition-colors">
-            <ArrowLeft size={24} />
-          </Link>
-          <h1 className="text-xl font-black text-white uppercase tracking-wider flex items-center gap-2">
-            <Filter className="text-amber-500" /> Filtro Doppi
-          </h1>
-        </div>
-        <Link href="/" className="text-xs font-bold text-zinc-500 hover:text-amber-500 uppercase tracking-widest flex items-center gap-2">
-          <Home size={14} /> Home
-        </Link>
-      </div>
+        {/* TOP SECTION FISSA */}
+        <div className="top-section">
+          <header className="flex justify-between items-center mb-3">
+            <h1 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <FileText size={18} className="text-amber-500"/> TRANSITI EXCEL ANALYZER
+            </h1>
+            <div className="flex gap-2">
+              <button onClick={svuotaTutto} className="bg-zinc-800 border border-zinc-700 hover:border-red-500 text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all">
+                Reset App
+              </button>
+              <button onClick={scaricaFileUnico} disabled={datiFiltrati.length === 0} className="bg-amber-600 border border-amber-500 hover:bg-amber-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                <Download size={14} /> Esporta Vista ({datiFiltrati.length})
+              </button>
+            </div>
+          </header>
 
-      <main className="max-w-6xl mx-auto w-full p-6 flex-grow">
-        
-        {/* AREA CARICAMENTO */}
-        <div 
-          className={`drop-zone ${dragActive ? 'active' : ''}`}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-          onClick={() => document.getElementById('excelInput')?.click()}
-        >
-          <input 
-            type="file" 
-            id="excelInput" 
-            className="hidden" 
-            accept=".xlsx, .xls, .csv" 
-            onChange={handleManualSelect} 
-          />
+          <div className="control-card !mb-3 !py-3">
+             <div 
+                 className={`drop-zone ${isDragActive ? 'drag-active' : ''}`} 
+                 onDragOver={onDragOver}
+                 onDragLeave={onDragLeave}
+                 onDrop={onDrop}
+             >
+                <div className="flex items-center gap-4 w-full px-4">
+                  <Upload size={24} className="text-amber-500"/>
+                  <div className="text-left flex-1">
+                    <p className="font-bold text-white text-sm uppercase">Carica file Excel (CSV Transiti) per compararli</p>
+                    <p className="text-xs text-zinc-500 font-mono">Trascina qui le estrapolazioni Odierne o Storiche ({filesCaricati.length} file in memoria).</p>
+                  </div>
+                  <input type="file" multiple id="fileUpload" className="hidden" accept=".txt,.csv" onChange={handleFileChange} />
+                  <button onClick={() => document.getElementById('fileUpload')?.click()} className="bg-zinc-800 border border-zinc-700 px-6 py-2 rounded text-xs font-bold text-zinc-300 hover:text-white hover:border-amber-500 transition-all uppercase tracking-wider">
+                      Sfoglia PC
+                  </button>
+                </div>
+             </div>
+          </div>
+
+          {/* STATISTICHE (Reattive ai filtri attivi) */}
+          <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 mt-4 ml-1 flex items-center gap-2">
+            Statistiche Relazionali {filtroSoloDoppi || filtroIncongruenzaPeso || filtroErrore !== 'TUTTI' || filtroDataInizio || filtroDataFine || filtroTurno !== 'TUTTI' || ricercaSpedizione ? <span className="bg-amber-500 text-black px-2 py-0.5 rounded text-[10px] font-black">FILTRATE</span> : ''}
+          </h2>
           
-          <div className="flex flex-col items-center gap-4">
-            <div className={`p-4 rounded-full ${dragActive ? 'bg-amber-500/20 text-amber-500' : 'bg-zinc-800 text-zinc-500'}`}>
-              <Upload size={48} />
+          <div className="dashboard-grid">
+            <div className="stat-card">
+              <Hash size={24} className="stat-icon text-zinc-500" />
+              <span className="stat-label">Lav. Viste</span>
+              <span className="stat-value text-primary">{statistiche.totale}</span>
+              <span className="stat-sub">A: <span className="text-blue">{statistiche.colliArrivi}</span> | P: <span className="text-orange">{statistiche.colliPartenze}</span></span>
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-white mb-1">Trascina qui il file Excel</h3>
-              <p className="text-sm text-zinc-500">Supporta .xlsx, .xls e .csv</p>
+            <div className="stat-card">
+              <Activity size={24} className="stat-icon text-zinc-500" />
+              <span className="stat-label">Media Ora</span>
+              <span className="stat-value text-white">{statistiche.mediaColli}</span>
+              <span className="stat-sub">Sped. / ora</span>
             </div>
-            <button className="btn-primary">
-              Scegli File
-            </button>
-          </div>
-        </div>
+            <div className="stat-card">
+              <Scale size={24} className="stat-icon text-zinc-500" />
+              <span className="stat-label">Peso / Ora</span>
+              <span className="stat-value text-emerald">{statistiche.pesoOra.toLocaleString('it-IT', {maximumFractionDigits: 1})} <span className="text-xs">kg/h</span></span>
+              <span className="stat-sub">Tot: {statistiche.pesoTot.toLocaleString('it-IT', {maximumFractionDigits: 0})} kg</span>
+            </div>
+            <div className="stat-card">
+              <Box size={24} className="stat-icon text-zinc-500" />
+              <span className="stat-label">Vol / Ora</span>
+              <span className="stat-value text-emerald">{statistiche.volOra.toLocaleString('it-IT', {maximumFractionDigits: 2})} <span className="text-xs">m³/h</span></span>
+              <span className="stat-sub">Tot: {statistiche.volTot.toLocaleString('it-IT', {maximumFractionDigits: 1})} m³</span>
+            </div>
+            <div className="stat-card">
+              <Calculator size={24} className="stat-icon text-zinc-500" />
+              <span className="stat-label">Rapp. P/V</span>
+              <span className="stat-value text-purple">{statistiche.rapportoPV.toLocaleString('it-IT', {maximumFractionDigits: 4})}</span>
+              <span className="stat-sub">Vol / 300</span>
+            </div>
+            
+            {/* RIQUADRO ERRORI */}
+            <div className={`stat-card ${statistiche.erroriCount > 0 ? 'alert' : ''}`}>
+              <XOctagon size={24} className={`stat-icon ${statistiche.erroriCount > 0 ? 'text-error opacity-40' : 'text-zinc-500'}`} />
+              <span className={`stat-label ${statistiche.erroriCount > 0 ? 'text-error' : ''}`}>Errori Ril.</span>
+              <span className={`stat-value ${statistiche.erroriCount > 0 ? 'text-error' : 'text-white'}`}>
+                {statistiche.erroriCount}
+              </span>
+              <span className="stat-sub">Anomalie scan</span>
+            </div>
 
-        {/* STATUS BAR */}
-        <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 p-4 rounded-xl mb-8 shadow-lg">
-          <div className="flex items-center gap-3">
-            {status.type === 'loading' && <div className="animate-spin text-amber-500"><FileSpreadsheet /></div>}
-            {status.type === 'success' && <CheckCircle className="text-emerald-500" />}
-            {status.type === 'error' && <AlertCircle className="text-red-500" />}
-            <span className={`font-mono text-sm font-bold ${
-              status.type === 'success' ? 'text-emerald-500' : 
-              status.type === 'error' ? 'text-red-500' : 'text-zinc-400'
-            }`}>
-              {status.msg}
-            </span>
+            {/* NUOVO RIQUADRO: DIFFERENZA PESO SUI DOPPIONI */}
+            <div 
+              onClick={() => setFiltroIncongruenzaPeso(!filtroIncongruenzaPeso)}
+              title="Clicca per isolare i colli passati più volte che hanno una differenza di peso tra i vari passaggi di almeno 0.5kg"
+              className={`stat-card clickable ${statistiche.incongruenzePesoCount > 0 ? 'alert' : ''} ${filtroIncongruenzaPeso ? 'active-filter' : ''}`}
+            >
+              <Scale size={24} className={`stat-icon ${statistiche.incongruenzePesoCount > 0 ? 'text-error opacity-40' : 'text-zinc-500'}`} />
+              <span className={`stat-label ${statistiche.incongruenzePesoCount > 0 ? 'text-error' : ''}`}>Diff. {'>='} 500g</span>
+              <span className={`stat-value ${statistiche.incongruenzePesoCount > 0 ? 'text-error' : 'text-white'}`}>
+                {statistiche.incongruenzePesoCount}
+              </span>
+              <span className="stat-sub">{filtroIncongruenzaPeso ? 'FILTRO ATTIVO' : 'Sui doppioni'}</span>
+            </div>
+
+            {/* RIQUADRO DOPPIE SPEDIZIONI */}
+            <div 
+              onClick={() => setFiltroSoloDoppi(!filtroSoloDoppi)}
+              title="Clicca per isolare e analizzare solo i pacchi passati 2 o più volte"
+              className={`stat-card clickable ${statistiche.numDuplicati > 0 ? 'alert' : ''} ${filtroSoloDoppi ? 'active-filter' : ''}`}
+            >
+              <AlertTriangle size={24} className={`stat-icon ${statistiche.numDuplicati > 0 ? 'text-error opacity-40' : 'text-zinc-500'}`} />
+              <span className={`stat-label ${statistiche.numDuplicati > 0 ? 'text-error' : ''}`}>Sped. Doppie</span>
+              <span className={`stat-value ${statistiche.numDuplicati > 0 ? 'text-error' : 'text-white'}`}>
+                {statistiche.numDuplicati}
+              </span>
+              <span className="stat-sub">{filtroSoloDoppi ? 'FILTRO ATTIVO' : 'Clicca per isolare'}</span>
+            </div>
+
           </div>
 
-          {results.length > 0 && (
-            <button onClick={exportExcel} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 text-sm transition-all shadow-lg shadow-emerald-900/20">
-              <Download size={16} /> Scarica Report
-            </button>
+          {/* CONFRONTO GIORNALIERO */}
+          {statsGiornaliere.length > 0 && (
+            <>
+              <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Confronto Giornaliero (Vista Filtrata)</h2>
+              <div className="daily-comparison-wrapper">
+                {statsGiornaliere.map((g) => (
+                  <div key={g.id} className="daily-card">
+                    <div className="daily-header">
+                      <Calendar size={16} className="text-amber-500"/>
+                      <h3>{g.label}</h3>
+                    </div>
+                    <div className="daily-row"><span className="daily-label">Colli Totali:</span> <span className="text-primary daily-val">{g.totale}</span></div>
+                    <div className="daily-row"><span className="daily-label ml-2">↳ ARRIVI:</span> <span className="text-blue daily-val">{g.colliArrivi}</span></div>
+                    <div className="daily-row"><span className="daily-label ml-2">↳ PARTENZE:</span> <span className="text-orange daily-val">{g.colliPartenze}</span></div>
+                    <div className="daily-row mt-2"><span className="daily-label">Media (Colli/h):</span> <span className="daily-val">{g.mediaColli}</span></div>
+                    <div className="daily-row"><span className="daily-label">Vol/h (m³/h):</span> <span className="text-emerald daily-val">{g.volOra.toLocaleString('it-IT', {maximumFractionDigits: 2})}</span></div>
+                    <div className="daily-row"><span className="daily-label">Rapporto P/V:</span> <span className="text-purple daily-val">{g.rapportoPV.toLocaleString('it-IT', {maximumFractionDigits: 4})}</span></div>
+                    <div className="daily-row"><span className="daily-label">Errori / Doppioni:</span> <span className={(g.erroriCount > 0 || g.numDuplicati > 0) ? "text-error font-bold" : "daily-val"}>{g.erroriCount} / {g.numDuplicati}</span></div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
+
         </div>
 
-        {/* TABELLA RISULTATI */}
-        {results.length > 0 && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4">
-            <div className="overflow-x-auto max-h-[500px]">
-              <table className="results-table">
-                <thead>
-                  <tr>
-                    {Object.keys(results[0]).map((header, i) => (
-                      <th key={i}>{header}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {renderTableRows()}
-                </tbody>
-              </table>
-            </div>
-            <div className="p-3 bg-zinc-950 border-t border-zinc-800 text-center text-xs text-zinc-500 font-mono uppercase tracking-widest">
-              Anteprima dei primi {results.length} record duplicati
-            </div>
+        {/* BARRA RICERCA E FILTRI */}
+        <div className="search-wrapper shrink-0">
+          <div className="search-bar-row">
+            <Search size={16} className="search-icon" />
+            <input 
+              type="text" 
+              placeholder="Cerca numero di spedizione specifico..." 
+              value={ricercaSpedizione}
+              onChange={(e) => setRicercaSpedizione(e.target.value)}
+              className="search-input"
+            />
           </div>
-        )}
+          
+          <div className="filters-row">
+             <Filter size={16} className="text-zinc-500 shrink-0" />
+             
+             <select 
+                value={filtroTurno} 
+                onChange={(e) => setFiltroTurno(e.target.value)}
+                className="filter-input"
+             >
+                <option value="TUTTI">Tutti i Turni</option>
+                <option value="ARRIVI">Solo ARRIVI (Mattina)</option>
+                <option value="PARTENZE">Solo PARTENZE (Pomeriggio/Sera)</option>
+             </select>
 
-      </main>
-    </div>
+             <select 
+                value={filtroErrore} 
+                onChange={(e) => setFiltroErrore(e.target.value)}
+                className="filter-input"
+             >
+                <option value="TUTTI">Con & Senza Errori</option>
+                <option value="ERRORI">Mostra Solo Errori</option>
+                <option value="NO_ERRORI">Nascondi Errori</option>
+             </select>
+
+             <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1">
+                <span className="filter-label">Da:</span>
+                <input 
+                  type="date" 
+                  value={filtroDataInizio} 
+                  onChange={(e) => setFiltroDataInizio(e.target.value)}
+                  className="bg-transparent text-white outline-none text-sm font-bold uppercase cursor-pointer"
+                />
+             </div>
+
+             <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1">
+                <span className="filter-label">A:</span>
+                <input 
+                  type="date" 
+                  value={filtroDataFine} 
+                  onChange={(e) => setFiltroDataFine(e.target.value)}
+                  className="bg-transparent text-white outline-none text-sm font-bold uppercase cursor-pointer"
+                />
+             </div>
+             
+             {(filtroTurno !== 'TUTTI' || filtroErrore !== 'TUTTI' || filtroDataInizio || filtroDataFine || filtroSoloDoppi || filtroIncongruenzaPeso || ricercaSpedizione) && (
+               <button 
+                 onClick={azzeraFiltri}
+                 className="text-xs font-bold text-amber-500 hover:text-white uppercase ml-auto border border-amber-500/50 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-all"
+               >
+                 Azzera Filtri
+               </button>
+             )}
+          </div>
+        </div>
+
+        {/* TABELLA DATI ESTRATTI (Filtrata) */}
+        <div className="list-wrapper flex-1">
+           {datiFusi.length === 0 ? (
+               <div className="empty-state">
+                  <FileText size={48} className="mb-4 text-zinc-800"/>
+                  <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">In attesa di dati</p>
+                  <p className="text-xs text-zinc-700 mt-2 font-mono">Trascina i tuoi file orari Transiti per visualizzare le liste.</p>
+               </div>
+           ) : datiFiltrati.length === 0 ? (
+               <div className="empty-state">
+                  <AlertTriangle size={48} className="mb-4 text-zinc-700"/>
+                  <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Nessun Risultato</p>
+                  <p className="text-xs text-zinc-700 mt-2 font-mono">I filtri impostati non corrispondono a nessuna spedizione.</p>
+               </div>
+           ) : (
+             <table className="data-table">
+               <thead>
+                 <tr>
+                   <th style={{ width: '40px' }}>#</th>
+                   <th>Spedizione</th>
+                   <th>Data & Ora</th>
+                   <th>Zona (O/S)</th>
+                   <th>Turno</th>
+                   {(filtroSoloDoppi || filtroIncongruenzaPeso) && <th>File Sorgente</th>}
+                   <th>Errore (E)</th>
+                   <th>Peso (Kg)</th>
+                   <th>Misure (LWH)</th>
+                   <th>Volume (m³)</th>
+                   <th>Rapp. P/V</th>
+                 </tr>
+               </thead>
+               <tbody>
+                 {datiFiltrati.map((riga, i) => {
+                   const isDuplicato = globalDuplicati.includes(riga.spedizione);
+                   const isErrore = !!riga.errore;
+                   const isWeightIssue = spedizioniDiffPeso.has(riga.spedizione);
+                   
+                   let rowClass = '';
+                   if (isErrore) rowClass = 'row-error';
+                   else if (isWeightIssue) rowClass = 'row-weight-issue'; 
+                   else if (isDuplicato) rowClass = 'row-duplicate';
+
+                   const rowKeyId = `${riga.idTransito}-${i}`;
+
+                   return (
+                     <tr key={rowKeyId} className={rowClass}>
+                       <td className="text-zinc-600 font-bold">{i + 1}</td>
+                       
+                       <td className={(isDuplicato || isErrore || isWeightIssue) ? 'font-bold' : 'text-white'}>
+                         <div className="flex items-center gap-3">
+                           {riga.spedizione}
+                           <button 
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               handleCopy(riga.spedizione, rowKeyId);
+                             }}
+                             className="copy-btn"
+                             title="Copia negli appunti"
+                           >
+                             {copiedId === rowKeyId ? <Check size={14} className="text-emerald-500"/> : <Copy size={14} />}
+                           </button>
+                         </div>
+                       </td>
+                       
+                       <td>{riga.dataOraFormattata}</td>
+                       <td>{riga.zona}</td>
+                       <td className={riga.turno === 'ARRIVI' ? 'text-blue font-bold' : 'text-orange font-bold'}>{riga.turno}</td>
+                       
+                       {(filtroSoloDoppi || filtroIncongruenzaPeso) && <td className="text-xs font-mono text-zinc-400">{riga.fileName}</td>}
+                       
+                       <td className={isErrore ? 'text-error font-black' : 'text-zinc-600'}>{riga.errore || '-'}</td>
+                       <td className={isWeightIssue ? 'text-amber-400 font-bold' : 'text-amber-500/80'}>{riga.pesoKg.toFixed(2)}</td>
+                       <td className="text-zinc-400">{riga.l}x{riga.w}x{riga.h}</td>
+                       <td className="text-emerald-500/80">{riga.volumeM3.toFixed(4)}</td>
+                       <td className="text-purple-400/80">{riga.rapportoPVRiga.toFixed(6)}</td>
+                     </tr>
+                   );
+                 })}
+               </tbody>
+             </table>
+           )}
+        </div>
+
+      </div>
+    </>
   );
 }
