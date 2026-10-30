@@ -95,7 +95,7 @@ const stiliCSS = `
     scrollbar-color: var(--border) transparent;
   }
   .daily-card {
-    min-width: 260px;
+    min-width: 270px;
     background: #121214;
     border: 1px solid var(--border);
     border-top: 3px solid var(--primary);
@@ -126,6 +126,8 @@ const stiliCSS = `
   .text-error { color: var(--error) !important; }
   .text-emerald { color: var(--success) !important; }
   .text-purple { color: #c084fc !important; }
+  .text-blue { color: #60a5fa !important; }
+  .text-orange { color: #fb923c !important; }
 
   .search-wrapper {
     padding: 0 20px 10px 20px;
@@ -186,6 +188,9 @@ export default function GeneratoreLavorazioniCSV() {
     let volumeTotale = 0;
     let minTime = Infinity;
     let maxTime = -Infinity;
+    
+    let colliArrivi = 0;
+    let colliPartenze = 0;
 
     datiFusi.forEach(riga => {
       if (riga.spedizione) {
@@ -198,6 +203,9 @@ export default function GeneratoreLavorazioniCSV() {
       }
       pesoTotale += riga.pesoKg;
       volumeTotale += riga.volumeM3;
+
+      if (riga.turno === 'ARRIVI') colliArrivi++;
+      else colliPartenze++;
     });
 
     let oreCalcolo = 1; 
@@ -216,6 +224,8 @@ export default function GeneratoreLavorazioniCSV() {
     const numLavorazioni = datiFusi.length;
     return {
       totale: numLavorazioni,
+      colliArrivi,
+      colliPartenze,
       mediaColli: numLavorazioni > 0 ? Math.round(numLavorazioni / oreCalcolo) : 0,
       oreRealiFormattate: stringaOre,
       pesoTot: pesoTotale,
@@ -238,6 +248,8 @@ export default function GeneratoreLavorazioniCSV() {
           id: riga.giornoId,
           label: riga.giornoLabel,
           totale: 0,
+          colliArrivi: 0,
+          colliPartenze: 0,
           pesoTot: 0,
           volTot: 0,
           minTime: Infinity,
@@ -251,6 +263,9 @@ export default function GeneratoreLavorazioniCSV() {
       g.totale += 1;
       g.pesoTot += riga.pesoKg;
       g.volTot += riga.volumeM3;
+      
+      if (riga.turno === 'ARRIVI') g.colliArrivi++;
+      else g.colliPartenze++;
 
       if (riga.timestamp < g.minTime) g.minTime = riga.timestamp;
       if (riga.timestamp > g.maxTime) g.maxTime = riga.timestamp;
@@ -338,6 +353,7 @@ export default function GeneratoreLavorazioniCSV() {
           let timestamp = null;
           let giornoId = "Sconosciuto";
           let giornoLabel = "Sconosciuto";
+          let turno = "Sconosciuto";
           
           const partiData = dataOraRaw.split('_'); 
           if (partiData.length >= 6) {
@@ -348,6 +364,9 @@ export default function GeneratoreLavorazioniCSV() {
              const min = parseInt(partiData[4], 10);
              const sec = parseInt(partiData[5], 10);
              
+             // Identificazione Turno (Minore di 13 = ARRIVI, Altrimenti PARTENZE)
+             turno = ore < 13 ? 'ARRIVI' : 'PARTENZE';
+
              giornoId = `${Y}-${M.toString().padStart(2, '0')}-${D.toString().padStart(2, '0')}`;
              giornoLabel = `${D.toString().padStart(2, '0')}/${M.toString().padStart(2, '0')}/${Y}`;
 
@@ -361,7 +380,7 @@ export default function GeneratoreLavorazioniCSV() {
               pesoKg, l, w, h, volumeM3,
               rapportoPVRiga,
               dataOraFormattata, timestamp,
-              giornoId, giornoLabel
+              giornoId, giornoLabel, turno
             });
           }
         }
@@ -378,9 +397,9 @@ export default function GeneratoreLavorazioniCSV() {
   const scaricaFileUnico = () => {
     if (datiFusi.length === 0) return;
     
-    const intestazioni = "Spedizione;Peso_Kg;Lungh_cm;Largh_cm;Alt_cm;Volume_m3;Rapporto_PV;Data_Ora\n";
+    const intestazioni = "Spedizione;Peso_Kg;Lungh_cm;Largh_cm;Alt_cm;Volume_m3;Rapporto_PV;Turno;Data_Ora\n";
     const contenuto = datiFusi.map(r => 
-      `${r.spedizione};${r.pesoKg.toFixed(2)};${r.l};${r.w};${r.h};${r.volumeM3.toFixed(4)};${r.rapportoPVRiga.toFixed(6)};${r.dataOraFormattata}`
+      `${r.spedizione};${r.pesoKg.toFixed(2)};${r.l};${r.w};${r.h};${r.volumeM3.toFixed(4)};${r.rapportoPVRiga.toFixed(6)};${r.turno};${r.dataOraFormattata}`
     ).join('\n');
 
     const blob = new Blob([intestazioni + contenuto], { type: 'text/csv;charset=utf-8;' });
@@ -442,7 +461,7 @@ export default function GeneratoreLavorazioniCSV() {
               <Hash size={24} className="stat-icon text-zinc-500" />
               <span className="stat-label">Lavorazioni Totali</span>
               <span className="stat-value text-primary">{statistiche.totale}</span>
-              <span className="stat-sub">Colli rilevati</span>
+              <span className="stat-sub">Arrivi: <span className="text-blue">{statistiche.colliArrivi}</span> | Partenze: <span className="text-orange">{statistiche.colliPartenze}</span></span>
             </div>
             <div className="stat-card">
               <Activity size={24} className="stat-icon text-zinc-500" />
@@ -493,9 +512,10 @@ export default function GeneratoreLavorazioniCSV() {
                       <Calendar size={16} className="text-amber-500"/>
                       <h3>{g.label}</h3>
                     </div>
-                    <div className="daily-row"><span className="daily-label">Colli Lavorati:</span> <span className="text-primary daily-val">{g.totale}</span></div>
-                    <div className="daily-row"><span className="daily-label">Durata Effettiva:</span> <span className="daily-val">{g.stringaOre}</span></div>
-                    <div className="daily-row"><span className="daily-label">Media (Colli/h):</span> <span className="daily-val">{g.mediaColli}</span></div>
+                    <div className="daily-row"><span className="daily-label">Colli Totali:</span> <span className="text-primary daily-val">{g.totale}</span></div>
+                    <div className="daily-row"><span className="daily-label ml-2">↳ ARRIVI:</span> <span className="text-blue daily-val">{g.colliArrivi}</span></div>
+                    <div className="daily-row"><span className="daily-label ml-2">↳ PARTENZE:</span> <span className="text-orange daily-val">{g.colliPartenze}</span></div>
+                    <div className="daily-row mt-2"><span className="daily-label">Media (Colli/h):</span> <span className="daily-val">{g.mediaColli}</span></div>
                     <div className="daily-row"><span className="daily-label">Vol/h (m³/h):</span> <span className="text-emerald daily-val">{g.volOra.toLocaleString('it-IT', {maximumFractionDigits: 2})}</span></div>
                     <div className="daily-row"><span className="daily-label">Rapporto P/V:</span> <span className="text-purple daily-val">{g.rapportoPV.toLocaleString('it-IT', {maximumFractionDigits: 4})}</span></div>
                     <div className="daily-row"><span className="daily-label">Duplicati:</span> <span className={g.numDuplicati > 0 ? "text-error font-bold" : "daily-val"}>{g.numDuplicati}</span></div>
@@ -534,6 +554,7 @@ export default function GeneratoreLavorazioniCSV() {
                    <th style={{ width: '40px' }}>#</th>
                    <th>Spedizione</th>
                    <th>Data & Ora</th>
+                   <th>Turno</th>
                    <th>Peso (Kg)</th>
                    <th>L (cm)</th>
                    <th>W (cm)</th>
@@ -550,6 +571,7 @@ export default function GeneratoreLavorazioniCSV() {
                        <td className="text-zinc-600 font-bold">{i + 1}</td>
                        <td className={isDuplicato ? 'font-bold' : 'text-white'}>{riga.spedizione}</td>
                        <td>{riga.dataOraFormattata}</td>
+                       <td className={riga.turno === 'ARRIVI' ? 'text-blue font-bold' : 'text-orange font-bold'}>{riga.turno}</td>
                        <td className="text-amber-500/80">{riga.pesoKg.toFixed(2)}</td>
                        <td>{riga.l}</td>
                        <td>{riga.w}</td>
