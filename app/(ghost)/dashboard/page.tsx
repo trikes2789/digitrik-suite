@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Terminal, FileSpreadsheet, Ghost, ArrowLeft, Truck, ClipboardList } from 'lucide-react';
+import { Terminal, FileSpreadsheet, Ghost, ArrowLeft, Truck, ClipboardList, Package } from 'lucide-react';
 
 export default function GhostDashboard() {
   return (
@@ -47,13 +47,22 @@ export default function GhostDashboard() {
              <p className="text-sm text-zinc-500">Monitoraggio e analisi dei tempi di resa delle spedizioni.</p>
           </Link>
 
-          {/* NUOVO LINK: RECUPERO LETTURE AUTISTI */}
+          {/* LINK RECUPERO LETTURE AUTISTI */}
           <Link href="/recupero-letture-autista" className="group block p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-purple-500/50 hover:bg-zinc-900/80 transition-all">
              <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-500 mb-6 group-hover:scale-110 transition-transform">
                <ClipboardList size={28} />
              </div>
              <h3 className="text-2xl font-bold text-white mb-2">Recupero Letture Autisti</h3>
              <p className="text-sm text-zinc-500">Strumento per il recupero e la gestione dei dati delle letture.</p>
+          </Link>
+
+          {/* NUOVO LINK: ANALISI PALLET MASTER */}
+          <Link href="/analisi_pallet" className="group block p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-orange-500/50 hover:bg-zinc-900/80 transition-all md:col-span-2 lg:col-span-1">
+             <div className="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-500 mb-6 group-hover:scale-110 transition-transform">
+               <Package size={28} />
+             </div>
+             <h3 className="text-2xl font-bold text-white mb-2">Analisi Pallet Master</h3>
+             <p className="text-sm text-zinc-500">Strumento per l'elaborazione e la fusione oraria dei dati Pallet Master.</p>
           </Link>
 
         </div>
