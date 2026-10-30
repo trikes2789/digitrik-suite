@@ -216,7 +216,7 @@ export default function GeneratoreLavorazioniCSV() {
   const [filtroTurno, setFiltroTurno] = useState('TUTTI');
   const [filtroDataInizio, setFiltroDataInizio] = useState('');
   const [filtroDataFine, setFiltroDataFine] = useState('');
-  const [filtroSoloDoppi, setFiltroSoloDoppi] = useState(false); // NUOVO STATO
+  const [filtroSoloDoppi, setFiltroSoloDoppi] = useState(false); 
 
   // 1. TROVA I DOPPIONI GLOBALI (indipendentemente dai filtri attivi, serve per evidenziare le righe)
   const globalDuplicati = useMemo(() => {
@@ -231,9 +231,9 @@ export default function GeneratoreLavorazioniCSV() {
     return Array.from(doppie);
   }, [datiFusi]);
 
-  // 2. APPLICAZIONE DEI FILTRI (Crea il dataset che alimenterà tabella e dashboard)
+  // 2. APPLICAZIONE DEI FILTRI E ORDINAMENTO
   const datiFiltrati = useMemo(() => {
-    return datiFusi.filter(r => {
+    let filtered = datiFusi.filter(r => {
       if (ricercaSpedizione && !r.spedizione.includes(ricercaSpedizione.toUpperCase())) return false;
       if (filtroTurno !== 'TUTTI' && r.turno !== filtroTurno) return false;
       if (filtroDataInizio && r.giornoId < filtroDataInizio) return false;
@@ -241,9 +241,20 @@ export default function GeneratoreLavorazioniCSV() {
       if (filtroSoloDoppi && !globalDuplicati.includes(r.spedizione)) return false;
       return true;
     });
+
+    // Se stiamo guardando i doppioni, mettiamoli in ordine alfabetico e poi cronologico
+    if (filtroSoloDoppi) {
+      filtered.sort((a, b) => {
+        const compSped = a.spedizione.localeCompare(b.spedizione);
+        if (compSped !== 0) return compSped;
+        return a.timestamp - b.timestamp; // Ordina per data/ora a parità di spedizione
+      });
+    }
+
+    return filtered;
   }, [datiFusi, ricercaSpedizione, filtroTurno, filtroDataInizio, filtroDataFine, filtroSoloDoppi, globalDuplicati]);
 
-  // 3. CALCOLO STATISTICHE GLOBALI (Ora Reattivo a datiFiltrati)
+  // 3. CALCOLO STATISTICHE GLOBALI (Reattivo a datiFiltrati)
   const statistiche = useMemo(() => {
     let duplicatiCount = new Set<string>();
     let spedVisteLocal = new Set<string>();
@@ -295,13 +306,11 @@ export default function GeneratoreLavorazioniCSV() {
       volTot: volumeTotale,
       volOra: volumeTotale / oreCalcolo,
       rapportoPV: volumeTotale / 300,
-      
-      // Se il filtro doppi è attivo, mostriamo il totale dei doppi globali per chiarezza
       numDuplicati: filtroSoloDoppi ? globalDuplicati.length : duplicatiCount.size
     };
   }, [datiFiltrati, filtroSoloDoppi, globalDuplicati]);
 
-  // 4. CALCOLO CONFRONTO GIORNALIERO (Ora Reattivo a datiFiltrati)
+  // 4. CALCOLO CONFRONTO GIORNALIERO (Reattivo a datiFiltrati)
   const statsGiornaliere = useMemo(() => {
     const map = new Map();
 
@@ -382,6 +391,7 @@ export default function GeneratoreLavorazioniCSV() {
     let nuoviDati: any[] = [];
 
     for (let file of nuoviFiles) {
+      const fileName = file.name;
       const testo = await file.text();
       const linee = testo.split('\n').filter(l => l.trim() !== '');
       
@@ -432,7 +442,8 @@ export default function GeneratoreLavorazioniCSV() {
               pesoKg, l, w, h, volumeM3,
               rapportoPVRiga,
               dataOraFormattata, timestamp,
-              giornoId, giornoLabel, turno
+              giornoId, giornoLabel, turno,
+              fileName // <-- Nome del file per il filtro doppie
             });
           }
         }
@@ -462,9 +473,9 @@ export default function GeneratoreLavorazioniCSV() {
 
   const scaricaFileUnico = () => {
     if (datiFiltrati.length === 0) return;
-    const intestazioni = "Spedizione;Peso_Kg;Lungh_cm;Largh_cm;Alt_cm;Volume_m3;Rapporto_PV;Turno;Data_Ora\n";
+    const intestazioni = "Spedizione;Peso_Kg;Lungh_cm;Largh_cm;Alt_cm;Volume_m3;Rapporto_PV;Turno;Data_Ora;File_Sorgente\n";
     const contenuto = datiFiltrati.map(r => 
-      `${r.spedizione};${r.pesoKg.toFixed(2)};${r.l};${r.w};${r.h};${r.volumeM3.toFixed(4)};${r.rapportoPVRiga.toFixed(6)};${r.turno};${r.dataOraFormattata}`
+      `${r.spedizione};${r.pesoKg.toFixed(2)};${r.l};${r.w};${r.h};${r.volumeM3.toFixed(4)};${r.rapportoPVRiga.toFixed(6)};${r.turno};${r.dataOraFormattata};${r.fileName}`
     ).join('\n');
     const blob = new Blob([intestazioni + contenuto], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -567,7 +578,7 @@ export default function GeneratoreLavorazioniCSV() {
               <span className="stat-sub">Volume Vista / 300</span>
             </div>
             
-            {/* RIQUADRO DOPPIE SPEDIZIONI - ORA CLICCABILE */}
+            {/* RIQUADRO DOPPIE SPEDIZIONI - CLICCABILE */}
             <div 
               onClick={() => setFiltroSoloDoppi(!filtroSoloDoppi)}
               title="Clicca per isolare e analizzare solo i pacchi passati 2 o più volte"
@@ -594,7 +605,7 @@ export default function GeneratoreLavorazioniCSV() {
                       <Calendar size={16} className="text-amber-500"/>
                       <h3>{g.label}</h3>
                     </div>
-                    <div className="daily-row"><span className="daily-label">Colli Lavorati:</span> <span className="text-primary daily-val">{g.totale}</span></div>
+                    <div className="daily-row"><span className="daily-label">Colli Totali:</span> <span className="text-primary daily-val">{g.totale}</span></div>
                     <div className="daily-row"><span className="daily-label ml-2">↳ ARRIVI:</span> <span className="text-blue daily-val">{g.colliArrivi}</span></div>
                     <div className="daily-row"><span className="daily-label ml-2">↳ PARTENZE:</span> <span className="text-orange daily-val">{g.colliPartenze}</span></div>
                     <div className="daily-row mt-2"><span className="daily-label">Media (Colli/h):</span> <span className="daily-val">{g.mediaColli}</span></div>
@@ -687,6 +698,8 @@ export default function GeneratoreLavorazioniCSV() {
                    <th style={{ width: '40px' }}>#</th>
                    <th>Spedizione</th>
                    <th>Data & Ora</th>
+                   {/* COLONNA VISIBILE SOLO SE E' ATTIVO IL FILTRO DOPPI */}
+                   {filtroSoloDoppi && <th>File Sorgente</th>}
                    <th>Turno</th>
                    <th>Peso (Kg)</th>
                    <th>L (cm)</th>
@@ -704,6 +717,8 @@ export default function GeneratoreLavorazioniCSV() {
                        <td className="text-zinc-600 font-bold">{i + 1}</td>
                        <td className={isDuplicato ? 'font-bold' : 'text-white'}>{riga.spedizione}</td>
                        <td>{riga.dataOraFormattata}</td>
+                       {/* CAMPO MOSTRATO SOLO SE E' ATTIVO IL FILTRO DOPPI */}
+                       {filtroSoloDoppi && <td className="text-xs font-mono text-zinc-400">{riga.fileName}</td>}
                        <td className={riga.turno === 'ARRIVI' ? 'text-blue font-bold' : 'text-orange font-bold'}>{riga.turno}</td>
                        <td className="text-amber-500/80">{riga.pesoKg.toFixed(2)}</td>
                        <td>{riga.l}</td>
