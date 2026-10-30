@@ -34,7 +34,7 @@ export default function GhostDashboard() {
              <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 mb-6 group-hover:scale-110 transition-transform">
                <FileSpreadsheet size={28} />
              </div>
-             <h3 className="text-2xl font-bold text-white mb-2">Filtro Excel</h3>
+             <h3 className="text-2xl font-bold text-white mb-2">Analisi Pack Master</h3>
              <p className="text-sm text-zinc-500">Analisi file XLSX per individuare duplicati e barcode errati.</p>
           </Link>
 
