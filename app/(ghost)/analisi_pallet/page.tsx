@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Upload, FileText, Download, AlertTriangle, 
-  Clock, Hash, Box, Scale, Activity, Search, Calculator, Calendar
+  Clock, Hash, Box, Scale, Activity, Search, Calculator, Calendar, Filter
 } from 'lucide-react';
 
 /* STILI CSS INLINE - TEMA AMBRA UNIFORME */
@@ -61,7 +61,7 @@ const stiliCSS = `
 
   .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 12px;
     margin-bottom: 12px;
   }
@@ -131,7 +131,18 @@ const stiliCSS = `
 
   .search-wrapper {
     padding: 0 20px 10px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .search-bar-row {
     position: relative;
+    width: 100%;
+  }
+  .filters-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
   }
   .search-input {
     width: 100%;
@@ -147,7 +158,21 @@ const stiliCSS = `
     transition: 0.2s;
   }
   .search-input:focus { border-color: var(--primary); }
-  .search-icon { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); color: #71717a; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #71717a; }
+  
+  .filter-input {
+    background: var(--card-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: white;
+    outline: none;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .filter-input:focus { border-color: var(--primary); }
+  .filter-label { font-size: 0.7rem; color: #a1a1aa; text-transform: uppercase; font-weight: bold; margin-right: 4px; }
 
   .list-wrapper {
     flex-grow: 1;
@@ -178,9 +203,14 @@ export default function GeneratoreLavorazioniCSV() {
   const [isDragActive, setIsDragActive] = useState(false);
   const [filesCaricati, setFilesCaricati] = useState<string[]>([]);
   const [datiFusi, setDatiFusi] = useState<any[]>([]);
+  
+  // STATI PER I FILTRI DELLA LISTA
   const [ricercaSpedizione, setRicercaSpedizione] = useState('');
+  const [filtroTurno, setFiltroTurno] = useState('TUTTI');
+  const [filtroDataInizio, setFiltroDataInizio] = useState('');
+  const [filtroDataFine, setFiltroDataFine] = useState('');
 
-  // 1. CALCOLO STATISTICHE GLOBALI (TUTTI I GIORNI UNITI)
+  // 1. CALCOLO STATISTICHE GLOBALI (Sull'intero Dataset)
   const statistiche = useMemo(() => {
     let duplicati = new Set<string>();
     let spedViste = new Set<string>();
@@ -238,7 +268,7 @@ export default function GeneratoreLavorazioniCSV() {
     };
   }, [datiFusi]);
 
-  // 2. CALCOLO CONFRONTO GIORNALIERO (Raggruppato per data)
+  // 2. CALCOLO CONFRONTO GIORNALIERO
   const statsGiornaliere = useMemo(() => {
     const map = new Map();
 
@@ -301,13 +331,22 @@ export default function GeneratoreLavorazioniCSV() {
       });
   }, [datiFusi]);
 
-
-  // Filtro ricerca globale
+  // 3. APPLICAZIONE DEI FILTRI SULLA LISTA
   const datiFiltrati = useMemo(() => {
-    if (!ricercaSpedizione) return datiFusi;
-    const q = ricercaSpedizione.toUpperCase();
-    return datiFusi.filter(r => r.spedizione.includes(q));
-  }, [datiFusi, ricercaSpedizione]);
+    return datiFusi.filter(r => {
+      // Filtro testo Spedizione
+      if (ricercaSpedizione && !r.spedizione.includes(ricercaSpedizione.toUpperCase())) return false;
+      
+      // Filtro Turno
+      if (filtroTurno !== 'TUTTI' && r.turno !== filtroTurno) return false;
+
+      // Filtro Date (giornoId è già in formato YYYY-MM-DD, perfetto per la comparazione stringhe)
+      if (filtroDataInizio && r.giornoId < filtroDataInizio) return false;
+      if (filtroDataFine && r.giornoId > filtroDataFine) return false;
+
+      return true;
+    });
+  }, [datiFusi, ricercaSpedizione, filtroTurno, filtroDataInizio, filtroDataFine]);
 
   // Gestione Drag & Drop e Parser
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragActive(true); };
@@ -364,7 +403,6 @@ export default function GeneratoreLavorazioniCSV() {
              const min = parseInt(partiData[4], 10);
              const sec = parseInt(partiData[5], 10);
              
-             // Identificazione Turno (Minore di 13 = ARRIVI, Altrimenti PARTENZE)
              turno = ore < 13 ? 'ARRIVI' : 'PARTENZE';
 
              giornoId = `${Y}-${M.toString().padStart(2, '0')}-${D.toString().padStart(2, '0')}`;
@@ -391,14 +429,20 @@ export default function GeneratoreLavorazioniCSV() {
   };
 
   const svuotaTutto = () => {
-    setDatiFusi([]); setFilesCaricati([]); setRicercaSpedizione('');
+    setDatiFusi([]); 
+    setFilesCaricati([]); 
+    setRicercaSpedizione('');
+    setFiltroTurno('TUTTI');
+    setFiltroDataInizio('');
+    setFiltroDataFine('');
   };
 
   const scaricaFileUnico = () => {
-    if (datiFusi.length === 0) return;
+    if (datiFiltrati.length === 0) return;
     
+    // Esporta solo i dati attualmente visibili/filtrati
     const intestazioni = "Spedizione;Peso_Kg;Lungh_cm;Largh_cm;Alt_cm;Volume_m3;Rapporto_PV;Turno;Data_Ora\n";
-    const contenuto = datiFusi.map(r => 
+    const contenuto = datiFiltrati.map(r => 
       `${r.spedizione};${r.pesoKg.toFixed(2)};${r.l};${r.w};${r.h};${r.volumeM3.toFixed(4)};${r.rapportoPVRiga.toFixed(6)};${r.turno};${r.dataOraFormattata}`
     ).join('\n');
 
@@ -406,7 +450,7 @@ export default function GeneratoreLavorazioniCSV() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `Analisi_Comparata_${new Date().getTime()}.csv`);
+    link.setAttribute("download", `Analisi_Sorting_${new Date().getTime()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -427,8 +471,8 @@ export default function GeneratoreLavorazioniCSV() {
               <button onClick={svuotaTutto} className="bg-zinc-800 border border-zinc-700 hover:border-red-500 text-zinc-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all">
                 Reset
               </button>
-              <button onClick={scaricaFileUnico} disabled={datiFusi.length === 0} className="bg-amber-600 border border-amber-500 hover:bg-amber-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-                <Download size={14} /> Esporta Tutto
+              <button onClick={scaricaFileUnico} disabled={datiFiltrati.length === 0} className="bg-amber-600 border border-amber-500 hover:bg-amber-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                <Download size={14} /> Esporta Vista ({datiFiltrati.length})
               </button>
             </div>
           </header>
@@ -444,7 +488,7 @@ export default function GeneratoreLavorazioniCSV() {
                   <Upload size={24} className="text-amber-500"/>
                   <div className="text-left flex-1">
                     <p className="font-bold text-white text-sm uppercase">Carica i file CSV per compararli</p>
-                    <p className="text-xs text-zinc-500 font-mono">Puoi inserire estrapolazioni di giorni diversi per attivarne il confronto ({filesCaricati.length} file attuali).</p>
+                    <p className="text-xs text-zinc-500 font-mono">Trascina qui i tuoi estrapolati ({filesCaricati.length} file attuali).</p>
                   </div>
                   <input type="file" multiple id="fileUpload" className="hidden" accept=".txt,.csv" onChange={handleFileChange} />
                   <button onClick={() => document.getElementById('fileUpload')?.click()} className="bg-zinc-800 border border-zinc-700 px-6 py-2 rounded text-xs font-bold text-zinc-300 hover:text-white hover:border-amber-500 transition-all uppercase tracking-wider">
@@ -454,14 +498,14 @@ export default function GeneratoreLavorazioniCSV() {
              </div>
           </div>
 
-          {/* STATISTICHE GLOBALI (SOMMA DI TUTTO) */}
+          {/* STATISTICHE GLOBALI (SOMMA DI TUTTO, INDIPENDENTI DAI FILTRI SOTTOSTANTI) */}
           <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 mt-4 ml-1">Statistiche Globali (Intero Dataset)</h2>
           <div className="dashboard-grid">
             <div className="stat-card">
               <Hash size={24} className="stat-icon text-zinc-500" />
               <span className="stat-label">Lavorazioni Totali</span>
               <span className="stat-value text-primary">{statistiche.totale}</span>
-              <span className="stat-sub">Arrivi: <span className="text-blue">{statistiche.colliArrivi}</span> | Partenze: <span className="text-orange">{statistiche.colliPartenze}</span></span>
+              <span className="stat-sub">Arrivi: <span className="text-blue">{statistiche.colliArrivi}</span> | Part: <span className="text-orange">{statistiche.colliPartenze}</span></span>
             </div>
             <div className="stat-card">
               <Activity size={24} className="stat-icon text-zinc-500" />
@@ -499,9 +543,20 @@ export default function GeneratoreLavorazioniCSV() {
               <span className="stat-value text-purple">{statistiche.rapportoPV.toLocaleString('it-IT', {maximumFractionDigits: 4})}</span>
               <span className="stat-sub">Volume Totale / 300</span>
             </div>
+            
+            {/* RIQUADRO DOPPIE SPEDIZIONI */}
+            <div className={`stat-card ${statistiche.numDuplicati > 0 ? 'alert' : ''}`}>
+              <AlertTriangle size={24} className={`stat-icon ${statistiche.numDuplicati > 0 ? 'text-error opacity-40' : 'text-zinc-500'}`} />
+              <span className={`stat-label ${statistiche.numDuplicati > 0 ? 'text-error' : ''}`}>Sped. Doppie</span>
+              <span className={`stat-value ${statistiche.numDuplicati > 0 ? 'text-error' : 'text-white'}`}>
+                {statistiche.numDuplicati}
+              </span>
+              <span className="stat-sub">Processate più volte</span>
+            </div>
+
           </div>
 
-          {/* CONFRONTO GIORNALIERO (SCORRIMENTO ORIZZONTALE) */}
+          {/* CONFRONTO GIORNALIERO */}
           {statsGiornaliere.length > 0 && (
             <>
               <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">Confronto Giornaliero ({statsGiornaliere.length} giorni)</h2>
@@ -518,7 +573,7 @@ export default function GeneratoreLavorazioniCSV() {
                     <div className="daily-row mt-2"><span className="daily-label">Media (Colli/h):</span> <span className="daily-val">{g.mediaColli}</span></div>
                     <div className="daily-row"><span className="daily-label">Vol/h (m³/h):</span> <span className="text-emerald daily-val">{g.volOra.toLocaleString('it-IT', {maximumFractionDigits: 2})}</span></div>
                     <div className="daily-row"><span className="daily-label">Rapporto P/V:</span> <span className="text-purple daily-val">{g.rapportoPV.toLocaleString('it-IT', {maximumFractionDigits: 4})}</span></div>
-                    <div className="daily-row"><span className="daily-label">Duplicati:</span> <span className={g.numDuplicati > 0 ? "text-error font-bold" : "daily-val"}>{g.numDuplicati}</span></div>
+                    <div className="daily-row"><span className="daily-label">Doppioni:</span> <span className={g.numDuplicati > 0 ? "text-error font-bold" : "daily-val"}>{g.numDuplicati}</span></div>
                   </div>
                 ))}
               </div>
@@ -527,25 +582,76 @@ export default function GeneratoreLavorazioniCSV() {
 
         </div>
 
-        {/* CAMPO DI RICERCA */}
+        {/* BARRA RICERCA E FILTRI */}
         <div className="search-wrapper shrink-0">
-          <Search size={16} className="search-icon" />
-          <input 
-            type="text" 
-            placeholder="Cerca numero di spedizione nell'intero dataset..." 
-            value={ricercaSpedizione}
-            onChange={(e) => setRicercaSpedizione(e.target.value)}
-            className="search-input"
-          />
+          <div className="search-bar-row">
+            <Search size={16} className="search-icon" />
+            <input 
+              type="text" 
+              placeholder="Cerca numero di spedizione..." 
+              value={ricercaSpedizione}
+              onChange={(e) => setRicercaSpedizione(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          
+          <div className="filters-row">
+             <Filter size={16} className="text-zinc-500 shrink-0" />
+             
+             <select 
+                value={filtroTurno} 
+                onChange={(e) => setFiltroTurno(e.target.value)}
+                className="filter-input"
+             >
+                <option value="TUTTI">Tutti i Turni</option>
+                <option value="ARRIVI">Solo ARRIVI (Mattina)</option>
+                <option value="PARTENZE">Solo PARTENZE (Pom/Sera)</option>
+             </select>
+
+             <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1">
+                <span className="filter-label">Da:</span>
+                <input 
+                  type="date" 
+                  value={filtroDataInizio} 
+                  onChange={(e) => setFiltroDataInizio(e.target.value)}
+                  className="bg-transparent text-white outline-none text-sm font-bold uppercase cursor-pointer"
+                />
+             </div>
+
+             <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1">
+                <span className="filter-label">A:</span>
+                <input 
+                  type="date" 
+                  value={filtroDataFine} 
+                  onChange={(e) => setFiltroDataFine(e.target.value)}
+                  className="bg-transparent text-white outline-none text-sm font-bold uppercase cursor-pointer"
+                />
+             </div>
+             
+             {(filtroTurno !== 'TUTTI' || filtroDataInizio || filtroDataFine) && (
+               <button 
+                 onClick={() => { setFiltroTurno('TUTTI'); setFiltroDataInizio(''); setFiltroDataFine(''); }}
+                 className="text-xs font-bold text-amber-500 hover:text-white uppercase ml-auto"
+               >
+                 Azzera Filtri
+               </button>
+             )}
+          </div>
         </div>
 
-        {/* TABELLA DATI ESTRATTI */}
+        {/* TABELLA DATI ESTRATTI (Filtrata) */}
         <div className="list-wrapper flex-1">
            {datiFusi.length === 0 ? (
                <div className="empty-state">
                   <FileText size={48} className="mb-4 text-zinc-800"/>
                   <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">In attesa di dati</p>
-                  <p className="text-xs text-zinc-700 mt-2 font-mono">Trascina i tuoi file orari per confrontare i giorni.</p>
+                  <p className="text-xs text-zinc-700 mt-2 font-mono">Trascina i tuoi file orari per visualizzare le liste.</p>
+               </div>
+           ) : datiFiltrati.length === 0 ? (
+               <div className="empty-state">
+                  <AlertTriangle size={48} className="mb-4 text-zinc-700"/>
+                  <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Nessun Risultato</p>
+                  <p className="text-xs text-zinc-700 mt-2 font-mono">I filtri impostati non corrispondono a nessuna spedizione.</p>
                </div>
            ) : (
              <table className="data-table">
