@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Terminal, FileSpreadsheet, Ghost, ArrowLeft, Truck, ClipboardList, Package } from 'lucide-react';
+import { Terminal, FileSpreadsheet, Ghost, ArrowLeft, Truck, ClipboardList, Package, Scale } from 'lucide-react';
 
 export default function GhostDashboard() {
   return (
@@ -57,12 +57,21 @@ export default function GhostDashboard() {
           </Link>
 
           {/* NUOVO LINK: ANALISI PALLET MASTER */}
-          <Link href="/analisi_pallet" className="group block p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-orange-500/50 hover:bg-zinc-900/80 transition-all md:col-span-2 lg:col-span-1">
+          <Link href="/analisi_pallet" className="group block p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-orange-500/50 hover:bg-zinc-900/80 transition-all">
              <div className="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-500 mb-6 group-hover:scale-110 transition-transform">
                <Package size={28} />
              </div>
              <h3 className="text-2xl font-bold text-white mb-2">Analisi Pallet Master</h3>
              <p className="text-sm text-zinc-500">Strumento per l'elaborazione e la fusione oraria dei dati Pallet Master.</p>
+          </Link>
+
+          {/* NUOVO LINK: CONTROLLO PESATURE COLLI PLUS */}
+          <Link href="/controllo_pesature_colli_plus" className="group block p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-pink-500/50 hover:bg-zinc-900/80 transition-all">
+             <div className="w-12 h-12 bg-pink-500/10 rounded-2xl flex items-center justify-center text-pink-500 mb-6 group-hover:scale-110 transition-transform">
+               <Scale size={28} />
+             </div>
+             <h3 className="text-2xl font-bold text-white mb-2">Controllo Pesature Plus</h3>
+             <p className="text-sm text-zinc-500">Incrocio dati tra Borderò (TXT) e file CSV Packmaster.</p>
           </Link>
 
         </div>
