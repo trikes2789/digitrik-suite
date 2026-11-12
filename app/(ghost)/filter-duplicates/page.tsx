@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Upload, FileText, Download, AlertTriangle, 
-  Clock, Hash, Box, Scale, Activity, Search, Calculator, Calendar, Filter, XOctagon, Copy, Check
+  Hash, Box, Scale, Activity, Search, Calculator, Calendar, Filter, XOctagon, Copy, Check
 } from 'lucide-react';
 
 /* STILI CSS INLINE - TEMA AMBRA UNIFORME */
@@ -22,7 +22,13 @@ const stiliCSS = `
     --error-dim: rgba(239, 68, 68, 0.1);
   }
 
-  body { background-color: var(--bg); color: var(--text-main); overflow: hidden; font-family: sans-serif; }
+  body { 
+    background-color: var(--bg); 
+    color: var(--text-main); 
+    font-family: sans-serif; 
+    margin: 0;
+    padding: 0;
+  }
 
   .top-section { 
     background: rgba(9, 9, 11, 0.95); 
@@ -183,9 +189,7 @@ const stiliCSS = `
 
   .list-wrapper {
     flex-grow: 1;
-    overflow-y: auto;
     background: #000;
-    height: 0; 
     padding: 0 20px 20px 20px;
   }
 
@@ -195,7 +199,19 @@ const stiliCSS = `
     font-family: monospace;
     font-size: 0.8rem;
   }
-  .data-table th { background: var(--bg); color: var(--primary); padding: 10px; text-align: left; position: sticky; top: 0px; z-index: 10; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+  .data-table th { 
+    background: var(--bg); 
+    color: var(--primary); 
+    padding: 10px; 
+    text-align: left; 
+    position: sticky; 
+    top: 0px; 
+    z-index: 10; 
+    font-size: 0.7rem; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    border-bottom: 1px solid var(--border); 
+  }
   .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: #a1a1aa; }
   .data-table tr:hover td { background: var(--card-dark); color: white; }
   
@@ -205,7 +221,7 @@ const stiliCSS = `
   .row-weight-issue td { color: #fbbf24; } 
   
   .empty-state {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #52525b; text-align: center; margin-top: 40px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 200px; color: #52525b; text-align: center; margin-top: 40px;
   }
 
   .copy-btn {
@@ -629,7 +645,11 @@ export default function GeneratoreTransitiCSV() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: stiliCSS }} />
-      <div className="flex flex-col h-screen bg-black text-white selection:bg-amber-500/30">
+      {/* 
+        NOTA: Sostituito 'h-screen' e aggiunto 'overflow-y-auto' 
+        per consentire lo scorrimento totale della pagina sugli schermi piccoli 
+      */}
+      <div className="flex flex-col h-screen overflow-y-auto bg-black text-white selection:bg-amber-500/30">
 
         {/* TOP SECTION FISSA */}
         <div className="top-section">
