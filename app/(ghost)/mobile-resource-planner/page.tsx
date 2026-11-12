@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { Calculator, List, PlusCircle, ArrowLeft, Trash2, Users, Package, Settings, ChevronRight } from 'lucide-react';
+import { Calculator, List, PlusCircle, ArrowLeft, Trash2, Users, Package, Settings, ChevronRight, Clock } from 'lucide-react';
 
 interface Wave {
   id: string;
@@ -23,13 +23,18 @@ export default function MobileResourcePlanner() {
   const [activeTab, setActiveTab] = useState<string>('entry');
   
   const [waves, setWaves] = useState<Wave[]>([]);
-  const [targetHours, setTargetHours] = useState<number>(8);
+  
+  // Stati per il calcolo
+  const [calcMode, setCalcMode] = useState<'personnel' | 'time'>('personnel');
+  const [targetHours, setTargetHours] = useState<number>(8); // Per Trova Risorse
+  const [availablePickers, setAvailablePickers] = useState<number>(2); // Per Trova Tempi
+  const [availableForklifts, setAvailableForklifts] = useState<number>(1); // Per Trova Tempi
+  const [shiftLength, setShiftLength] = useState<number>(8); // Lunghezza del turno in ore per Trova Tempi
 
   // Inizializza i parametri dal localStorage (se disponibili) altrimenti usa i default
   const [rates, setRates] = useState(defaultRates);
   const [isClient, setIsClient] = useState(false);
 
-  // Effetto eseguito solo lato client per evitare problemi di idratazione in Next.js
   useEffect(() => {
     setIsClient(true);
     const savedRates = localStorage.getItem('resourcePlannerRates');
@@ -59,7 +64,6 @@ export default function MobileResourcePlanner() {
       }
     };
     setRates(newRates);
-    // Salva immediatamente nel localStorage
     localStorage.setItem('resourcePlannerRates', JSON.stringify(newRates));
   };
 
@@ -92,7 +96,7 @@ export default function MobileResourcePlanner() {
     setWaves(waves.filter(w => w.id !== idToDelete));
   };
 
-  // Motore di Calcolo Dinamico sui Parametri Specifici
+  // Motore di Calcolo Unificato
   const calculations = useMemo(() => {
     let pickerHours = 0;
     let forkliftHours = 0;
@@ -111,13 +115,15 @@ export default function MobileResourcePlanner() {
     return {
       pickerHours,
       forkliftHours,
+      // Risultati Modalità 'personnel'
       pickersNeeded: Math.ceil(pickerHours / targetHours),
-      forkliftsNeeded: Math.ceil(forkliftHours / targetHours)
+      forkliftsNeeded: Math.ceil(forkliftHours / targetHours),
+      // Risultati Modalità 'time'
+      timePickers: pickerHours / (availablePickers || 1),
+      timeForklifts: forkliftHours / (availableForklifts || 1),
     };
-  }, [waves, targetHours, rates]);
+  }, [waves, targetHours, availablePickers, availableForklifts, rates]);
 
-  // Per evitare problemi di idratazione (Hydration mismatch), non mostriamo l'UI
-  // finché non siamo sicuri di essere nel browser, poiché il localStorage è solo lato client.
   if (!isClient) return null;
 
   return (
@@ -255,48 +261,140 @@ export default function MobileResourcePlanner() {
             </div>
           )}
 
-          {/* TAB 3: DASHBOARD RISORSE */}
+          {/* TAB 3: DASHBOARD RISORSE (CON CALCOLO INVERSO) */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6 animate-in fade-in duration-300">
               
-              <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl">
-                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 flex justify-between items-end">
-                  Target Lavorazione
-                  <span className="text-cyan-400 text-lg">{targetHours} Ore</span>
-                </label>
-                <input 
-                  type="range" 
-                  min="1" 
-                  max="12" 
-                  value={targetHours} 
-                  onChange={(e) => setTargetHours(parseInt(e.target.value))}
-                  className="w-full accent-cyan-500 h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
-                />
-                <div className="flex justify-between text-[10px] font-bold text-zinc-600 mt-3 uppercase tracking-wider">
-                  <span>1h (Urgente)</span>
-                  <span>8h (Standard)</span>
-                </div>
+              {/* Toggle Modalità Calcolo */}
+              <div className="flex bg-zinc-900 rounded-2xl p-1 border border-zinc-800 mb-6 relative">
+                 <button 
+                   onClick={() => setCalcMode('personnel')} 
+                   className={`flex-1 py-2 text-xs font-bold uppercase rounded-xl transition-all z-10 ${calcMode === 'personnel' ? 'text-white shadow-md' : 'text-zinc-500'}`}
+                 >
+                   Trova Personale
+                 </button>
+                 <button 
+                   onClick={() => setCalcMode('time')} 
+                   className={`flex-1 py-2 text-xs font-bold uppercase rounded-xl transition-all z-10 flex items-center justify-center gap-2 ${calcMode === 'time' ? 'text-white shadow-md' : 'text-zinc-500'}`}
+                 >
+                   <Clock size={14} className={calcMode === 'time' ? 'text-cyan-500' : ''} />
+                   Trova Tempi
+                 </button>
+                 {/* Sfondo Animato dello Switcher */}
+                 <div className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-zinc-800 rounded-xl transition-transform duration-300 ${calcMode === 'personnel' ? 'translate-x-0' : 'translate-x-[calc(100%+4px)]'}`} />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-cyan-500/5 border border-cyan-500/20 p-6 rounded-3xl flex flex-col items-center justify-center text-center relative overflow-hidden">
-                  <div className="absolute -right-4 -top-4 text-cyan-500/10">
-                    <Users size={80} />
+              {/* VISTA 1: CALCOLA PERSONALE DA ORE TARGET */}
+              {calcMode === 'personnel' ? (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl">
+                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 flex justify-between items-end">
+                      Target Lavorazione
+                      <span className="text-cyan-400 text-lg">{targetHours} Ore</span>
+                    </label>
+                    <input 
+                      type="range" 
+                      min="1" 
+                      max="12" 
+                      value={targetHours} 
+                      onChange={(e) => setTargetHours(parseInt(e.target.value))}
+                      className="w-full accent-cyan-500 h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[10px] font-bold text-zinc-600 mt-3 uppercase tracking-wider">
+                      <span>1h (Urgente)</span>
+                      <span>8h (Standard)</span>
+                    </div>
                   </div>
-                  <span className="text-[10px] text-cyan-500 uppercase font-bold tracking-widest mb-2 relative z-10">Picker</span>
-                  <span className="text-6xl font-black text-cyan-400 mb-2 relative z-10">{calculations.pickersNeeded}</span>
-                  <span className="text-[10px] text-cyan-500/60 font-bold uppercase relative z-10">Tot. {calculations.pickerHours.toFixed(1)}h</span>
-                </div>
 
-                <div className="bg-orange-500/5 border border-orange-500/20 p-6 rounded-3xl flex flex-col items-center justify-center text-center relative overflow-hidden">
-                  <div className="absolute -right-4 -top-4 text-orange-500/10">
-                    <Package size={80} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-cyan-500/5 border border-cyan-500/20 p-6 rounded-3xl flex flex-col items-center justify-center text-center relative overflow-hidden">
+                      <div className="absolute -right-4 -top-4 text-cyan-500/10"><Users size={80} /></div>
+                      <span className="text-[10px] text-cyan-500 uppercase font-bold tracking-widest mb-2 relative z-10">Servono</span>
+                      <span className="text-6xl font-black text-cyan-400 mb-2 relative z-10">{calculations.pickersNeeded}</span>
+                      <span className="text-[10px] text-cyan-500/60 font-bold uppercase relative z-10">Picker ({calculations.pickerHours.toFixed(1)}h volumi)</span>
+                    </div>
+
+                    <div className="bg-orange-500/5 border border-orange-500/20 p-6 rounded-3xl flex flex-col items-center justify-center text-center relative overflow-hidden">
+                      <div className="absolute -right-4 -top-4 text-orange-500/10"><Package size={80} /></div>
+                      <span className="text-[10px] text-orange-500 uppercase font-bold tracking-widest mb-2 relative z-10">Servono</span>
+                      <span className="text-6xl font-black text-orange-400 mb-2 relative z-10">{calculations.forkliftsNeeded}</span>
+                      <span className="text-[10px] text-orange-500/60 font-bold uppercase relative z-10">Muletti ({calculations.forkliftHours.toFixed(1)}h volumi)</span>
+                    </div>
                   </div>
-                  <span className="text-[10px] text-orange-500 uppercase font-bold tracking-widest mb-2 relative z-10">Muletti</span>
-                  <span className="text-6xl font-black text-orange-400 mb-2 relative z-10">{calculations.forkliftsNeeded}</span>
-                  <span className="text-[10px] text-orange-500/60 font-bold uppercase relative z-10">Tot. {calculations.forkliftHours.toFixed(1)}h</span>
                 </div>
-              </div>
+              ) : (
+                
+                /* VISTA 2: CALCOLA TEMPI DA PERSONALE DISPONIBILE */
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl space-y-6">
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">Risorse In Turno</label>
+                      <div className="grid grid-cols-2 gap-4">
+                        
+                        <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 flex flex-col items-center">
+                          <span className="text-[10px] text-cyan-500 font-bold uppercase tracking-widest mb-2">N. Picker</span>
+                          <input 
+                            type="number" 
+                            min="1"
+                            value={availablePickers} 
+                            onChange={(e) => setAvailablePickers(Number(e.target.value) || 1)}
+                            className="w-16 bg-zinc-900 border border-cyan-500/30 rounded-xl p-2 text-white text-center font-bold text-xl outline-none focus:border-cyan-500"
+                          />
+                        </div>
+
+                        <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 flex flex-col items-center">
+                          <span className="text-[10px] text-orange-500 font-bold uppercase tracking-widest mb-2">N. Muletti</span>
+                          <input 
+                            type="number" 
+                            min="1"
+                            value={availableForklifts} 
+                            onChange={(e) => setAvailableForklifts(Number(e.target.value) || 1)}
+                            className="w-16 bg-zinc-900 border border-orange-500/30 rounded-xl p-2 text-white text-center font-bold text-xl outline-none focus:border-orange-500"
+                          />
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-zinc-800/50">
+                      <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 flex justify-between items-end">
+                        Lunghezza Turno
+                        <span className="text-zinc-300 text-lg">{shiftLength} Ore</span>
+                      </label>
+                      <input 
+                        type="range" 
+                        min="1" 
+                        max="12" 
+                        value={shiftLength} 
+                        onChange={(e) => setShiftLength(parseInt(e.target.value))}
+                        className="w-full accent-zinc-500 h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] font-bold text-zinc-600 mt-3 uppercase tracking-wider">
+                        <span>1h</span>
+                        <span>12h</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-cyan-500/5 border border-cyan-500/20 p-5 rounded-3xl flex flex-col items-center justify-center text-center relative overflow-hidden">
+                      <span className="text-[10px] text-cyan-500 uppercase font-bold tracking-widest mb-2 relative z-10">Tempo Stimato</span>
+                      <span className="text-4xl font-black text-cyan-400 mb-2 relative z-10">{calculations.timePickers.toFixed(1)}<span className="text-2xl">h</span></span>
+                      <span className="text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-1 rounded-lg uppercase font-bold relative z-10">
+                        = {(calculations.timePickers / shiftLength).toFixed(1)} Turni ({shiftLength}h)
+                      </span>
+                    </div>
+
+                    <div className="bg-orange-500/5 border border-orange-500/20 p-5 rounded-3xl flex flex-col items-center justify-center text-center relative overflow-hidden">
+                      <span className="text-[10px] text-orange-500 uppercase font-bold tracking-widest mb-2 relative z-10">Tempo Stimato</span>
+                      <span className="text-4xl font-black text-orange-400 mb-2 relative z-10">{calculations.timeForklifts.toFixed(1)}<span className="text-2xl">h</span></span>
+                      <span className="text-[10px] bg-orange-500/10 text-orange-400 border border-orange-500/20 px-2 py-1 rounded-lg uppercase font-bold relative z-10">
+                        = {(calculations.timeForklifts / shiftLength).toFixed(1)} Turni ({shiftLength}h)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
