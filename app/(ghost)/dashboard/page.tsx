@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Terminal, FileSpreadsheet, Ghost, ArrowLeft, Truck, ClipboardList, Package, Scale } from 'lucide-react';
+import { Terminal, FileSpreadsheet, Ghost, ArrowLeft, Truck, ClipboardList, Package, Scale, Users, Smartphone } from 'lucide-react';
 
 export default function GhostDashboard() {
   return (
@@ -72,6 +72,22 @@ export default function GhostDashboard() {
              </div>
              <h3 className="text-2xl font-bold text-white mb-2">Controllo Pesature Plus</h3>
              <p className="text-sm text-zinc-500">Incrocio dati tra Borderò (TXT) e file CSV Packmaster.</p>
+          </Link>
+
+          {/* NUOVO LINK: PIANIFICATORE RISORSE (MOBILE APP) */}
+          <Link href="/mobile-resource-planner" className="group block p-8 bg-zinc-900 border border-zinc-800 rounded-3xl hover:border-cyan-500/50 hover:bg-zinc-900/80 transition-all relative overflow-hidden">
+             
+             {/* Badge Mobile App nell'angolo */}
+             <div className="absolute top-6 right-6 bg-zinc-800 text-zinc-400 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 border border-zinc-700">
+                <Smartphone size={12} />
+                App Mobile
+             </div>
+
+             <div className="w-12 h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-500 mb-6 group-hover:scale-110 transition-transform">
+               <Users size={28} />
+             </div>
+             <h3 className="text-2xl font-bold text-white mb-2 pr-20">Pianificatore Risorse</h3>
+             <p className="text-sm text-zinc-500">Calcolo live del fabbisogno di Picker e Mulettisti in base ai volumi (Case, Loose, PLT).</p>
           </Link>
 
         </div>
